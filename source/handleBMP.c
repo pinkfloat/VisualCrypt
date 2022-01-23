@@ -129,13 +129,18 @@ static int readBmpBody(FILE* file, Pixel* pixelArray, int32_t width, int32_t hei
 
     /* calculate pixel Array */
     uint8_t* pBuffer = bmpBuffer;
+    float red, green, blue;
 
     for (int32_t row = 0; row < height; row++) {
         for (int32_t column = 0; column < width; column++) {
 
-            /* assuming that the read picture is at least grey since only one of the
-            RGB color values is used to determine if the pixel is set to black or white */
-            pixelArray[row * width + column] = *pBuffer > 127 ? 1 : 0; /* white = 1, black = 0 */
+            /* weighted the color values of an rgb-image and determines whether
+            a pixel of the result is supposed to be black or white */
+            red = *pBuffer * 0.2616;
+            green = *(pBuffer+1) * 0.7152;
+            blue = *(pBuffer+2) * 0.0722;
+            pixelArray[row * width + column] = (blue + green + red) > 127 ? 1 : 0; /* white = 1, black = 0 */
+
             pBuffer += 3;
         }
     }

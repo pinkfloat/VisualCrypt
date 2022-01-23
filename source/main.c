@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include "handleBMP.h"
 
-#define SOURCE_PATH "../image/cameraman.bmp"
-#define DEST_PATH "../image/created.bmp"
+#define SOURCE_PATH "../image/colortest.bmp"
+#define DEST_PATH "../image/blacknwhite.bmp"
 
 int main(int argc, char* argv[])
 {
