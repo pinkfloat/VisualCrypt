@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "handleBMP.h"
+#include "vcAlgorithms.h"
 
 #define SOURCE_PATH "../image/colortest.bmp"
 #define DEST_PATH01 "../image/share01.bmp"
@@ -45,6 +46,8 @@ int main(int argc, char* argv[])
 
 	if(copyImageContent(&source, &share02) != 0)
 		goto cleanupF;
+
+	deterministicAlgorithm(&source, &share01, &share02);
 
 	/* draw image files */
 	if (createBMP(&share01) != 0){
