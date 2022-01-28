@@ -73,8 +73,10 @@ static void writeBmpBody(const Pixel* source, Pixel* destination, int32_t width,
     }
 }
 
-int createBMP(FILE* file, const Pixel* pixelArray, int32_t width, int32_t height)
+int createBMP(Image* image)
 {
+    int32_t width = image->width;
+    int32_t height = image->height;
     uint32_t bmpSize = SIZE_BMP_HEADER + roundToMultipleOf4(3*width) * height;
 
     /* create BMP file content */
@@ -84,10 +86,10 @@ int createBMP(FILE* file, const Pixel* pixelArray, int32_t width, int32_t height
         return -1;
     }
     writeBmpHeader((BmpHeader*)bmpBuffer, width, height);
-    writeBmpBody(pixelArray, bmpBuffer + sizeof(BmpHeader), width, height);
+    writeBmpBody(image->array, bmpBuffer + sizeof(BmpHeader), width, height);
 
     /* write content to file */
-    if (fwrite(bmpBuffer + 2, 1, bmpSize, file) != bmpSize) {
+    if (fwrite(bmpBuffer + 2, 1, bmpSize, image->file) != bmpSize) {
         free(bmpBuffer);
         fprintf(stderr, "ERR: write to file\n");
         return -1;
@@ -110,9 +112,11 @@ static int readBmpHeader(FILE* file, BmpHeader* headerInformation)
     return 0;
 }
 
-static int readBmpBody(FILE* file, Pixel* pixelArray, int32_t width, int32_t height)
+static int readBmpBody(Image* image)
 {
-    /* read remaining file to buffer after readBmpHeader */
+    int32_t width = image->width;
+    int32_t height = image->height;
+
     uint32_t bmpSize = roundToMultipleOf4(3*width) * height;
     uint8_t* bmpBuffer = malloc(width * height * BYTES_PER_RGB_PIXEL);
 
@@ -121,7 +125,8 @@ static int readBmpBody(FILE* file, Pixel* pixelArray, int32_t width, int32_t hei
         return -1;
     }
 
-    if (fread(bmpBuffer, 1, bmpSize, file) != bmpSize) {
+    /* read remaining file to buffer after readBmpHeader */
+    if (fread(bmpBuffer, 1, bmpSize, image->file) != bmpSize) {
         free(bmpBuffer);
         fprintf(stderr, "ERR: invalid BMP file\n");
         return -1;
@@ -139,7 +144,7 @@ static int readBmpBody(FILE* file, Pixel* pixelArray, int32_t width, int32_t hei
             red = *pBuffer * 0.2616;
             green = *(pBuffer+1) * 0.7152;
             blue = *(pBuffer+2) * 0.0722;
-            pixelArray[row * width + column] = (blue + green + red) > 127 ? 1 : 0; /* white = 1, black = 0 */
+            image->array[row * width + column] = (blue + green + red) > 127 ? 1 : 0; /* white = 1, black = 0 */
 
             pBuffer += 3;
         }
@@ -150,27 +155,24 @@ static int readBmpBody(FILE* file, Pixel* pixelArray, int32_t width, int32_t hei
 }
 
 /* Info: allocates buffer without freeing on success */
-int readBMP(FILE* file, Pixel** pixelArray, int32_t* width, int32_t* height)
+int readBMP(Image* image)
 {
     BmpHeader headerInformation;
 
-    if(readBmpHeader(file, &headerInformation) != 0){
+    if(readBmpHeader(image->file, &headerInformation) != 0){
 		fprintf(stderr, "ERR: read BMP Header\n");
         return -1;
 	}
 
-    *width = headerInformation.widthInPixel;
-	*height = headerInformation.heightInPixel;
+    image->width = headerInformation.widthInPixel;
+	image->height = headerInformation.heightInPixel;
 
-	*pixelArray = malloc(*width * *height);
-	if (*pixelArray == NULL) {
-		fprintf(stderr, "ERR: allocate pArray buffer\n");
-		return -1;
-	}
+	if (mallocPixelArray(image) != 0)
+        return -1;
 
-	if (readBmpBody(file, *pixelArray, *width, *height) != 0){
+	if (readBmpBody(image) != 0){
 		fprintf(stderr, "ERR: read BMP Body\n");
-        free(*pixelArray);
+        free(image->array);
 		return -1;
 	}
 

@@ -1,52 +1,82 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include "handleBMP.h"
 
 #define SOURCE_PATH "../image/colortest.bmp"
-#define DEST_PATH "../image/blacknwhite.bmp"
+#define DEST_PATH01 "../image/share01.bmp"
+#define DEST_PATH02 "../image/share02.bmp"
 
 int main(int argc, char* argv[])
 {
-	int32_t width, height;
-	Pixel* pixelArray;
+	Image source, share01, share02;
 
-	/* open existing image file 01 */
-	FILE* file01 = fopen(SOURCE_PATH, "rb");
-    if ( file01 == NULL ){
-        fprintf(stderr, "ERR: open image file\n");
-        return -1;
-    }
+	/* open existing image file for read */
+	if (openImageR(SOURCE_PATH, &source) != 0)
+		return -1;
 
-	/* create new image file 02 */
-    FILE* file02 = fopen(DEST_PATH, "wb");
-    if ( file02 == NULL ){
-        fprintf(stderr, "ERR: create image file\n");
+	/* create new writeable share file */
+    if (openImageW(DEST_PATH01, &share01) != 0)
 		goto cleanupA;
-    }
 
-	/* read image file 01 */
-	if (readBMP(file01, &pixelArray, &width, &height) != 0){
-		fprintf(stderr, "ERR: readBMP\n");
+	/* create new writeable share file */
+    if (openImageW(DEST_PATH02, &share02) != 0)
 		goto cleanupB;
-	}
 
-	/* draw image file 02 */
-	if (createBMP(file02, pixelArray, width, height) != 0){
-		fprintf(stderr, "ERR: createBMP\n");
+	/* read image file */
+	if (readBMP(&source) != 0){ /* allocates buffer on success */
+		fprintf(stderr, "ERR: readBMP\n");
 		goto cleanupC;
 	}
+
+	/* create pixel-array for share01 */
+	if(mallocImageOfEqSize(&source, &share01) != 0){
+		fprintf(stderr, "ERR: createShare01\n");
+		goto cleanupD;
+	}
+
+	/* create pixel-array for share02 */
+	if(mallocImageOfEqSize(&source, &share02) != 0){
+		fprintf(stderr, "ERR: createShare02\n");
+		goto cleanupE;
+	}
+
+	/* dummy-fill of the arrays */
+	if(copyImageContent(&source, &share01) != 0)
+		goto cleanupF;
+
+	if(copyImageContent(&source, &share02) != 0)
+		goto cleanupF;
+
+	/* draw image files */
+	if (createBMP(&share01) != 0){
+		fprintf(stderr, "ERR: createBMP\n");
+		goto cleanupF;
+	}
+
+	if (createBMP(&share02) != 0){
+		fprintf(stderr, "ERR: createBMP\n");
+		goto cleanupF;
+	}
 	
-	fprintf(stdout, "Created File!");
-	free(pixelArray);
-	fclose(file02);
-	fclose(file01);
+	fprintf(stdout, "Created File!\n");
+	free(share02.array);
+	free(share01.array);
+	free(source.array);
+	fclose(share02.file);
+	fclose(share01.file);
+	fclose(source.file);
 	return 0;
 
+	cleanupF:
+		free(share02.array);
+	cleanupE:
+		free(share01.array);
+	cleanupD:
+		free(source.array);
 	cleanupC:
-		free(pixelArray);
+		fclose(share02.file);
 	cleanupB:
-		fclose(file02);
+		fclose(share01.file);
 	cleanupA:
-		fclose(file01);
+		fclose(source.file);
 		return -1;
 }

@@ -1,12 +1,9 @@
 #ifndef HANDLEBMP_H
 #define HANDLEBMP_H
  
-#include <stdio.h>
-#include <stdint.h>
+#include "image.h"
 
-typedef uint8_t Pixel; /* black / white */
-
-int createBMP(FILE* file, const Pixel* pixelArray, int32_t width, int32_t height);
-int readBMP(FILE* file, Pixel** pixelArray, int32_t* width, int32_t* height);
+int createBMP(Image* image);
+int readBMP(Image* image);
 
 #endif /* HANDLEBMP_H */
