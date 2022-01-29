@@ -4,7 +4,12 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#ifndef TYPE_PIXEL
+#define TYPE_PIXEL
+
 typedef uint8_t Pixel; /* black / white */
+
+#endif /* TYPE_PIXEL */
 
 typedef struct {
     FILE *file;

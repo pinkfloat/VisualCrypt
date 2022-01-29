@@ -1,4 +1,5 @@
-#include <stdlib.h>
+#include "booleanMatrix.h"
+#include "setsNsubsets.h"
 #include "vcAlgorithms.h"
 
 void deterministicAlgorithm(Image* source, Image* share01, Image* share02)
@@ -24,9 +25,12 @@ void deterministicAlgorithm(Image* source, Image* share01, Image* share02)
         uint8_t* v[] = {v_0, v_1};
         uint8_t v_len = 1;
 
+    Set U = createSet(m);
+    deleteSet(&U);
+
     /* create basis matrices */
-    int B0[n][m];
-    int B1[n][m];
+    BooleanMatrix B0 = createBooleanMatrix(n,m);
+    BooleanMatrix B1 = createBooleanMatrix(n,m);
 
     uint8_t found = 0;
 
@@ -43,13 +47,13 @@ void deterministicAlgorithm(Image* source, Image* share01, Image* share02)
                     }
                 }
                 if(found)
-                    B0[i][j] = 1;
+                    setPixel(&B0, i, j, 1);
                 else
-                    B0[i][j] = 0;
+                    setPixel(&B0, i, j, 0);
                 found = 0;
             }
             else /* the subset is NULL */
-                B0[i][j] = 0;
+                setPixel(&B0, i, j, 0);;
 
             /*___FILL_B1___*/
             /* check if i is part of the subset v_j */
@@ -61,13 +65,13 @@ void deterministicAlgorithm(Image* source, Image* share01, Image* share02)
                     }
                 }
                 if(found)
-                    B1[i][j] = 1;
+                    setPixel(&B1, i, j, 1);
                 else
-                    B1[i][j] = 0;
+                    setPixel(&B1, i, j, 0);
                 found = 0;
             }
             else /* the subset is NULL */
-                B1[i][j] = 0;
+                setPixel(&B1, i, j, 0);
         }
     }
 
@@ -75,15 +79,18 @@ void deterministicAlgorithm(Image* source, Image* share01, Image* share02)
     fprintf(stdout, "B0:\n");
     for(int i = 0; i < n; i++){     /* rows */
         for(int j = 0; j < m; j++){ /* columns */
-            fprintf(stdout, "%d", B0[i][j]);
+            fprintf(stdout, "%d", getPixel(&B0, i, j));
         }
         fprintf(stdout, "\n");
     }
     fprintf(stdout, "\nB1:\n");
     for(int i = 0; i < n; i++){     /* rows */
         for(int j = 0; j < m; j++){ /* columns */
-            fprintf(stdout, "%d", B1[i][j]);
+            fprintf(stdout, "%d", getPixel(&B1, i, j));
         }
         fprintf(stdout, "\n");
     }
+
+    deleteBooleanMatrix(&B0);
+    deleteBooleanMatrix(&B1);
 }
