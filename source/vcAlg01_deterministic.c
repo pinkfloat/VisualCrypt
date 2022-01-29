@@ -4,29 +4,10 @@
 
 void deterministicAlgorithm(Image* source, Image* share01, Image* share02)
 {
-    uint8_t n = 2;              /* number of shares */
+    uint8_t n = 3;              /* number of shares */
     uint8_t m = 1 << (n-1);     /* number of pixels in a share per pixel in source file = 2^{n-1} */
 
-    /* create basis set "w" */
-    int w[n];
-    for(uint8_t i = 0; i < n; i++)
-        w[i] = i;
-
-    /* will be replaced by auto-calculation of the subsets */
-        /* u = even cardinality subsets of w */
-        uint8_t u_0[] = {0, 1};
-        uint8_t* u_1 = NULL;
-        uint8_t* u[] = {u_0, u_1};
-        uint8_t u_len = 2;
-
-        /* v = odd cardinality subsets of w */
-        uint8_t v_0[] = {0};
-        uint8_t v_1[] = {1};
-        uint8_t* v[] = {v_0, v_1};
-        uint8_t v_len = 1;
-
-    Set U = createSet(m);
-    deleteSet(&U);
+    Set set = createSet(n, m);
 
     /* create basis matrices */
     BooleanMatrix B0 = createBooleanMatrix(n,m);
@@ -39,9 +20,9 @@ void deterministicAlgorithm(Image* source, Image* share01, Image* share02)
 
             /*___FILL_B0___*/
             /* check if i is part of the subset u_j */
-            if (u[j]) /* the subset contains numbers */ {
-                for (int e = 0; e < u_len; e++){ /* e = element of the subset */
-                    if (u[j][e] == i){
+            if (set.even[j].length) /* the subset contains numbers */ {
+                for (int e = 0; e < set.even[j].length; e++){ /* e = element of the subset */
+                    if (set.even[j].data[e] == i){
                         found = 1;
                         break;
                     }
@@ -53,13 +34,13 @@ void deterministicAlgorithm(Image* source, Image* share01, Image* share02)
                 found = 0;
             }
             else /* the subset is NULL */
-                setPixel(&B0, i, j, 0);;
+                setPixel(&B0, i, j, 0);
 
             /*___FILL_B1___*/
             /* check if i is part of the subset v_j */
-            if (v[j]) /* the subset contains numbers */ {
-                for (int e = 0; e < v_len; e++){ /* e = element of the subset */
-                    if (v[j][e] == i){
+            if (set.odd[j].length) /* the subset contains numbers */ {
+                for (int e = 0; e < set.odd[j].length; e++){ /* e = element of the subset */
+                    if (set.odd[j].data[e] == i){
                         found = 1;
                         break;
                     }
@@ -90,7 +71,9 @@ void deterministicAlgorithm(Image* source, Image* share01, Image* share02)
         }
         fprintf(stdout, "\n");
     }
+    fprintf(stdout, "\n");
 
     deleteBooleanMatrix(&B0);
     deleteBooleanMatrix(&B1);
+    deleteSet(&set);
 }
