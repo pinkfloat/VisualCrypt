@@ -2,78 +2,87 @@
 #include "setsNsubsets.h"
 #include "vcAlgorithms.h"
 
-void deterministicAlgorithm(Image* source, Image* share01, Image* share02)
+static inline void fillBooleanMatrix(BooleanMatrix* B, SubSet* set, uint8_t i, uint8_t j)
 {
-    uint8_t n = 3;              /* number of shares */
-    uint8_t m = 1 << (n-1);     /* number of pixels in a share per pixel in source file = 2^{n-1} */
-
-    Set set = createSet(n, m);
-
-    /* create basis matrices */
-    BooleanMatrix B0 = createBooleanMatrix(n,m);
-    BooleanMatrix B1 = createBooleanMatrix(n,m);
-
     uint8_t found = 0;
-
-    for(int i = 0; i < n; i++){     /* rows */
-        for(int j = 0; j < m; j++){ /* columns */
-
-            /*___FILL_B0___*/
-            /* check if i is part of the subset u_j */
-            if (set.even[j].length) /* the subset contains numbers */ {
-                for (int e = 0; e < set.even[j].length; e++){ /* e = element of the subset */
-                    if (set.even[j].data[e] == i){
-                        found = 1;
-                        break;
-                    }
-                }
-                if(found)
-                    setPixel(&B0, i, j, 1);
-                else
-                    setPixel(&B0, i, j, 0);
-                found = 0;
+    if (set[j].length) /* the subset is not NULL */
+    {
+        for (int e = 0; e < set[j].length; e++) /* e = element of a subset */
+        {
+            /* check if element i is part of the subset */
+            if (set[j].data[e] == i){
+                found = 1;
+                break;
             }
-            else /* the subset is NULL */
-                setPixel(&B0, i, j, 0);
-
-            /*___FILL_B1___*/
-            /* check if i is part of the subset v_j */
-            if (set.odd[j].length) /* the subset contains numbers */ {
-                for (int e = 0; e < set.odd[j].length; e++){ /* e = element of the subset */
-                    if (set.odd[j].data[e] == i){
-                        found = 1;
-                        break;
-                    }
-                }
-                if(found)
-                    setPixel(&B1, i, j, 1);
-                else
-                    setPixel(&B1, i, j, 0);
-                found = 0;
-            }
-            else /* the subset is NULL */
-                setPixel(&B1, i, j, 0);
         }
+        if(found)
+            setPixel(B, i, j, 1);
+        else
+            setPixel(B, i, j, 0);
     }
+    else /* the subset is NULL */
+        setPixel(B, i, j, 0);
+}
 
-    /* debug print */
-    fprintf(stdout, "B0:\n");
-    for(int i = 0; i < n; i++){     /* rows */
-        for(int j = 0; j < m; j++){ /* columns */
-            fprintf(stdout, "%d", getPixel(&B0, i, j));
-        }
-        fprintf(stdout, "\n");
-    }
-    fprintf(stdout, "\nB1:\n");
-    for(int i = 0; i < n; i++){     /* rows */
-        for(int j = 0; j < m; j++){ /* columns */
-            fprintf(stdout, "%d", getPixel(&B1, i, j));
+static void debugPrintMatrix(BooleanMatrix* B, uint8_t num, uint8_t n, uint8_t m){
+    fprintf(stdout, "B%d:\n", num);
+    for(int i = 0; i < n; i++)     /* rows */
+    {
+        for(int j = 0; j < m; j++) /* columns */
+        {
+            fprintf(stdout, "%d", getPixel(B, i, j));
         }
         fprintf(stdout, "\n");
     }
     fprintf(stdout, "\n");
+}
 
-    deleteBooleanMatrix(&B0);
+int deterministicAlgorithm(Image* source, Image** shares, uint8_t number_of_shares)
+{
+    uint8_t n = number_of_shares;
+    uint8_t m = 1 << (n-1);     /* number of pixels in a share per pixel in source file = 2^{n-1} */
+
+    /*  create set with n elements holding subsets
+        with even and odd cardinalities of it
+    */
+    Set set = createSet(n, m);
+    if(!set.even || !set.odd)
+        return -1;
+
+    debugPrintAllSubsets(&set);
+
+    /* create basis matrices */
+    BooleanMatrix B0 = createBooleanMatrix(n,m);
+    if(!B0.array)
+        goto cleanupA;
+
+    BooleanMatrix B1 = createBooleanMatrix(n,m);
+    if(!B1.array)
+        goto cleanupB;
+
+    for(uint8_t i = 0; i < n; i++)     /* rows */
+    {
+        for(uint8_t j = 0; j < m; j++) /* columns */
+        {
+            /*___FILL_B0___*/
+            fillBooleanMatrix(&B0, set.even, i, j);
+
+            /*___FILL_B1___*/
+            fillBooleanMatrix(&B1, set.odd, i, j);
+        }
+    }
+
+    debugPrintMatrix(&B0, 0, n, m);
+    debugPrintMatrix(&B1, 1, n, m);
+
     deleteBooleanMatrix(&B1);
+    deleteBooleanMatrix(&B0);
     deleteSet(&set);
+    return 0;
+
+    cleanupB:
+        deleteBooleanMatrix(&B0);
+    cleanupA:
+        deleteSet(&set);
+    return -1;
 }

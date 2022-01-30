@@ -9,6 +9,8 @@
 int main(int argc, char* argv[])
 {
 	Image source, share01, share02;
+	Image* shares[] = {&share01, &share02};
+	int number_of_shares = 2;
 
 	/* open existing image file for read */
 	if (openImageR(SOURCE_PATH, &source) != 0)
@@ -23,19 +25,22 @@ int main(int argc, char* argv[])
 		goto cleanupB;
 
 	/* read image file */
-	if (readBMP(&source) != 0){ /* allocates buffer on success */
+	if (readBMP(&source) != 0) /* allocates buffer on success */
+	{
 		fprintf(stderr, "ERR: readBMP\n");
 		goto cleanupC;
 	}
 
 	/* create pixel-array for share01 */
-	if(mallocImageOfEqSize(&source, &share01) != 0){
+	if(mallocImageOfEqSize(&source, &share01) != 0)
+	{
 		fprintf(stderr, "ERR: createShare01\n");
 		goto cleanupD;
 	}
 
 	/* create pixel-array for share02 */
-	if(mallocImageOfEqSize(&source, &share02) != 0){
+	if(mallocImageOfEqSize(&source, &share02) != 0)
+	{
 		fprintf(stderr, "ERR: createShare02\n");
 		goto cleanupE;
 	}
@@ -47,15 +52,13 @@ int main(int argc, char* argv[])
 	if(copyImageContent(&source, &share02) != 0)
 		goto cleanupF;
 
-	deterministicAlgorithm(&source, &share01, &share02);
+	/* call the algorithm */
+	if(deterministicAlgorithm(&source, shares, number_of_shares) != 0)
+		goto cleanupF;
 
 	/* draw image files */
-	if (createBMP(&share01) != 0){
-		fprintf(stderr, "ERR: createBMP\n");
-		goto cleanupF;
-	}
-
-	if (createBMP(&share02) != 0){
+	if (createBMP(&share01) != 0 || createBMP(&share02) != 0 )
+	{
 		fprintf(stderr, "ERR: createBMP\n");
 		goto cleanupF;
 	}

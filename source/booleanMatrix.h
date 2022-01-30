@@ -1,6 +1,7 @@
 #ifndef BOOLEANMATRIX_H
 #define BOOLEANMATRIX_H
 
+#include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -23,6 +24,8 @@ static inline BooleanMatrix createBooleanMatrix(int n, int m)
     result.n = n;
     result.m = m;
     result.array = malloc(sizeof(Pixel)*n*m);
+    if (!result.array)
+        fprintf(stderr, "ERR: allocate buffer for BooleanMatrix\n");
     return result;
 }
 

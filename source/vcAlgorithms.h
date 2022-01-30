@@ -3,6 +3,6 @@
 
 #include "image.h"
 
-void deterministicAlgorithm(Image* source, Image* share01, Image* share02);
+int deterministicAlgorithm(Image* source, Image** shares, uint8_t number_of_shares);
 
 #endif /* VCALGORITHMS_H */  
