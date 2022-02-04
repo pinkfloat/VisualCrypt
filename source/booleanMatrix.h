@@ -1,9 +1,8 @@
 #ifndef BOOLEANMATRIX_H
 #define BOOLEANMATRIX_H
 
-#include <stdio.h>
 #include <stdint.h>
-#include <stdlib.h>
+#include "setsNsubsets.h"
 
 #ifndef TYPE_PIXEL
 #define TYPE_PIXEL
@@ -18,30 +17,12 @@ typedef struct {
     Pixel* array;
 } BooleanMatrix;
 
-static inline BooleanMatrix createBooleanMatrix(int n, int m)
-{
-    BooleanMatrix result;
-    result.n = n;
-    result.m = m;
-    result.array = malloc(sizeof(Pixel)*n*m);
-    if (!result.array)
-        fprintf(stderr, "ERR: allocate buffer for BooleanMatrix\n");
-    return result;
-}
+BooleanMatrix createBooleanMatrix(int n, int m);
+Pixel getPixel(BooleanMatrix* matrix, int i, int j);
+void setPixel(BooleanMatrix* matrix, int i, int j, uint8_t value);
+void deleteBooleanMatrix(BooleanMatrix* matrix);
 
-static inline Pixel getPixel(BooleanMatrix* matrix, int i, int j)
-{
-    return matrix->array[i * matrix->m + j];
-}
-
-static inline void setPixel(BooleanMatrix* matrix, int i, int j, uint8_t value)
-{
-    matrix->array[i * matrix->m + j] = value;
-}
-
-static inline void deleteBooleanMatrix(BooleanMatrix* matrix)
-{
-    free(matrix->array);
-}
+void fillBasisMatrix(BooleanMatrix* B, SubSet* set, uint8_t i, uint8_t j);
+void printBooleanMatrix(BooleanMatrix* B, char* name, uint8_t n, uint8_t m);
 
 #endif /* BOOLEANMATRIX_H */

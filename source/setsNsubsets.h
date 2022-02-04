@@ -16,6 +16,6 @@ typedef struct {
 
 Set createSet(uint8_t n, uint8_t m);
 void deleteSet(Set* set);
-void debugPrintAllSubsets(Set* set);
+void printAllSubsets(Set* set);
 
 #endif /* SETSNSUBSETS_H */ 

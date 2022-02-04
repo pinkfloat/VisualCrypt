@@ -204,7 +204,7 @@ static void printSubset(SubSet* set, uint8_t num_sets, char sign)
     fprintf(stdout, "\n");
 }
 
-void debugPrintAllSubsets(Set* set)
+void printAllSubsets(Set* set)
 {
     /* print even subsets */
     printSubset(set->even, set->num_subsets, 'u');
