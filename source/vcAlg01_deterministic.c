@@ -38,12 +38,27 @@ int deterministicAlgorithm(Image* source, Image** shares, uint8_t number_of_shar
 
     printBooleanMatrix(&B0, "B0", n, m);
     printBooleanMatrix(&B1, "B1", n, m);
+    
 
+    /* Test if the permutation works */
+
+    BooleanMatrix permutation = permuteBasisMatrix(&B0);
+    if(!permutation.array)
+        goto cleanupC;
+
+    printBooleanMatrix(&permutation, "P0", n, m);
+
+
+    /* Cleanup */
+
+    deleteBooleanMatrix(&permutation);
     deleteBooleanMatrix(&B1);
     deleteBooleanMatrix(&B0);
     deleteSet(&set);
     return 0;
 
+    cleanupC:
+        deleteBooleanMatrix(&B1);
     cleanupB:
         deleteBooleanMatrix(&B0);
     cleanupA:

@@ -10,7 +10,7 @@ int main(int argc, char* argv[])
 {
 	Image source, share01, share02;
 	Image* shares[] = {&share01, &share02};
-	int number_of_shares = 2;
+	int number_of_shares = 3;
 
 	/* open existing image file for read */
 	if (openImageR(SOURCE_PATH, &source) != 0)
