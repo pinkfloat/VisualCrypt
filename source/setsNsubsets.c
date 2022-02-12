@@ -85,21 +85,21 @@ static void incrementSubSet(uint8_t n, uint8_t len, uint8_t* set)
     }
 }
 
-static int fillSubSet(SubSet* set, uint8_t* tmpSet, uint8_t n, uint8_t len, uint8_t numSubsets)
+static int fillSubSet(SubSet** set, uint8_t* tmpSet, uint8_t n, uint8_t len, uint8_t numSubsets)
 {
     for(uint8_t idx = 0; idx < numSubsets; idx++)
     {
         /* allocate subset of correct length */
-        *set = createSubSet(len);
-        if(!set->data)
+        **set = createSubSet(len);
+        if(!(*set)->data)
             return -1;
 
         /* save data from tmpSet in actual set */
-        copyDataInSet(*set, tmpSet);
+        copyDataInSet(**set, tmpSet);
 
         /* fill data for the next loop in tmpSet */
         incrementSubSet(n, len, tmpSet);
-        set++;
+        (*set)++;
     }
     return 0;
 }
@@ -107,6 +107,8 @@ static int fillSubSet(SubSet* set, uint8_t* tmpSet, uint8_t n, uint8_t len, uint
 /* n = number of set elements */
 static int createAllSubSets(Set* set, uint8_t n)
 {
+    SubSet* pOdd = set->odd;
+    SubSet* pEven = set->even;
     uint8_t numSubsets;
     int err;
 
@@ -128,10 +130,10 @@ static int createAllSubSets(Set* set, uint8_t n)
         fillInitialSubSet(tmpSet, len);
 
         if(len % 2){ /* odd */
-            err = fillSubSet(set->odd, tmpSet, n, len, numSubsets);
+            err = fillSubSet(&pOdd, tmpSet, n, len, numSubsets);
         }
         else{ /* even */
-            err = fillSubSet(set->even, tmpSet, n, len, numSubsets);
+            err = fillSubSet(&pEven, tmpSet, n, len, numSubsets);
         }
 
         free(tmpSet);
