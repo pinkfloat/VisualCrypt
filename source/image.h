@@ -18,11 +18,12 @@ typedef struct {
     int32_t height;
 } Image;
 
-int openImageR(char* path, Image* image);
-int openImageW(char* path, Image* image);
-
 int mallocPixelArray(Image* image);
-int mallocImageOfEqSize(Image* source, Image* dest);
-int copyImageContent(Image* source, Image* dest);
+
+int createSourceImage(char* path, Image* image);
+int createShareFiles(char* dirPath, Image** share, int number_of_shares);
+void closeShareFiles(Image** share, int number_of_shares);
+int mallocDeterministicShareArrays(Image* source, Image** share, int number_of_shares);
+void freeShareArrays(Image** share, int number_of_shares);
 
 #endif /* IMAGE_H */ 
