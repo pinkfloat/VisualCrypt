@@ -24,6 +24,6 @@ void deleteBooleanMatrix(BooleanMatrix* matrix);
 
 void fillBasisMatrix(BooleanMatrix* B, SubSet* set, uint8_t i, uint8_t j);
 BooleanMatrix permuteBasisMatrix(BooleanMatrix* B);
-void printBooleanMatrix(BooleanMatrix* B, char* name, uint8_t n, uint8_t m);
+void printBooleanMatrix(BooleanMatrix* B, char* name);
 
 #endif /* BOOLEANMATRIX_H */

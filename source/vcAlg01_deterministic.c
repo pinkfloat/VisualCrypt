@@ -36,8 +36,8 @@ int deterministicAlgorithm(Image* source, Image** shares, uint8_t number_of_shar
         }
     }
 
-    printBooleanMatrix(&B0, "B0", n, m);
-    printBooleanMatrix(&B1, "B1", n, m);
+    printBooleanMatrix(&B0, "B0");
+    printBooleanMatrix(&B1, "B1");
     
     /* Create pixel-arrays for the shares */
 	if (mallocDeterministicShareArrays(source, shares, n, m) != 0)

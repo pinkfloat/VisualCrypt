@@ -121,8 +121,11 @@ BooleanMatrix permuteBasisMatrix(BooleanMatrix* basis)
     return permutation;
 }
 
-void printBooleanMatrix(BooleanMatrix* B, char* name, uint8_t n, uint8_t m)
+void printBooleanMatrix(BooleanMatrix* B, char* name)
 {
+    int n = B->n;
+    int m = B->m;
+
     fprintf(stdout, "%2s:\n", name);
     for(int i = 0; i < n; i++)     /* rows */
     {
