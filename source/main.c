@@ -19,25 +19,16 @@ int main(int argc, char* argv[])
     if (createShareFiles(DEST_PATH, shares, number_of_shares) != 0)
 		goto cleanupA;
 
-
-	/* create pixel-arrays for the shares */
-	if (mallocDeterministicShareArrays(&source, shares, number_of_shares) != 0)
-		goto cleanupB;
-
-
 	/* call the algorithm */
 	if(deterministicAlgorithm(&source, shares, number_of_shares) != 0)
-		goto cleanupC;
+		goto cleanupB;
 	
 	fprintf(stdout, "Success!\n");
-	freeShareArrays(shares, number_of_shares);
 	closeShareFiles(shares, number_of_shares);
 	free(source.array);
 	fclose(source.file);
 	return 0;
 
-	cleanupC:
-		freeShareArrays(shares, number_of_shares);
 	cleanupB:
 		closeShareFiles(shares, number_of_shares);
 	cleanupA:

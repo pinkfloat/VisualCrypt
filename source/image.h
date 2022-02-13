@@ -23,7 +23,5 @@ int mallocPixelArray(Image* image);
 int createSourceImage(char* path, Image* image);
 int createShareFiles(char* dirPath, Image** share, int number_of_shares);
 void closeShareFiles(Image** share, int number_of_shares);
-int mallocDeterministicShareArrays(Image* source, Image** share, int number_of_shares);
-void freeShareArrays(Image** share, int number_of_shares);
 
 #endif /* IMAGE_H */ 

@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <math.h>
 #include <string.h>
 #include "image.h"
 #include "handleBMP.h"
@@ -110,53 +109,4 @@ void closeShareFiles(Image** share, int number_of_shares)
         if(share[i]->file != NULL)
             fclose(share[i]->file);
     }
-}
-
-int mallocDeterministicShareArrays(Image* source, Image** share, int number_of_shares)
-{
-    int err = 0;
-
-     /* number of pixels in a share per pixel in source file = 2^{n-1} */
-    uint8_t m = 1 << (number_of_shares-1);
-
-    int32_t deterministicHeight, deterministicWidth;
-
-    /* calculate the pixel expansion */
-    if (number_of_shares % 2) /* odd */
-    {
-        /*  the shares will have the same appearance as
-            the source, and are just scaled a bit larger
-        */
-        deterministicHeight = (int32_t)sqrt(m);
-        deterministicWidth = deterministicHeight;
-    }
-    else /* even */
-    {
-        /*  the shares will look a little
-            "stretched" from left to right
-        */
-        deterministicHeight = (int32_t)sqrt(m/2);
-        deterministicWidth = deterministicHeight * 2;
-    }
-
-    /* for each share */
-    for(int i = 0; i < number_of_shares; i++)
-    {
-        if(!err)
-        {
-            share[i]->height = source->height * deterministicHeight;
-            share[i]->width = source->width * deterministicWidth;
-            err = mallocPixelArray(share[i]);
-        }
-        else
-            share[i]->array = NULL;
-    }
-    return err;
-}
-
-void freeShareArrays(Image** share, int number_of_shares)
-{
-     /* for each share */
-    for(int i = 0; i < number_of_shares; i++)
-        free(share[i]->array);
 }

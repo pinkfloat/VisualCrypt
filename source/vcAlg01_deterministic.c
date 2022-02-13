@@ -1,4 +1,4 @@
-#include "booleanMatrix.h"
+#include "deterministicShares.h"
 #include "vcAlgorithms.h"
 
 int deterministicAlgorithm(Image* source, Image** shares, uint8_t number_of_shares)
@@ -39,25 +39,24 @@ int deterministicAlgorithm(Image* source, Image** shares, uint8_t number_of_shar
     printBooleanMatrix(&B0, "B0", n, m);
     printBooleanMatrix(&B1, "B1", n, m);
     
-
-    /* Test if the permutation works */
-
-    BooleanMatrix permutation = permuteBasisMatrix(&B0);
-    if(!permutation.array)
+    /* Create pixel-arrays for the shares */
+	if (mallocDeterministicShareArrays(source, shares, n, m) != 0)
         goto cleanupC;
 
-    printBooleanMatrix(&permutation, "P0", n, m);
+    if (fillDeterministicShareArrays(source, shares, &B0, &B1) != 0)
+        goto cleanupC;
 
 
     /* Cleanup */
 
-    deleteBooleanMatrix(&permutation);
+    freeShareArrays(shares, n);
     deleteBooleanMatrix(&B1);
     deleteBooleanMatrix(&B0);
     deleteSet(&set);
     return 0;
 
     cleanupC:
+        freeShareArrays(shares, n);
         deleteBooleanMatrix(&B1);
     cleanupB:
         deleteBooleanMatrix(&B0);
