@@ -60,10 +60,16 @@ static int copyDeterministicPixelToShare(BooleanMatrix* detPixel, Image* share)
 
 int fillDeterministicShareArrays(Image* source, Image** share, BooleanMatrix* B0, BooleanMatrix* B1)
 {
-    /* Test if the permutation works */
-    BooleanMatrix permutation = permuteBasisMatrix(B0);
+    /* create matrix of equal size as the basis matrices */
+    BooleanMatrix permutation = createBooleanMatrix(B0->n, B0->m);
     if(!permutation.array)
         return -1;
+
+    if (permuteBasisMatrix(B0, &permutation) != 0)
+    {
+        deleteBooleanMatrix(&permutation);
+        return -1;
+    }
 
     printBooleanMatrix(&permutation, "P0");
     deleteBooleanMatrix(&permutation);

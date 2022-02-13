@@ -61,16 +61,11 @@ static inline void copyMatrixColumn(BooleanMatrix* source, BooleanMatrix* dest, 
 }
 
 /*  switch the columns of a given basis matrix and copy
-    them into another (new) "permutation matrix"
+    them into the "permutation matrix"
 */
-BooleanMatrix permuteBasisMatrix(BooleanMatrix* basis)
+int permuteBasisMatrix(BooleanMatrix* basis, BooleanMatrix* permutation)
 {
     int m = basis->m;
-
-    /* create matrix of equal size as the basis matrix */
-    BooleanMatrix permutation = createBooleanMatrix(basis->n, m);
-    if (!permutation.array)
-        return permutation;
 
     /*  create checklist of size m to store which columns
         of the basis matrix has been already used in the
@@ -78,10 +73,7 @@ BooleanMatrix permuteBasisMatrix(BooleanMatrix* basis)
     */
     Pixel* checkList = calloc(m, sizeof(Pixel));
     if (!checkList)
-    {
-        deleteBooleanMatrix(&permutation);
-        return permutation;
-    }
+        return -1;
 
     /* initialize random number generator */
     time_t t;
@@ -110,7 +102,7 @@ BooleanMatrix permuteBasisMatrix(BooleanMatrix* basis)
                 /*  copy the random chosen column of the basis matrix
                     to the next empty column of the permutation matrix
                 */
-                copyMatrixColumn(basis, &permutation, idx, j);
+                copyMatrixColumn(basis, permutation, idx, j);
                 checkList[idx] = 1; /* mark column in checkList as used */
                 break;
             }
@@ -118,7 +110,7 @@ BooleanMatrix permuteBasisMatrix(BooleanMatrix* basis)
         }
     }
     free(checkList);
-    return permutation;
+    return 0;
 }
 
 void printBooleanMatrix(BooleanMatrix* B, char* name)
