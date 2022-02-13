@@ -22,14 +22,21 @@ int main(int argc, char* argv[])
 	/* call the algorithm */
 	if(deterministicAlgorithm(&source, shares, number_of_shares) != 0)
 		goto cleanupB;
+
+	/* draw the share-bmps */
+	if (drawShareFiles(shares, number_of_shares) != 0)
+		goto cleanupB;
 	
 	fprintf(stdout, "Success!\n");
+	freeShareArrays(shares, number_of_shares);
 	closeShareFiles(shares, number_of_shares);
 	free(source.array);
 	fclose(source.file);
 	return 0;
 
 	cleanupB:
+		fprintf(stderr, "Failed!\n");
+		freeShareArrays(shares, number_of_shares);
 		closeShareFiles(shares, number_of_shares);
 	cleanupA:
 		free(source.array);

@@ -101,6 +101,20 @@ int createShareFiles(char* dirPath, Image** share, int number_of_shares)
     return err;
 }
 
+int drawShareFiles(Image** share, int number_of_shares)
+{
+    int err;
+
+    /* for each share */
+    for(uint8_t i = 0; i < number_of_shares; i++)
+    {
+        err = createBMP(share[i]);
+        if (err)
+            break;
+    }
+    return err;
+}
+
 void closeShareFiles(Image** share, int number_of_shares)
 {
      /* for each share */
@@ -109,4 +123,11 @@ void closeShareFiles(Image** share, int number_of_shares)
         if(share[i]->file != NULL)
             fclose(share[i]->file);
     }
+}
+
+void freeShareArrays(Image** share, int n)
+{
+     /* for each share */
+    for(int i = 0; i < n; i++)
+        free(share[i]->array);
 }

@@ -22,6 +22,9 @@ int mallocPixelArray(Image* image);
 
 int createSourceImage(char* path, Image* image);
 int createShareFiles(char* dirPath, Image** share, int number_of_shares);
+int drawShareFiles(Image** share, int number_of_shares);
 void closeShareFiles(Image** share, int number_of_shares);
+
+void freeShareArrays(Image** share, int n);
 
 #endif /* IMAGE_H */ 

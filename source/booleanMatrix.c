@@ -75,10 +75,6 @@ int permuteBasisMatrix(BooleanMatrix* basis, BooleanMatrix* permutation)
     if (!checkList)
         return -1;
 
-    /* initialize random number generator */
-    time_t t;
-    srand((unsigned) time(&t));
-
     /*  fill columns of the permutation matrix in
         a random way with the columns of the basis
         matrix

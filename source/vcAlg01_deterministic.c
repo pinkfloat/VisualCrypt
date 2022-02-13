@@ -6,6 +6,10 @@ int deterministicAlgorithm(Image* source, Image** shares, uint8_t number_of_shar
     uint8_t n = number_of_shares;
     uint8_t m = 1 << (n-1);     /* number of pixels in a share per pixel in source file = 2^{n-1} */
 
+    /* Create pixel-arrays for the shares */
+	if (mallocDeterministicShareArrays(source, shares, n, m) != 0)
+        return -1;
+
     /*  create set with n elements holding subsets
         with even and odd cardinalities of it
     */
@@ -39,24 +43,19 @@ int deterministicAlgorithm(Image* source, Image** shares, uint8_t number_of_shar
     printBooleanMatrix(&B0, "B0");
     printBooleanMatrix(&B1, "B1");
     
-    /* Create pixel-arrays for the shares */
-	if (mallocDeterministicShareArrays(source, shares, n, m) != 0)
-        goto cleanupC;
-
+    /* Fill pixel-arrays of the shares */
     if (fillDeterministicShareArrays(source, shares, &B0, &B1) != 0)
         goto cleanupC;
 
 
     /* Cleanup */
 
-    freeShareArrays(shares, n);
     deleteBooleanMatrix(&B1);
     deleteBooleanMatrix(&B0);
     deleteSet(&set);
     return 0;
 
     cleanupC:
-        freeShareArrays(shares, n);
         deleteBooleanMatrix(&B1);
     cleanupB:
         deleteBooleanMatrix(&B0);
