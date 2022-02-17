@@ -1,11 +1,10 @@
 #include <stdlib.h>
+#include "settings.h"
 #include "vcAlgorithms.h"
 
-#define SOURCE_PATH "../image/colortest.bmp"
-#define DEST_PATH "../image"
-
-int callAlgorithm(int numberOfShares, int (*algorithm)(AlgorithmData*))
-{   
+int callAlgorithm(int (*algorithm)(AlgorithmData*))
+{
+	int numberOfShares = NUMBER_OF_SHARES;
 	Image source, *shares = malloc(numberOfShares*sizeof(Image));
 	if(!shares)
 		return -1;

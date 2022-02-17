@@ -9,7 +9,7 @@ typedef struct {
     uint8_t numberOfShares;
 } AlgorithmData;
 
-int callAlgorithm(int numberOfShares, int (*algorithm)(AlgorithmData*));
+int callAlgorithm(int (*algorithm)(AlgorithmData*));
 
 int deterministicAlgorithm(AlgorithmData* data);
 

@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include "settings.h"
 #include "handleBMP.h"
 
 #define SIZE_BMP_HEADER 54
@@ -144,7 +145,7 @@ static int readBmpBody(Image* image)
             red = *pBuffer * 0.2616;
             green = *(pBuffer+1) * 0.7152;
             blue = *(pBuffer+2) * 0.0722;
-            image->array[row * width + column] = (blue + green + red) > 127 ? 1 : 0; /* white = 1, black = 0 */
+            image->array[row * width + column] = (blue + green + red) > THRESHOLD ? 1 : 0; /* white = 1, black = 0 */
 
             pBuffer += 3;
         }
