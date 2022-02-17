@@ -23,7 +23,6 @@ void setPixel(BooleanMatrix* matrix, int i, int j, uint8_t value);
 void deleteBooleanMatrix(BooleanMatrix* matrix);
 
 void fillBasisMatrix(BooleanMatrix* B, SubSet* set, uint8_t i, uint8_t j);
-int permuteBasisMatrix(BooleanMatrix* basis, BooleanMatrix* permutation);
 void printBooleanMatrix(BooleanMatrix* B, char* name);
 
 #endif /* BOOLEANMATRIX_H */

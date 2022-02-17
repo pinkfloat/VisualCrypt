@@ -52,63 +52,6 @@ void fillBasisMatrix(BooleanMatrix* B, SubSet* set, uint8_t i, uint8_t j)
         setPixel(B, i, j, 0);
 }
 
-static inline void copyMatrixColumn(BooleanMatrix* source, BooleanMatrix* dest, int sourceColumnNum, int destColumnNum)
-{
-    for(int row = 0; row < source->n; row++)
-    {
-        setPixel(dest, row, destColumnNum, getPixel(source, row, sourceColumnNum));
-    }
-}
-
-/*  switch the columns of a given basis matrix and copy
-    them into the "permutation matrix"
-*/
-int permuteBasisMatrix(BooleanMatrix* basis, BooleanMatrix* permutation)
-{
-    int m = basis->m;
-
-    /*  create checklist of size m to store which columns
-        of the basis matrix has been already used in the
-        permutation matrix: 0 = unused column, 1 = used
-    */
-    Pixel* checkList = calloc(m, sizeof(Pixel));
-    if (!checkList)
-        return -1;
-
-    /*  fill columns of the permutation matrix in
-        a random way with the columns of the basis
-        matrix
-    */
-    int randNum, idx, zeroCount;
-    for (int j = 0; j < m; j++)
-    {
-        /* number between 1 and m-j */
-        randNum = rand() % (m-j)+1;
-
-        /*  search for the randNum-th zero
-            in the checkList
-        */
-        for(idx = 0, zeroCount = 0;; idx++)
-        {
-            if(checkList[idx] == 0)
-                zeroCount++;
-
-            if(zeroCount == randNum)
-            {
-                /*  copy the random chosen column of the basis matrix
-                    to the next empty column of the permutation matrix
-                */
-                copyMatrixColumn(basis, permutation, idx, j);
-                checkList[idx] = 1; /* mark column in checkList as used */
-                break;
-            }
-
-        }
-    }
-    free(checkList);
-    return 0;
-}
-
 void printBooleanMatrix(BooleanMatrix* B, char* name)
 {
     int n = B->n;
