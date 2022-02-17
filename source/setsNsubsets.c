@@ -154,7 +154,7 @@ Set createSet(uint8_t n, uint8_t m)
     */
     result.even = calloc(sizeof(SubSet),m);
     result.odd = calloc(sizeof(SubSet),m);
-    result.num_subsets = m;
+    result.numSubsets = m;
 
     if(!result.even || !result.odd)
     {
@@ -179,7 +179,7 @@ Set createSet(uint8_t n, uint8_t m)
 
 void deleteSet(Set* set)
 {
-    for (uint8_t i = 0; i < set->num_subsets; i++)
+    for (uint8_t i = 0; i < set->numSubsets; i++)
     {
         if(set->even+i)
             deleteSubSet(set->even+i);
@@ -207,8 +207,8 @@ static void printSubset(SubSet* set, uint8_t num_sets, char sign)
 void printAllSubsets(Set* set)
 {
     /* print even subsets */
-    printSubset(set->even, set->num_subsets, 'u');
+    printSubset(set->even, set->numSubsets, 'u');
 
     /* print odd subsets */
-    printSubset(set->odd, set->num_subsets, 'v');
+    printSubset(set->odd, set->numSubsets, 'v');
 }

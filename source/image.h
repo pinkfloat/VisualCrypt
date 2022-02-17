@@ -21,10 +21,10 @@ typedef struct {
 int mallocPixelArray(Image* image);
 
 int createSourceImage(char* path, Image* image);
-int createShareFiles(char* dirPath, Image** share, int number_of_shares);
-int drawShareFiles(Image** share, int number_of_shares);
-void closeShareFiles(Image** share, int number_of_shares);
+int createShareFiles(char* dirPath, Image* share, int numberOfShares);
+int drawShareFiles(Image* share, int numberOfShares);
+void closeShareFiles(Image* share, int numberOfShares);
 
-void freeShareArrays(Image** share, int n);
+void freeShareArrays(Image* share, int n);
 
 #endif /* IMAGE_H */ 

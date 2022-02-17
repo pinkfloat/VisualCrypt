@@ -80,54 +80,54 @@ int createSourceImage(char* path, Image* image)
 }
 
 /* creates empty .bmp files for the shares */
-int createShareFiles(char* dirPath, Image** share, int number_of_shares)
+int createShareFiles(char* dirPath, Image* share, int numberOfShares)
 {
     int err = 0;
     char path[100];
     memset(path, '\0', sizeof(path));
 
     /* for each share */
-    for(uint8_t i = 0; i < number_of_shares; i++)
+    for(uint8_t i = 0; i < numberOfShares; i++)
     {
         if (!err)
         {
             /* give every .bmp an unique number to save it */
             snprintf(path, sizeof(path), "%s/share%02d.bmp", dirPath, i+1);
-            err = openImageW(path, share[i]);
+            err = openImageW(path, share+i);
         }
         else
-            share[i]->file = NULL;
+            share[i].file = NULL;
     }
     return err;
 }
 
-int drawShareFiles(Image** share, int number_of_shares)
+int drawShareFiles(Image* share, int numberOfShares)
 {
     int err;
 
     /* for each share */
-    for(uint8_t i = 0; i < number_of_shares; i++)
+    for(uint8_t i = 0; i < numberOfShares; i++)
     {
-        err = createBMP(share[i]);
+        err = createBMP(share+i);
         if (err)
             break;
     }
     return err;
 }
 
-void closeShareFiles(Image** share, int number_of_shares)
+void closeShareFiles(Image* share, int numberOfShares)
 {
      /* for each share */
-    for(int i = 0; i < number_of_shares; i++)
+    for(int i = 0; i < numberOfShares; i++)
     {
-        if(share[i]->file != NULL)
-            fclose(share[i]->file);
+        if(share[i].file != NULL)
+            fclose(share[i].file);
     }
 }
 
-void freeShareArrays(Image** share, int n)
+void freeShareArrays(Image* share, int n)
 {
      /* for each share */
     for(int i = 0; i < n; i++)
-        free(share[i]->array);
+        free(share[i].array);
 }

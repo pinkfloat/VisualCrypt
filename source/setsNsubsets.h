@@ -11,7 +11,7 @@ typedef struct {
 typedef struct {
     SubSet* even;
     SubSet* odd;
-    uint8_t num_subsets; /* number of subsets behind "even" or "odd" */
+    uint8_t numSubsets; /* number of subsets behind "even" or "odd" */
 } Set;
 
 Set createSet(uint8_t n, uint8_t m);

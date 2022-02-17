@@ -32,7 +32,7 @@ static void calculateDeterministicPixelSize (int* deterministicHeight, int* dete
     }
 }
 
-int mallocDeterministicShareArrays(Image* source, Image** share, int n, int m)
+int mallocDeterministicShareArrays(Image* source, Image* share, int n, int m)
 {
     int err = 0;
 
@@ -44,12 +44,12 @@ int mallocDeterministicShareArrays(Image* source, Image** share, int n, int m)
     {
         if(!err)
         {
-            share[i]->height = source->height * deterministicHeight;
-            share[i]->width = source->width * deterministicWidth;
-            err = mallocPixelArray(share[i]);
+            share[i].height = source->height * deterministicHeight;
+            share[i].width = source->width * deterministicWidth;
+            err = mallocPixelArray(&share[i]);
         }
         else
-            share[i]->array = NULL;
+            share[i].array = NULL;
     }
     return err;
 }
@@ -112,7 +112,7 @@ static void copyDeterministicPixelToShare(BooleanMatrix* detPixel, Image* share,
     }
 }
 
-int fillDeterministicShareArrays(Image* source, Image** share, BooleanMatrix* B0, BooleanMatrix* B1)
+int fillDeterministicShareArrays(Image* source, Image* share, BooleanMatrix* B0, BooleanMatrix* B1)
 {
     int randNum;
     int n = B0->n;
@@ -190,12 +190,12 @@ int fillDeterministicShareArrays(Image* source, Image** share, BooleanMatrix* B0
             copy.source = &permutation;
 
             /* for each share */
-            for(int share_idx = 0; share_idx < n; share_idx++)
+            for(int shareIdx = 0; shareIdx < n; shareIdx++)
             {
                 /*  choose random which share will get which permutation-array row */
-                randNum = rand() % (n-share_idx)+1; /* number between 1 and "number-of-shares minus share_idx" */
+                randNum = rand() % (n-shareIdx)+1; /* number between 1 and "number-of-shares minus shareIdx" */
                 randomSort(randNum, rowCheckList, &copy, fillDeterministicPixel);
-                copyDeterministicPixelToShare(&deterministicPixel, share[share_idx], i*deterministicHeight, j*deterministicWidth);
+                copyDeterministicPixelToShare(&deterministicPixel, &share[shareIdx], i*deterministicHeight, j*deterministicWidth);
             }
         }
     }
