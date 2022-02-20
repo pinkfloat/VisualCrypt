@@ -2,6 +2,13 @@
 #include <stdlib.h>
 #include "setsNsubsets.h"
 
+/********************************************************************
+* Function:     createSubSet
+*--------------------------------------------------------------------
+* Description:  Allocates buffer for data of a SubSet of size
+*               "length".
+* Return:       The created SubSet.
+********************************************************************/
 static SubSet createSubSet(uint8_t length)
 {
     SubSet result;
@@ -12,14 +19,23 @@ static SubSet createSubSet(uint8_t length)
     return result;
 }
 
+/********************************************************************
+* Function:     deleteSubSet
+*--------------------------------------------------------------------
+* Description:  Frees data of a SubSet.
+********************************************************************/
 static inline void deleteSubSet(SubSet* subset)
 {
     free(subset->data);
 }
 
-/*  the ! math-operation 
-    i.e. 4! = 4 * 3 * 2 * 1 = 24 
-*/
+/********************************************************************
+* Function:     factorial
+*--------------------------------------------------------------------
+* Description:  Performs the ! math-operation for "num".
+*               i.e.: 4! = 4 * 3 * 2 * 1 = 24 
+* Return:       The result of num!
+********************************************************************/
 static inline uint16_t factorial(uint8_t num)
 {
     uint16_t fact = 1;
@@ -28,32 +44,69 @@ static inline uint16_t factorial(uint8_t num)
     return fact;
 }
 
-/*  calculate number of (even or odd)
-    subsets that will have the length r
-    n = number of set elements,
-    r = number of elements in a subset
-*/
+/********************************************************************
+* Function:     numOfSubsetsOfLen
+*--------------------------------------------------------------------
+* Description:  Calculates the number of subsets of a set with "n"
+*               elements, that will have the length "r".
+*               i.e.:
+*               given:    set = {0, 1, 2} -> n=3
+*               searched: how many subsets of length 2 exist? -> r=2
+*               There would be: {0,1}, {0,2} and {1,2}
+*               -> The result of this function is 3
+* Input:        n = number of set elements,
+*               r = number of elements in a subset
+* Return:       number of subsets of length "r".
+********************************************************************/
 static inline uint8_t numOfSubsetsOfLen(uint8_t n, uint8_t r)
 {
     return factorial(n) / (factorial(r)*factorial(n-r));
 }
 
-/*  fill subset from len-1 to 0, i.e.:
-    len = 4 -> {3,2,1,0}
-    len = 3 -> {2,1,0}
-*/
-static void fillInitialSubSet(uint8_t* set, int len)
+/********************************************************************
+* Function:     fillInitialSubSet
+*--------------------------------------------------------------------
+* Description:  Fills the data of a SubSet from length-1 to 0.
+*               i.e.:
+*               length = 4 -> {3,2,1,0}
+*               length = 3 -> {2,1,0}
+********************************************************************/
+static inline void fillInitialSubSet(uint8_t* data, int length)
 {
-    for (int i = 0, x = len - 1; i < len; i++)
-        set[i] = x--;
+    for (int i = 0, x = length - 1; i < length; i++)
+        data[i] = x--;
 }
 
-static void copyDataInSet(SubSet set, uint8_t* data)
+/********************************************************************
+* Function:     copyDataInSet
+*--------------------------------------------------------------------
+* Description:  Copies an integer stream to the data of a SubSet.
+********************************************************************/
+static inline void copyDataInSet(SubSet set, uint8_t* data)
 {
     for (int i = 0; i < set.length; i++)
         set.data[i] = data[i];
 }
 
+/********************************************************************
+* Function:     incrementSubSet
+*--------------------------------------------------------------------
+* Description:  In order to find all subsets of a specific length of
+*               a set, this function will calculate the "next" subset
+*               that would follow after the one, given to this
+*               function.
+*               i.e.: for 3 out of 5, this function - called in a
+*               loop - will fill the SubSet data "set" with:
+*               start: {2,1,0} -> result: {3,1,0}
+*               start: {3,1,0} -> result: {4,1,0}
+*               start: {4,1,0} -> result: {3,2,1}
+*               start: {3,2,1} -> result: {4,2,1}
+*               and so on.
+* Input:        n = number of set elements (in the example above its 5)
+*               len = length of the subset (in the example above its 3)
+* In/Out:       set = a subset filled with values (start) for which
+*               this function will calculate the next values (result)
+********************************************************************/
 static void incrementSubSet(uint8_t n, uint8_t len, uint8_t* set)
 {
     for(int offset = 0; offset < len; offset++)
@@ -85,6 +138,22 @@ static void incrementSubSet(uint8_t n, uint8_t len, uint8_t* set)
     }
 }
 
+/********************************************************************
+* Function:     fillSubSet
+*--------------------------------------------------------------------
+* Description:  This function uses the integer stream "tmpSet"
+*               to temporarily store the results of the function
+*               incrementSubSet() and saves them permanently
+*               in the newly allocated SubSets "set".
+* Input:        n = number of set elements,
+*               len = length of the subsets
+*               numSubsets = number of subsets of length len
+* Output:       set = pointer to the next address of a SubSet that
+*               will be created and filled with data.
+* In/Out:       tmpSet = subset values getting updated by
+*               incrementSubSet()
+* Return:       0 on success, -1 on failure.
+********************************************************************/
 static int fillSubSet(SubSet** set, uint8_t* tmpSet, uint8_t n, uint8_t len, uint8_t numSubsets)
 {
     for(uint8_t idx = 0; idx < numSubsets; idx++)
@@ -104,9 +173,17 @@ static int fillSubSet(SubSet** set, uint8_t* tmpSet, uint8_t n, uint8_t len, uin
     return 0;
 }
 
-/* n = number of set elements */
-static int createAllSubSets(Set* set, uint8_t n)
+/********************************************************************
+* Function:     createAllSubSets
+*--------------------------------------------------------------------
+* Description:  Calculates all subsets of a set with n elements and
+*               sorts them in the SubSet arrays of the Set structure,
+*               after having even or odd cardinality.
+* Return:       0 on success, -1 on failure.
+********************************************************************/
+static int createAllSubSets(Set* set)
 {
+    uint8_t n = set->numSetElements;
     SubSet* pOdd = set->odd;
     SubSet* pEven = set->even;
     uint8_t numSubsets;
@@ -117,12 +194,7 @@ static int createAllSubSets(Set* set, uint8_t n)
         numSubsets = numOfSubsetsOfLen(n, len);
 
         uint8_t* tmpSet = malloc(len);
-        /*  fill the first subset with the lowest possible 
-            value combination for len i.e. for 3 out of 5,
-            where len is 3 and the set is {0,1,2,3,4}, the
-            initial set would be: {0,1,2}, and since the 
-            sets are filled reverted: {2,1,0}
-        */
+
         if(!tmpSet){
             fprintf(stderr, "ERR: allocate buffer for temporary SubSet\n");
             return -1;
@@ -143,6 +215,18 @@ static int createAllSubSets(Set* set, uint8_t n)
     return 0;
 }
 
+/********************************************************************
+* Function:     createSet
+*--------------------------------------------------------------------
+* Description:  A Set is (in this programm) considered a structure
+*               that is holding all Subsets of a Set with n elements,
+*               sorted in arrays of SubSets after having even or odd
+*               cardinality. This function will create one of them.
+* Input:        n = number of set elements,
+*               m = number of subsets having respectively even or
+*               odd cardinality.
+* Return:       The created Set.
+********************************************************************/
 Set createSet(uint8_t n, uint8_t m)
 {
     Set result;
@@ -152,6 +236,7 @@ Set createSet(uint8_t n, uint8_t m)
         is needed for odd n's), by just
         not-initilaising the memory
     */
+    result.numSetElements = n;
     result.even = calloc(sizeof(SubSet),m);
     result.odd = calloc(sizeof(SubSet),m);
     result.numSubsets = m;
@@ -164,7 +249,7 @@ Set createSet(uint8_t n, uint8_t m)
         return result;
     }
     
-    err = createAllSubSets(&result, n);
+    err = createAllSubSets(&result);
     if(err)
     {
         /* free everything allocated so far */
@@ -177,6 +262,12 @@ Set createSet(uint8_t n, uint8_t m)
     return result;
 }
 
+/********************************************************************
+* Function:     deleteSet
+*--------------------------------------------------------------------
+* Description:  Free all the allocated resources of a Set structure
+*               created with createSet().
+********************************************************************/
 void deleteSet(Set* set)
 {
     for (uint8_t i = 0; i < set->numSubsets; i++)
@@ -190,7 +281,14 @@ void deleteSet(Set* set)
     free(set->odd);
 } 
 
-static void printSubset(SubSet* set, uint8_t num_sets, char sign)
+/********************************************************************
+* Function:     printSubsets
+*--------------------------------------------------------------------
+* Description:  Print the SubSets from the array of subsets "set".
+*               Each will be printed behind the letter "sign" and a
+*               distinct number to tell them apart.
+********************************************************************/
+static void printSubsets(SubSet* set, uint8_t num_sets, char sign)
 {
     for(uint8_t i = 0; i < num_sets; i++)
     {
@@ -204,11 +302,18 @@ static void printSubset(SubSet* set, uint8_t num_sets, char sign)
     fprintf(stdout, "\n");
 }
 
+/********************************************************************
+* Function:     printAllSubsets
+*--------------------------------------------------------------------
+* Description:  Print all subsets of the set "set". The even subsets
+*               will be printed behind the letter "u", while the odd
+*               subsets are receiving the letter "v".
+********************************************************************/
 void printAllSubsets(Set* set)
 {
     /* print even subsets */
-    printSubset(set->even, set->numSubsets, 'u');
+    printSubsets(set->even, set->numSubsets, 'u');
 
     /* print odd subsets */
-    printSubset(set->odd, set->numSubsets, 'v');
+    printSubsets(set->odd, set->numSubsets, 'v');
 }

@@ -3,6 +3,13 @@
 #include "image.h"
 #include "handleBMP.h"
 
+/********************************************************************
+* Function:     openImageR
+*--------------------------------------------------------------------
+* Description:  Opens the binary file on the location "path" for read
+*               and stores it in image->file.
+* Return:       0 on success, -1 on failure.
+********************************************************************/
 static int openImageR(char* path, Image* image)
 {
     image->file = fopen(path, "rb");
@@ -13,6 +20,13 @@ static int openImageR(char* path, Image* image)
     return 0;
 }
 
+/********************************************************************
+* Function:     openImageW
+*--------------------------------------------------------------------
+* Description:  Opens the binary file on the location "path" for
+*               write and stores it in image->file.
+* Return:       0 on success, -1 on failure.
+********************************************************************/
 static int openImageW(char* path, Image* image)
 {
     image->file = fopen(path, "wb");
@@ -23,6 +37,13 @@ static int openImageW(char* path, Image* image)
     return 0;
 }
 
+/********************************************************************
+* Function:     mallocPixelArray
+*--------------------------------------------------------------------
+* Description:  Allocates a pixel array of the size image->width
+*               * image->height and stores it in image->array.
+* Return:       0 on success, -1 on failure.
+********************************************************************/
 int mallocPixelArray(Image* image)
 {
     image->array = malloc(image->width * image->height);
@@ -33,36 +54,16 @@ int mallocPixelArray(Image* image)
     return 0;
 }
 
-static int mallocImageOfEqSize(Image* source, Image* dest)
-{
-    dest->width = source->width;
-    dest->height = source->height;
-    return mallocPixelArray(dest);
-}
-
-static int copyImageContent(Image* source, Image* dest)
-{
-    if((dest->width != source->width) || (dest->height != source->height)){
-        fprintf(stderr, "ERR: can't copy image of different size\n");
-		return -1;
-    }
-
-    int32_t width = dest->width;
-    int32_t height = dest->height;
-
-    for (int32_t row = 0; row < height; row++) {
-        for (int32_t column = 0; column < width; column++) {
-            dest->array[row*width+column] = source->array[row*width+column];
-        }
-    }
-    return 0;
-}
-
- /* Info:
-    allocates buffer on success
-    for image->array (and fills
-    it with data from the BMP)
- */
+/********************************************************************
+* Function:     createSourceImage
+*--------------------------------------------------------------------
+* Description:  Opens the bmp file located at "path" and stores the
+*               opened file path, width, height and black-and-white
+*               interpreted pixel array in the structure "image".
+* Info:         Allocates buffer for image->array without freeing it
+*               on success.
+* Return:       0 on success, -1 on failure.
+********************************************************************/
 int createSourceImage(char* path, Image* image)
 {
     /* open existing image file for read */
@@ -79,7 +80,14 @@ int createSourceImage(char* path, Image* image)
     return 0;
 }
 
-/* creates empty .bmp files for the shares */
+/********************************************************************
+* Function:     createShareFiles
+*--------------------------------------------------------------------
+* Description:  Creates empty .bmp files for the shares in the
+*               directory "dirPath" and names them share01, share02,
+*               etc. The opened files are stored in share->file.
+* Return:       0 on success, -1 on failure.
+********************************************************************/
 int createShareFiles(char* dirPath, Image* share, int numberOfShares)
 {
     int err = 0;
@@ -101,6 +109,14 @@ int createShareFiles(char* dirPath, Image* share, int numberOfShares)
     return err;
 }
 
+/********************************************************************
+* Function:     drawShareFiles
+*--------------------------------------------------------------------
+* Description:  Uses the data stored in share->array for each image
+*               structure "share" to calculate / draw the rgb values
+*               for each pixel of the opened bmp files (share->file).
+* Return:       0 on success, -1 on failure.
+********************************************************************/
 int drawShareFiles(Image* share, int numberOfShares)
 {
     int err;
@@ -115,6 +131,12 @@ int drawShareFiles(Image* share, int numberOfShares)
     return err;
 }
 
+/********************************************************************
+* Function:     closeShareFiles
+*--------------------------------------------------------------------
+* Description:  Close the file share->file for each image structure
+*               "share".
+********************************************************************/
 void closeShareFiles(Image* share, int numberOfShares)
 {
      /* for each share */
@@ -125,6 +147,12 @@ void closeShareFiles(Image* share, int numberOfShares)
     }
 }
 
+/********************************************************************
+* Function:     freeShareArrays
+*--------------------------------------------------------------------
+* Description:  Free the allocated buffer for each Image structure
+*               "share" at share->array.
+********************************************************************/
 void freeShareArrays(Image* share, int n)
 {
      /* for each share */

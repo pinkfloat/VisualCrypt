@@ -1,6 +1,13 @@
 #include "menu.h"
 #include "vcAlgorithms.h"
 
+/********************************************************************
+* Function:     main
+*--------------------------------------------------------------------
+* Description:  Ask the user which algorithm shall run and call the
+*               chosen one.
+* Return:       0 on success, -1 on failure.
+********************************************************************/
 int main(int argc, char* argv[])
 {
 	int choice, err = 0;

@@ -2,6 +2,16 @@
 #include "settings.h"
 #include "vcAlgorithms.h"
 
+/********************************************************************
+* Function:     callAlgorithm
+*--------------------------------------------------------------------
+* Description:  The function callAlgorithm will extract the data of
+*               the source bmp, call the algorithm given to it as
+*               parameter and draw all of the share bmps, after
+*               the algorithm is finished. It will use the settings
+*               stored in "settings.h".
+* Return:       0 on success, -1 on failure.
+********************************************************************/
 int callAlgorithm(int (*algorithm)(AlgorithmData*))
 {
 	int numberOfShares = NUMBER_OF_SHARES;

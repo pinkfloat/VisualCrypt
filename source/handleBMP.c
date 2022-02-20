@@ -36,6 +36,15 @@ static inline uint32_t roundToMultipleOf4(uint32_t x)
 
 /*_____________________________________WRITE_OPERATIONS_____________________________________*/
 
+/********************************************************************
+* Function:     writeBmpHeader
+*--------------------------------------------------------------------
+* Description:  Each BMP file has a header in front of its pixel
+*               data. This function will create a valid BMP header in
+*               order to create a new BMP file.
+* Input:        width = width of the new BMP file in pixel,
+*               height = height of the new BMP file in pixel
+********************************************************************/
 static void writeBmpHeader(BmpHeader* bmpHeader, int32_t width, int32_t height)
 {
    	/* 14 Byte BMP Fileheader */
@@ -59,7 +68,25 @@ static void writeBmpHeader(BmpHeader* bmpHeader, int32_t width, int32_t height)
     bmpHeader->numImportantColors    	 = 0;
 }
 
-/* take binary source value (black / white) and write it to RGB destination */
+/********************************************************************
+* Function:     writeBmpBody
+*--------------------------------------------------------------------
+* Description:  This function has to be called after writeBmpHeader()
+*               to create a bmp file properly. It will take the
+*               content of the pixel array "source", where the value
+*               "0" is considered as black and every other number is
+*               considered as white.
+*               If the source pixel is white, the rgb values of the
+*               corresponding destination pixel, interpreted as bmp
+*               color data, are all set to 255. For black pixel they
+*               are set to 0.
+* Input:        source = most likely a boolean pixel array with
+*                        the values 1 = white and 0 = black,
+*               width = width of the new BMP file in pixel,
+*               height = height of the new BMP file in pixel,
+* Output:       destination = array that will get the rgb values of
+*               the bmp file that will be created.
+********************************************************************/
 static void writeBmpBody(const Pixel* source, Pixel* destination, int32_t width, int32_t height)
 {
     Pixel p_source;
@@ -74,6 +101,16 @@ static void writeBmpBody(const Pixel* source, Pixel* destination, int32_t width,
     }
 }
 
+/********************************************************************
+* Function:     createBMP
+*--------------------------------------------------------------------
+* Description:  The function createBMP will create a black and white
+*               bmp file from the pure pixel data of a boolean array,
+*               stored in image->array. It will fill the empty bmp 
+*               file opened in image->file with a valid bmp header
+*               and the array contents, restructured as rgb-values.
+* Return:       0 on success, -1 on failure.
+********************************************************************/
 int createBMP(Image* image)
 {
     int32_t width = image->width;
@@ -102,17 +139,40 @@ int createBMP(Image* image)
 
 /*_____________________________________READ_OPERATIONS_____________________________________*/
 
+/********************************************************************
+* Function:     readBmpHeader
+*--------------------------------------------------------------------
+* Description:  Each BMP file has a header in front of its pixel
+*               data. This function will read to the end of the
+*               bmp header information, and stores them in a
+*               BmpHeader structure. In addition to that, it is
+*               positioning the file offset of "file" to the start
+*               of the pixel data.
+* Return:       0 on success, -1 on failure.
+********************************************************************/
 static int readBmpHeader(FILE* file, BmpHeader* headerInformation)
 {
     size_t bufferSize = sizeof(BmpHeader);
 
     if (fread( ((uint8_t*)headerInformation) + 2, 1, bufferSize - 2, file) != bufferSize - 2) {
-        fprintf(stderr, "ERR: get header information\n");
+        fprintf(stderr, "ERR: read header information\n");
         return -1;
     }
     return 0;
 }
 
+/********************************************************************
+* Function:     readBmpBody
+*--------------------------------------------------------------------
+* Description:  This function has to be called after readBmpHeader().
+*               It will read the rgb values of the opened bmp file
+*               image->file and, since the results are going to be
+*               black and white, calculates if a colored pixel is
+*               considered to be black(0) or white(1). The boolean
+*               interpretation of the image will be stored in
+*               image->array.
+* Return:       0 on success, -1 on failure.
+********************************************************************/
 static int readBmpBody(Image* image)
 {
     int32_t width = image->width;
@@ -155,13 +215,23 @@ static int readBmpBody(Image* image)
     return 0;
 }
 
-/* Info: allocates buffer without freeing on success */
+/********************************************************************
+* Function:     readBMP
+*--------------------------------------------------------------------
+* Description:  The function readBMP will read a colored bmp opened
+*               in image->file and get the information: width, height
+*               , and the pixel data from it, to store them into
+*               the image structure "image".
+* Info:         Allocates buffer for image->array without freeing it
+*               on success.
+* Return:       0 on success, -1 on failure.
+********************************************************************/
 int readBMP(Image* image)
 {
     BmpHeader headerInformation;
 
     if(readBmpHeader(image->file, &headerInformation) != 0){
-		fprintf(stderr, "ERR: read BMP Header\n");
+		fprintf(stderr, "ERR: read BMP header\n");
         return -1;
 	}
 
@@ -172,7 +242,7 @@ int readBMP(Image* image)
         return -1;
 
 	if (readBmpBody(image) != 0){
-		fprintf(stderr, "ERR: read BMP Body\n");
+		fprintf(stderr, "ERR: read BMP body\n");
         free(image->array);
 		return -1;
 	}

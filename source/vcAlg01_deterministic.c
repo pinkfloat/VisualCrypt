@@ -1,6 +1,19 @@
 #include "deterministicShares.h"
 #include "vcAlgorithms.h"
 
+/********************************************************************
+* Function:     deterministicAlgorithm
+*--------------------------------------------------------------------
+* Description:  This is an implementation of the so called
+*               "deterministic Algorithm" from Moni Naor and Adi
+*               Shamir. It will calculate the pixel of the share
+*               images from the pixel in the source file, by creating
+*               basis matrices out of the number of the share files.
+*               The basis matrices will be afterwards permutated in
+*               columns and each share will get a different row of
+*               every permutation per source pixel.
+* Return:       0 on success, -1 on failure.
+********************************************************************/
 int deterministicAlgorithm(AlgorithmData* data)
 {
     uint8_t n = data->numberOfShares;
@@ -10,7 +23,7 @@ int deterministicAlgorithm(AlgorithmData* data)
 	if (mallocDeterministicShareArrays(data->source, data->shares, n, m) != 0)
         return -1;
 
-    /*  create set with n elements holding subsets
+    /*  create set with n elements, holding subsets
         with even and odd cardinalities of it
     */
     Set set = createSet(n, m);

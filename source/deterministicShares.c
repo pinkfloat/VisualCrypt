@@ -11,8 +11,22 @@ typedef struct {
     int destIdx;
 } MatrixCopy;
 
-/* calculate the pixel expansion */
-static void calculateDeterministicPixelSize (int* deterministicHeight, int* deterministicWidth, int n, int m)
+/********************************************************************
+* Function:     calcPixelExpansion
+*--------------------------------------------------------------------
+* Description:  The shares, that will be created from the source
+*               image, will have a greater amount of pixel as the
+*               original source file. This function calculates the
+*               pixel expansion i.e. the amount of pixel that encrypt
+*               a source pixel in width and height with:
+* Input:        n = number of shares,
+*               m = number of pixels in a share per pixel in source,
+* Output:       deterministicHeight = height of the pixel array
+*               encrypting a pixel.
+*               deterministicWidth = width of the pixel array
+*               encrypting a pixel.
+********************************************************************/
+static void calcPixelExpansion (int* deterministicHeight, int* deterministicWidth, int n, int m)
 {
     if (n % 2) /* odd */
     {
@@ -32,12 +46,29 @@ static void calculateDeterministicPixelSize (int* deterministicHeight, int* dete
     }
 }
 
+/********************************************************************
+* Function:     mallocDeterministicShareArrays
+*--------------------------------------------------------------------
+* Description:  An image is in fact a pixel array printed to a BMP
+*               file. The pixels are stored as array values with
+*               "1" being black and "0" being white. This function
+*               will allocate the buffer of the pixel arrays, stored
+*               in Image structs, for all of the shares, that will
+*               be printed to BMPs later.
+* Input:        source = containing width and height of the source
+*               image,
+*               n = number of shares,
+*               m = number of pixels in a share per pixel in source,
+* Output:       share->array will be correctly allocated for each
+*               share.
+* Return:       0 on success, -1 on failure.
+********************************************************************/
 int mallocDeterministicShareArrays(Image* source, Image* share, int n, int m)
 {
     int err = 0;
 
     int deterministicHeight, deterministicWidth;
-    calculateDeterministicPixelSize(&deterministicHeight, &deterministicWidth, n, m);
+    calcPixelExpansion(&deterministicHeight, &deterministicWidth, n, m);
 
     /* for each share */
     for(int i = 0; i < n; i++)
@@ -54,18 +85,29 @@ int mallocDeterministicShareArrays(Image* source, Image* share, int n, int m)
     return err;
 }
 
-/*  Sort-Function for randomSort
-    copy the chosen column of a source matrix into the chosen column of a destination matrix
-*/
+/********************************************************************
+* Function:     copyMatrixColumn
+*--------------------------------------------------------------------
+* Description:  This is a sort-Function for randomSort().
+*               The function will copy a chosen column of the source
+*               matrix (copy->sourceIdx) into a chosen column of the
+*               destination matrix (copy->destIdx).
+********************************************************************/
 static inline void copyMatrixColumn(MatrixCopy* copy)
 {
     for(int row = 0; row < copy->source->n; row++)
         setPixel(copy->dest, row, copy->destIdx, getPixel(copy->source, row, copy->sourceIdx));
 }
 
-/*  Sort-Function for randomSort
-    re-arrange an 1D-array (row of the permutation matrix) into an 2D-array (deterministicPixel)
-*/
+/********************************************************************
+* Function:     fillDeterministicPixel
+*--------------------------------------------------------------------
+* Description:  This is a sort-Function for randomSort().
+*               The function copies the values of a row of a
+*               "permutation matrix" (1D-array) into a "deterministic
+*               pixel" (2D-array). It is part of the encryption of a
+*               specific pixel.
+********************************************************************/
 static inline void fillDeterministicPixel(MatrixCopy* copy)
 {
     int row = copy->sourceIdx;
@@ -73,9 +115,22 @@ static inline void fillDeterministicPixel(MatrixCopy* copy)
         copy->dest->array[column] = getPixel(copy->source, row, column);
 }
 
-/*  Copies rows/columns of a source array randomly new sorted to a
-    destination array, without using a row/column of the source twice
-*/
+/********************************************************************
+* Function:     randomSort
+*--------------------------------------------------------------------
+* Description:  The function randomSort() copies a row/column of a
+*               source matrix to a destination matrix, without using
+*               a row/column of the source twice. For doing this, a
+*               temporary vector "checkList" is used, that has the
+*               same size as the numbers of rows/columns, to store,
+*               which has already been taken. The "randNum"'th
+*               unused row/column of the source will be chosen and
+*               marked as "used" in the checkList.
+*               The code written in here is only to sort out which
+*               row/column of the source is to use. The copy process,
+*               from one matrix to another, is part of the sorting
+*               function, given as last parameter to randomSort.
+********************************************************************/
 static void randomSort(int randNum, Pixel* checkList, MatrixCopy* copy, void (*sortFunc)(MatrixCopy*))
 {
     for(int checkIdx = 0, zeroCount = 0;; checkIdx++)
@@ -97,9 +152,14 @@ static void randomSort(int randNum, Pixel* checkList, MatrixCopy* copy, void (*s
     }
 }
 
-/*  copy the pixel array detPixel to the PixelArray of the share,
-    starting at row posY and column posX of the share
-*/
+/********************************************************************
+* Function:     copyDeterministicPixelToShare
+*--------------------------------------------------------------------
+* Description:  The function copyDeterministicPixelToShare copies the
+*               pixel array of detPixel to the pixel array of the
+*               share, starting at row posY and column posX of the
+*               share.
+********************************************************************/
 static void copyDeterministicPixelToShare(BooleanMatrix* detPixel, Image* share, int posY, int posX)
 {
     /* for each pixel of detPixel */
@@ -112,6 +172,18 @@ static void copyDeterministicPixelToShare(BooleanMatrix* detPixel, Image* share,
     }
 }
 
+/********************************************************************
+* Function:     fillDeterministicShareArrays
+*--------------------------------------------------------------------
+* Description:  This function will fill the pixel arrays of the
+*               shares with the values "1" being black and "0" being
+*               white. Therefore the already calculated basis
+*               matrices B0 and B1 are used. The columns of the
+*               basis matrices will be randomly permutated and each
+*               row of the resulting permutations will be re-sorted,
+*               randomly assigned and copied to one of the shares.
+* Return:       0 on success, -1 on failure.
+********************************************************************/
 int fillDeterministicShareArrays(Image* source, Image* share, BooleanMatrix* B0, BooleanMatrix* B1)
 {
     int randNum;
@@ -119,7 +191,7 @@ int fillDeterministicShareArrays(Image* source, Image* share, BooleanMatrix* B0,
     int m = B0->m;
     MatrixCopy copy;
     int deterministicHeight, deterministicWidth;
-    calculateDeterministicPixelSize(&deterministicHeight, &deterministicWidth, n, m);
+    calcPixelExpansion(&deterministicHeight, &deterministicWidth, n, m);
 
     /* initialize random number generator */
     srand(time(NULL));
@@ -162,7 +234,7 @@ int fillDeterministicShareArrays(Image* source, Image* share, BooleanMatrix* B0,
             copy.dest = &permutation;
             for (int permColumn = 0; permColumn < m; permColumn++)
             {
-                randNum = rand() % (m-permColumn)+1; /* number between 1 and m-permColumn */
+                randNum = rand() % (m-permColumn)+1; /* number between 1 and m minus permColumn */
                 copy.destIdx = permColumn;
 
                 /* if the pixel is black */
@@ -182,7 +254,7 @@ int fillDeterministicShareArrays(Image* source, Image* share, BooleanMatrix* B0,
 
             /*  fill each permutation-array-row temporarily into the array 
                 "deterministicPixel", where the row will be interpreted as
-                2D-array. Then fill this 2D-array "deterministicPixel" randomly
+                2D-array. Then fill the 2D-array "deterministicPixel" randomly
                 in one of the shares, so each share will finally get a different
                 (2D-sorted) row of the permutation-array.
             */
@@ -192,7 +264,7 @@ int fillDeterministicShareArrays(Image* source, Image* share, BooleanMatrix* B0,
             /* for each share */
             for(int shareIdx = 0; shareIdx < n; shareIdx++)
             {
-                /*  choose random which share will get which permutation-array row */
+                /* choose random which share will get which permutation-array row */
                 randNum = rand() % (n-shareIdx)+1; /* number between 1 and "number-of-shares minus shareIdx" */
                 randomSort(randNum, rowCheckList, &copy, fillDeterministicPixel);
                 copyDeterministicPixelToShare(&deterministicPixel, &share[shareIdx], i*deterministicHeight, j*deterministicWidth);

@@ -5,7 +5,12 @@
 
 #define clear() fprintf(stdout, "\033[H\033[J")
 
-static void clearBuffer ()
+/********************************************************************
+* Function:     clearBuffer
+*--------------------------------------------------------------------
+* Description:  Clear the type-ahead buffer.
+********************************************************************/
+static void clearBuffer()
 {
    char tmp;
    do {
