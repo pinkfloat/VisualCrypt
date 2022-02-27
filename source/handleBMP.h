@@ -11,9 +11,8 @@
 *               stored in image->array. It will fill the empty bmp 
 *               file opened in image->file with a valid bmp header
 *               and the array contents, restructured as rgb-values.
-* Return:       0 on success, -1 on failure.
 ********************************************************************/
-int createBMP(Image* image);
+void createBMP(Image* image);
 
 /********************************************************************
 * Function:     readBMP
@@ -22,10 +21,7 @@ int createBMP(Image* image);
 *               in image->file and get the information: width, height
 *               , and the pixel data from it, to store them into
 *               the image structure "image".
-* Info:         Allocates buffer for image->array without freeing it
-*               on success.
-* Return:       0 on success, -1 on failure.
 ********************************************************************/
-int readBMP(Image* image);
+void readBMP(Image* image);
 
 #endif /* HANDLEBMP_H */

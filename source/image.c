@@ -1,5 +1,5 @@
-#include <stdlib.h>
 #include <string.h>
+#include "memoryManagement.h"
 #include "image.h"
 #include "handleBMP.h"
 
@@ -8,16 +8,12 @@
 *--------------------------------------------------------------------
 * Description:  Opens the binary file on the location "path" for read
 *               and stores it in image->file.
-* Return:       0 on success, -1 on failure.
 ********************************************************************/
-static int openImageR(char* path, Image* image)
+static void openImageR(char* path, Image* image)
 {
     image->file = fopen(path, "rb");
-    if ( image->file == NULL ){
-        fprintf(stderr, "ERR: open readable image %s\n", path);
-        return -1;
-    }
-    return 0;
+    if ( image->file == NULL )
+        xcustomExitOnFailure("ERR: open readable image");
 }
 
 /********************************************************************
@@ -25,16 +21,12 @@ static int openImageR(char* path, Image* image)
 *--------------------------------------------------------------------
 * Description:  Opens the binary file on the location "path" for
 *               write and stores it in image->file.
-* Return:       0 on success, -1 on failure.
 ********************************************************************/
-static int openImageW(char* path, Image* image)
+static void openImageW(char* path, Image* image)
 {
     image->file = fopen(path, "wb");
-    if ( image->file == NULL ){
-        fprintf(stderr, "ERR: open writeable image %s\n", path);
-        return -1;
-    }
-    return 0;
+    if ( image->file == NULL )
+        xcustomExitOnFailure("ERR: open writeable image");
 }
 
 /********************************************************************
@@ -42,16 +34,10 @@ static int openImageW(char* path, Image* image)
 *--------------------------------------------------------------------
 * Description:  Allocates a pixel array of the size image->width
 *               * image->height and stores it in image->array.
-* Return:       0 on success, -1 on failure.
 ********************************************************************/
-int mallocPixelArray(Image* image)
+void mallocPixelArray(Image* image)
 {
-    image->array = malloc(image->width * image->height);
-	if (image->array == NULL) {
-		fprintf(stderr, "ERR: allocate pArray buffer\n");
-		return -1;
-	}
-    return 0;
+    image->array = xmalloc(image->width * image->height);
 }
 
 /********************************************************************
@@ -60,24 +46,14 @@ int mallocPixelArray(Image* image)
 * Description:  Opens the bmp file located at "path" and stores the
 *               opened file path, width, height and black-and-white
 *               interpreted pixel array in the structure "image".
-* Info:         Allocates buffer for image->array without freeing it
-*               on success.
-* Return:       0 on success, -1 on failure.
 ********************************************************************/
-int createSourceImage(char* path, Image* image)
+void createSourceImage(char* path, Image* image)
 {
     /* open existing image file for read */
-	if (openImageR(path, image) != 0)
-		return -1;
+	openImageR(path, image);
 
     /* read image file */
-	if (readBMP(image) != 0) /* allocates buffer on success */
-	{
-		fprintf(stderr, "ERR: readBMP\n");
-		fclose(image->file);
-        return -1;
-	}
-    return 0;
+    readBMP(image);
 }
 
 /********************************************************************
@@ -86,27 +62,19 @@ int createSourceImage(char* path, Image* image)
 * Description:  Creates empty .bmp files for the shares in the
 *               directory "dirPath" and names them share01, share02,
 *               etc. The opened files are stored in share->file.
-* Return:       0 on success, -1 on failure.
 ********************************************************************/
-int createShareFiles(char* dirPath, Image* share, int numberOfShares)
+void createShareFiles(char* dirPath, Image* share, int numberOfShares)
 {
-    int err = 0;
     char path[100];
     memset(path, '\0', sizeof(path));
 
     /* for each share */
     for(uint8_t i = 0; i < numberOfShares; i++)
     {
-        if (!err)
-        {
             /* give every .bmp an unique number to save it */
             snprintf(path, sizeof(path), "%s/share%02d.bmp", dirPath, i+1);
-            err = openImageW(path, share+i);
-        }
-        else
-            share[i].file = NULL;
+            openImageW(path, share+i);
     }
-    return err;
 }
 
 /********************************************************************
@@ -115,20 +83,12 @@ int createShareFiles(char* dirPath, Image* share, int numberOfShares)
 * Description:  Uses the data stored in share->array for each image
 *               structure "share" to calculate / draw the rgb values
 *               for each pixel of the opened bmp files (share->file).
-* Return:       0 on success, -1 on failure.
 ********************************************************************/
-int drawShareFiles(Image* share, int numberOfShares)
+void drawShareFiles(Image* share, int numberOfShares)
 {
-    int err;
-
     /* for each share */
     for(uint8_t i = 0; i < numberOfShares; i++)
-    {
-        err = createBMP(share+i);
-        if (err)
-            break;
-    }
-    return err;
+        createBMP(share+i);
 }
 
 /********************************************************************
@@ -139,23 +99,10 @@ int drawShareFiles(Image* share, int numberOfShares)
 ********************************************************************/
 void closeShareFiles(Image* share, int numberOfShares)
 {
-     /* for each share */
+    /* for each share */
     for(int i = 0; i < numberOfShares; i++)
     {
         if(share[i].file != NULL)
             fclose(share[i].file);
     }
-}
-
-/********************************************************************
-* Function:     freeShareArrays
-*--------------------------------------------------------------------
-* Description:  Free the allocated buffer for each Image structure
-*               "share" at share->array.
-********************************************************************/
-void freeShareArrays(Image* share, int n)
-{
-     /* for each share */
-    for(int i = 0; i < n; i++)
-        free(share[i].array);
 }

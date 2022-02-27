@@ -1,7 +1,7 @@
 #include <math.h>
-#include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include "memoryManagement.h"
 #include "deterministicShares.h"
 
 typedef struct {
@@ -61,28 +61,19 @@ static void calcPixelExpansion (int* deterministicHeight, int* deterministicWidt
 *               m = number of pixels in a share per pixel in source,
 * Output:       share->array will be correctly allocated for each
 *               share.
-* Return:       0 on success, -1 on failure.
 ********************************************************************/
-int mallocDeterministicShareArrays(Image* source, Image* share, int n, int m)
+void mallocDeterministicShareArrays(Image* source, Image* share, int n, int m)
 {
-    int err = 0;
-
     int deterministicHeight, deterministicWidth;
     calcPixelExpansion(&deterministicHeight, &deterministicWidth, n, m);
 
     /* for each share */
     for(int i = 0; i < n; i++)
     {
-        if(!err)
-        {
-            share[i].height = source->height * deterministicHeight;
-            share[i].width = source->width * deterministicWidth;
-            err = mallocPixelArray(&share[i]);
-        }
-        else
-            share[i].array = NULL;
+        share[i].height = source->height * deterministicHeight;
+        share[i].width = source->width * deterministicWidth;
+        mallocPixelArray(&share[i]);
     }
-    return err;
 }
 
 /********************************************************************
@@ -148,7 +139,6 @@ static void randomSort(int randNum, Pixel* checkList, MatrixCopy* copy, void (*s
             checkList[checkIdx] = 1; /* mark row/column in checkList as used */
             break;
         }
-
     }
 }
 
@@ -182,9 +172,8 @@ static void copyDeterministicPixelToShare(BooleanMatrix* detPixel, Image* share,
 *               basis matrices will be randomly permutated and each
 *               row of the resulting permutations will be re-sorted,
 *               randomly assigned and copied to one of the shares.
-* Return:       0 on success, -1 on failure.
 ********************************************************************/
-int fillDeterministicShareArrays(Image* source, Image* share, BooleanMatrix* B0, BooleanMatrix* B1)
+void fillDeterministicShareArrays(Image* source, Image* share, BooleanMatrix* B0, BooleanMatrix* B1)
 {
     int randNum;
     int n = B0->n;
@@ -200,8 +189,6 @@ int fillDeterministicShareArrays(Image* source, Image* share, BooleanMatrix* B0,
         to store the permutations of them.
     */
     BooleanMatrix permutation = createBooleanMatrix(n, m);
-    if(!permutation.array)
-        return -1;
 
     /*  every pixel of the source will be encrypted in arrays of pixel,
         printed to the shares. This matrix has the size of an array
@@ -209,17 +196,13 @@ int fillDeterministicShareArrays(Image* source, Image* share, BooleanMatrix* B0,
         pixel-arrays printed to the shares.
     */
     BooleanMatrix deterministicPixel = createBooleanMatrix(deterministicHeight, deterministicWidth);
-    if (!deterministicPixel.array)
-        goto cleanupA;
 
     /*  create checklist of size n (/m) to store which rows (/columns)
         of the basis matrix has been already used in the destination
         matrix: 0 = unused row (/column), 1 = used
     */
-    Pixel* rowCheckList = malloc(n * sizeof(Pixel));
-    Pixel* columnCheckList = malloc(m * sizeof(Pixel));
-    if (!columnCheckList || !rowCheckList)
-        goto cleanupB;
+    Pixel* rowCheckList = xmalloc(n * sizeof(Pixel));
+    Pixel* columnCheckList = xmalloc(m * sizeof(Pixel));
 
     /* for each pixel of the source */
     for(int i = 0; i < source->height; i++)     /* rows */
@@ -271,18 +254,4 @@ int fillDeterministicShareArrays(Image* source, Image* share, BooleanMatrix* B0,
             }
         }
     }
-
-    free(columnCheckList);
-    free(rowCheckList);
-    deleteBooleanMatrix(&deterministicPixel);
-    deleteBooleanMatrix(&permutation);
-    return 0;
-
-    cleanupB:
-        free(columnCheckList);
-        free(rowCheckList);
-        deleteBooleanMatrix(&deterministicPixel);
-    cleanupA:
-        deleteBooleanMatrix(&permutation);
-        return -1;
 }

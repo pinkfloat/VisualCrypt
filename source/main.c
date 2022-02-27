@@ -10,7 +10,7 @@
 ********************************************************************/
 int main(int argc, char* argv[])
 {
-	int choice, err = 0;
+	int choice;
 	char *menu [] = {
 						"deterministic algorithm",
 						"probabilistic algorithm",
@@ -21,10 +21,10 @@ int main(int argc, char* argv[])
 	choice = getMenu("Encrypt Image Deluxe", menu, 4, "Your Choice: ");
 	switch(choice)
 	{
-		case 1:     err = callAlgorithm(deterministicAlgorithm); 	break;
+		case 1:     callAlgorithm(deterministicAlgorithm); 	break;
 		case 2: 	break;	
 		case 3: 	break;
 		default: 	break;
 	}
-	return err;
+	return 0;
 }

@@ -1,5 +1,5 @@
-#include <stdlib.h>
 #include "settings.h"
+#include "memoryManagement.h"
 #include "handleBMP.h"
 
 #define SIZE_BMP_HEADER 54
@@ -109,32 +109,24 @@ static void writeBmpBody(const Pixel* source, Pixel* destination, int32_t width,
 *               stored in image->array. It will fill the empty bmp 
 *               file opened in image->file with a valid bmp header
 *               and the array contents, restructured as rgb-values.
-* Return:       0 on success, -1 on failure.
 ********************************************************************/
-int createBMP(Image* image)
+void createBMP(Image* image)
 {
     int32_t width = image->width;
     int32_t height = image->height;
     uint32_t bmpSize = SIZE_BMP_HEADER + roundToMultipleOf4(3*width) * height;
 
     /* create BMP file content */
-    uint8_t* bmpBuffer = malloc(bmpSize + 2);
-    if (bmpBuffer == NULL) {
-        fprintf(stderr, "ERR: allocate buffer\n");
-        return -1;
-    }
+    uint8_t* bmpBuffer = xmalloc(bmpSize + 2);
+
     writeBmpHeader((BmpHeader*)bmpBuffer, width, height);
     writeBmpBody(image->array, bmpBuffer + sizeof(BmpHeader), width, height);
 
     /* write content to file */
-    if (fwrite(bmpBuffer + 2, 1, bmpSize, image->file) != bmpSize) {
-        free(bmpBuffer);
-        fprintf(stderr, "ERR: write to file\n");
-        return -1;
-    }
+    if (fwrite(bmpBuffer + 2, 1, bmpSize, image->file) != bmpSize)
+        xcustomExitOnFailure("ERR: create BMP");
 
-    free(bmpBuffer);
-    return 0;
+    xfree(bmpBuffer);
 }
 
 /*_____________________________________READ_OPERATIONS_____________________________________*/
@@ -148,17 +140,13 @@ int createBMP(Image* image)
 *               BmpHeader structure. In addition to that, it is
 *               positioning the file offset of "file" to the start
 *               of the pixel data.
-* Return:       0 on success, -1 on failure.
 ********************************************************************/
-static int readBmpHeader(FILE* file, BmpHeader* headerInformation)
+static void readBmpHeader(FILE* file, BmpHeader* headerInformation)
 {
     size_t bufferSize = sizeof(BmpHeader);
 
-    if (fread( ((uint8_t*)headerInformation) + 2, 1, bufferSize - 2, file) != bufferSize - 2) {
-        fprintf(stderr, "ERR: read header information\n");
-        return -1;
-    }
-    return 0;
+    if (fread( ((uint8_t*)headerInformation) + 2, 1, bufferSize - 2, file) != bufferSize - 2)
+        xcustomExitOnFailure("ERR: read BMP header information");
 }
 
 /********************************************************************
@@ -171,27 +159,18 @@ static int readBmpHeader(FILE* file, BmpHeader* headerInformation)
 *               considered to be black(0) or white(1). The boolean
 *               interpretation of the image will be stored in
 *               image->array.
-* Return:       0 on success, -1 on failure.
 ********************************************************************/
-static int readBmpBody(Image* image)
+static void readBmpBody(Image* image)
 {
     int32_t width = image->width;
     int32_t height = image->height;
 
     uint32_t bmpSize = roundToMultipleOf4(3*width) * height;
-    uint8_t* bmpBuffer = malloc(width * height * BYTES_PER_RGB_PIXEL);
-
-    if (bmpBuffer == NULL) {
-        fprintf(stderr, "ERR: allocate buffer\n");
-        return -1;
-    }
+    uint8_t* bmpBuffer = xmalloc(width * height * BYTES_PER_RGB_PIXEL);
 
     /* read remaining file to buffer after readBmpHeader */
-    if (fread(bmpBuffer, 1, bmpSize, image->file) != bmpSize) {
-        free(bmpBuffer);
-        fprintf(stderr, "ERR: invalid BMP file\n");
-        return -1;
-    }
+    if (fread(bmpBuffer, 1, bmpSize, image->file) != bmpSize)
+        xcustomExitOnFailure("ERR: invalid BMP body information");
 
     /* calculate pixel Array */
     uint8_t* pBuffer = bmpBuffer;
@@ -210,9 +189,7 @@ static int readBmpBody(Image* image)
             pBuffer += 3;
         }
     }
-
-    free(bmpBuffer);
-    return 0;
+    xfree(bmpBuffer);
 }
 
 /********************************************************************
@@ -222,30 +199,16 @@ static int readBmpBody(Image* image)
 *               in image->file and get the information: width, height
 *               , and the pixel data from it, to store them into
 *               the image structure "image".
-* Info:         Allocates buffer for image->array without freeing it
-*               on success.
-* Return:       0 on success, -1 on failure.
 ********************************************************************/
-int readBMP(Image* image)
+void readBMP(Image* image)
 {
     BmpHeader headerInformation;
 
-    if(readBmpHeader(image->file, &headerInformation) != 0){
-		fprintf(stderr, "ERR: read BMP header\n");
-        return -1;
-	}
+    readBmpHeader(image->file, &headerInformation);
 
     image->width = headerInformation.widthInPixel;
 	image->height = headerInformation.heightInPixel;
 
-	if (mallocPixelArray(image) != 0)
-        return -1;
-
-	if (readBmpBody(image) != 0){
-		fprintf(stderr, "ERR: read BMP body\n");
-        free(image->array);
-		return -1;
-	}
-
-    return 0;
+	mallocPixelArray(image);
+	readBmpBody(image);
 }

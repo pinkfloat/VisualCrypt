@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <time.h>
 
+#include "memoryManagement.h"
 #include "booleanMatrix.h"
 
 /********************************************************************
@@ -17,9 +17,7 @@ BooleanMatrix createBooleanMatrix(int n, int m)
     BooleanMatrix result;
     result.n = n;
     result.m = m;
-    result.array = malloc(sizeof(Pixel)*n*m);
-    if (!result.array)
-        fprintf(stderr, "ERR: allocate buffer for BooleanMatrix\n");
+    result.array = xmalloc(sizeof(Pixel)*n*m);
     return result;
 }
 
@@ -53,7 +51,7 @@ void setPixel(BooleanMatrix* matrix, int i, int j, uint8_t value)
 ********************************************************************/
 void deleteBooleanMatrix(BooleanMatrix* matrix)
 {
-    free(matrix->array);
+    xfree(matrix->array);
 }
 
 /********************************************************************

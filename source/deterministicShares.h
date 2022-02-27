@@ -19,9 +19,8 @@
 *               m = number of pixels in a share per pixel in source,
 * Output:       share->array will be correctly allocated for each
 *               share.
-* Return:       0 on success, -1 on failure.
 ********************************************************************/
-int mallocDeterministicShareArrays(Image* source, Image* share, int n, int m);
+void mallocDeterministicShareArrays(Image* source, Image* share, int n, int m);
 
 /********************************************************************
 * Function:     fillDeterministicShareArrays
@@ -33,8 +32,7 @@ int mallocDeterministicShareArrays(Image* source, Image* share, int n, int m);
 *               basis matrices will be randomly permutated and each
 *               row of the resulting permutations will be re-sorted,
 *               randomly assigned and copied to one of the shares.
-* Return:       0 on success, -1 on failure.
 ********************************************************************/
-int fillDeterministicShareArrays(Image* source, Image* share, BooleanMatrix* B0, BooleanMatrix* B1);
+void fillDeterministicShareArrays(Image* source, Image* share, BooleanMatrix* B0, BooleanMatrix* B1);
 
 #endif /* DETERMINISTICSHARES_H */

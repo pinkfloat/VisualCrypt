@@ -17,9 +17,8 @@ typedef struct {
 *               parameter and draw all of the share bmps, after
 *               the algorithm is finished. It will use the settings
 *               stored in "settings.h".
-* Return:       0 on success, -1 on failure.
 ********************************************************************/
-int callAlgorithm(int (*algorithm)(AlgorithmData*));
+void callAlgorithm(void (*algorithm)(AlgorithmData*));
 
 /********************************************************************
 * Function:     deterministicAlgorithm
@@ -32,8 +31,7 @@ int callAlgorithm(int (*algorithm)(AlgorithmData*));
 *               The basis matrices will be afterwards permutated in
 *               columns and each share will get a different row of
 *               every permutation per source pixel.
-* Return:       0 on success, -1 on failure.
 ********************************************************************/
-int deterministicAlgorithm(AlgorithmData* data);
+void deterministicAlgorithm(AlgorithmData* data);
 
 #endif /* VCALGORITHMS_H */  

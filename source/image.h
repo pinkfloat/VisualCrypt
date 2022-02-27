@@ -23,9 +23,8 @@ typedef struct {
 *--------------------------------------------------------------------
 * Description:  Allocates a pixel array of the size image->width
 *               * image->height and stores it in image->array.
-* Return:       0 on success, -1 on failure.
 ********************************************************************/
-int mallocPixelArray(Image* image);
+void mallocPixelArray(Image* image);
 
 /********************************************************************
 * Function:     createSourceImage
@@ -33,11 +32,8 @@ int mallocPixelArray(Image* image);
 * Description:  Opens the bmp file located at "path" and stores the
 *               opened file path, width, height and black-and-white
 *               interpreted pixel array in the structure "image".
-* Info:         Allocates buffer for image->array without freeing it
-*               on success.
-* Return:       0 on success, -1 on failure.
 ********************************************************************/
-int createSourceImage(char* path, Image* image);
+void createSourceImage(char* path, Image* image);
 
 /********************************************************************
 * Function:     createShareFiles
@@ -45,9 +41,8 @@ int createSourceImage(char* path, Image* image);
 * Description:  Creates empty .bmp files for the shares in the
 *               directory "dirPath" and names them share01, share02,
 *               etc. The opened files are stored in share->file.
-* Return:       0 on success, -1 on failure.
 ********************************************************************/
-int createShareFiles(char* dirPath, Image* share, int numberOfShares);
+void createShareFiles(char* dirPath, Image* share, int numberOfShares);
 
 /********************************************************************
 * Function:     drawShareFiles
@@ -55,9 +50,8 @@ int createShareFiles(char* dirPath, Image* share, int numberOfShares);
 * Description:  Uses the data stored in share->array for each image
 *               structure "share" to calculate / draw the rgb values
 *               for each pixel of the opened bmp files (share->file).
-* Return:       0 on success, -1 on failure.
 ********************************************************************/
-int drawShareFiles(Image* share, int numberOfShares);
+void drawShareFiles(Image* share, int numberOfShares);
 
 /********************************************************************
 * Function:     closeShareFiles
@@ -66,13 +60,5 @@ int drawShareFiles(Image* share, int numberOfShares);
 *               "share".
 ********************************************************************/
 void closeShareFiles(Image* share, int numberOfShares);
-
-/********************************************************************
-* Function:     freeShareArrays
-*--------------------------------------------------------------------
-* Description:  Free the allocated buffer for each Image structure
-*               "share" at share->array.
-********************************************************************/
-void freeShareArrays(Image* share, int n);
 
 #endif /* IMAGE_H */ 

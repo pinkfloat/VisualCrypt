@@ -30,14 +30,6 @@ typedef struct {
 Set createSet(uint8_t n, uint8_t m);
 
 /********************************************************************
-* Function:     deleteSet
-*--------------------------------------------------------------------
-* Description:  Free all the allocated resources of a Set structure
-*               created with createSet().
-********************************************************************/
-void deleteSet(Set* set);
-
-/********************************************************************
 * Function:     printAllSubsets
 *--------------------------------------------------------------------
 * Description:  Print all subsets of the set "set". The even subsets

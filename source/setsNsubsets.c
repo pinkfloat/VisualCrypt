@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <stdlib.h>
+#include "memoryManagement.h"
 #include "setsNsubsets.h"
 
 /********************************************************************
@@ -13,20 +13,8 @@ static SubSet createSubSet(uint8_t length)
 {
     SubSet result;
     result.length = length;
-    result.data = malloc(sizeof(uint8_t)*length);
-    if(!result.data)
-        fprintf(stderr, "ERR: allocate buffer for SubSet\n");
+    result.data = xmalloc(sizeof(uint8_t)*length);
     return result;
-}
-
-/********************************************************************
-* Function:     deleteSubSet
-*--------------------------------------------------------------------
-* Description:  Frees data of a SubSet.
-********************************************************************/
-static inline void deleteSubSet(SubSet* subset)
-{
-    free(subset->data);
 }
 
 /********************************************************************
@@ -152,16 +140,13 @@ static void incrementSubSet(uint8_t n, uint8_t len, uint8_t* set)
 *               will be created and filled with data.
 * In/Out:       tmpSet = subset values getting updated by
 *               incrementSubSet()
-* Return:       0 on success, -1 on failure.
 ********************************************************************/
-static int fillSubSet(SubSet** set, uint8_t* tmpSet, uint8_t n, uint8_t len, uint8_t numSubsets)
+static void fillSubSet(SubSet** set, uint8_t* tmpSet, uint8_t n, uint8_t len, uint8_t numSubsets)
 {
     for(uint8_t idx = 0; idx < numSubsets; idx++)
     {
         /* allocate subset of correct length */
         **set = createSubSet(len);
-        if(!(*set)->data)
-            return -1;
 
         /* save data from tmpSet in actual set */
         copyDataInSet(**set, tmpSet);
@@ -170,7 +155,6 @@ static int fillSubSet(SubSet** set, uint8_t* tmpSet, uint8_t n, uint8_t len, uin
         incrementSubSet(n, len, tmpSet);
         (*set)++;
     }
-    return 0;
 }
 
 /********************************************************************
@@ -179,40 +163,30 @@ static int fillSubSet(SubSet** set, uint8_t* tmpSet, uint8_t n, uint8_t len, uin
 * Description:  Calculates all subsets of a set with n elements and
 *               sorts them in the SubSet arrays of the Set structure,
 *               after having even or odd cardinality.
-* Return:       0 on success, -1 on failure.
 ********************************************************************/
-static int createAllSubSets(Set* set)
+static void createAllSubSets(Set* set)
 {
     uint8_t n = set->numSetElements;
     SubSet* pOdd = set->odd;
     SubSet* pEven = set->even;
     uint8_t numSubsets;
-    int err;
 
     for(uint8_t len = 1; len <= n; len++)
     {
         numSubsets = numOfSubsetsOfLen(n, len);
 
-        uint8_t* tmpSet = malloc(len);
-
-        if(!tmpSet){
-            fprintf(stderr, "ERR: allocate buffer for temporary SubSet\n");
-            return -1;
-        }
+        uint8_t* tmpSet = xmalloc(len);
         fillInitialSubSet(tmpSet, len);
 
         if(len % 2){ /* odd */
-            err = fillSubSet(&pOdd, tmpSet, n, len, numSubsets);
+            fillSubSet(&pOdd, tmpSet, n, len, numSubsets);
         }
         else{ /* even */
-            err = fillSubSet(&pEven, tmpSet, n, len, numSubsets);
+            fillSubSet(&pEven, tmpSet, n, len, numSubsets);
         }
 
-        free(tmpSet);
-        if(err)
-            return err;
+        xfree(tmpSet);
     }
-    return 0;
 }
 
 /********************************************************************
@@ -230,56 +204,19 @@ static int createAllSubSets(Set* set)
 Set createSet(uint8_t n, uint8_t m)
 {
     Set result;
-    int err;
-    /*  info: calloc is used to append a
+    /*  info: xcalloc is used to append a
         NULL-set to the even sets (that
         is needed for odd n's), by just
         not-initilaising the memory
     */
     result.numSetElements = n;
-    result.even = calloc(sizeof(SubSet),m);
-    result.odd = calloc(sizeof(SubSet),m);
+    result.even = xcalloc(sizeof(SubSet),m);
+    result.odd = xcalloc(sizeof(SubSet),m);
     result.numSubsets = m;
-
-    if(!result.even || !result.odd)
-    {
-        if (!result.odd)
-            free(result.even);
-        fprintf(stderr, "ERR: allocate buffer for Set\n");
-        return result;
-    }
     
-    err = createAllSubSets(&result);
-    if(err)
-    {
-        /* free everything allocated so far */
-        deleteSet(&result);
-
-        /* cause the programm to exit */
-        result.even = NULL;
-    }
-
+    createAllSubSets(&result);
     return result;
 }
-
-/********************************************************************
-* Function:     deleteSet
-*--------------------------------------------------------------------
-* Description:  Free all the allocated resources of a Set structure
-*               created with createSet().
-********************************************************************/
-void deleteSet(Set* set)
-{
-    for (uint8_t i = 0; i < set->numSubsets; i++)
-    {
-        if(set->even+i)
-            deleteSubSet(set->even+i);
-        if(set->odd+i)
-            deleteSubSet(set->odd+i);
-    }
-    free(set->even);
-    free(set->odd);
-} 
 
 /********************************************************************
 * Function:     printSubsets

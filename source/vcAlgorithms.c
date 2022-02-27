@@ -1,5 +1,5 @@
-#include <stdlib.h>
 #include "settings.h"
+#include "memoryManagement.h"
 #include "vcAlgorithms.h"
 
 /********************************************************************
@@ -10,22 +10,14 @@
 *               parameter and draw all of the share bmps, after
 *               the algorithm is finished. It will use the settings
 *               stored in "settings.h".
-* Return:       0 on success, -1 on failure.
 ********************************************************************/
-int callAlgorithm(int (*algorithm)(AlgorithmData*))
+void callAlgorithm(void (*algorithm)(AlgorithmData*))
 {
 	int numberOfShares = NUMBER_OF_SHARES;
-	Image source, *shares = malloc(numberOfShares*sizeof(Image));
-	if(!shares)
-		return -1;
+	Image source, *shares = xmalloc(numberOfShares*sizeof(Image));
 
-    /* open and read image file */
-	if (createSourceImage(SOURCE_PATH, &source) != 0)
-		goto cleanupA;
-
-	/* create new share files */
-    if (createShareFiles(DEST_PATH, shares, numberOfShares) != 0)
-		goto cleanupB;
+	createSourceImage(SOURCE_PATH, &source);
+    createShareFiles(DEST_PATH, shares, numberOfShares);
 
 	/* call the algorithm */
 	AlgorithmData data = {
@@ -33,29 +25,13 @@ int callAlgorithm(int (*algorithm)(AlgorithmData*))
 		.shares = shares,
 		.numberOfShares = numberOfShares,
 	};
-	if(algorithm(&data) != 0)
-		goto cleanupC;
+	algorithm(&data);
 
-	/* draw the share-bmps */
-	if (drawShareFiles(shares, numberOfShares) != 0)
-		goto cleanupC;
+	drawShareFiles(shares, numberOfShares);
 	
-	fprintf(stdout, "Success!\n");
-	freeShareArrays(shares, numberOfShares);
+	/* cleanup */
 	closeShareFiles(shares, numberOfShares);
-	free(source.array);
 	fclose(source.file);
-	free(shares);
-	return 0;
-
-	cleanupC:
-		fprintf(stderr, "Failed!\n");
-		freeShareArrays(shares, numberOfShares);
-		closeShareFiles(shares, numberOfShares);
-	cleanupB:
-		free(source.array);
-		fclose(source.file);
-	cleanupA:
-		free(shares);
-		return -1;
+	xfreeAll();
+	fprintf(stdout, "Success!\n");
 }
