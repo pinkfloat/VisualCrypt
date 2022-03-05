@@ -2,13 +2,9 @@
 #define MEMORY_MANAGEMENT_H
 
 #include <stdlib.h>
+#include "dataManagement.h"
 
-typedef struct xMem {
-    void *data;
-    struct xMem *next;
-} xMemory;
-
-extern xMemory *First;
+extern List *memList;
 
 /********************************************************************
 * Function:     xmalloc
@@ -17,7 +13,7 @@ extern xMemory *First;
 *               global memory list of the programm, where pointer to
 *               all allocated memory are stored.
 *               If the allocation fails, the programm will free
-*               all allocated memory and exit.
+*               all allocated memory, close all opened files and exit.
 * Input:        size = size of the memory block in bytes
 * Return:       pointer to the allocated memory
 ********************************************************************/
@@ -30,7 +26,7 @@ void* xmalloc(size_t size);
 *               global memory list of the programm, where pointer to
 *               all allocated memory are stored.
 *               If the allocation fails, the programm will free
-*               all allocated memory and exit.
+*               all allocated memory, close all opened files and exit.
 * Input:        nitems = number of elements to allocate,
 *               size = size of the elements in bytes
 * Return:       pointer to the allocated memory
@@ -55,13 +51,5 @@ void xfree(void* ptr);
 *               allocated with xmalloc or xcalloc.
 ********************************************************************/
 void xfreeAll();
-
-/********************************************************************
-* Function:     xcustomExitOnFailure
-*--------------------------------------------------------------------
-* Description:  Exit the programm with the exit message "message".
-*               It will free all allocates buffer by calling xfreeAll.
-********************************************************************/
-void xcustomExitOnFailure(const char *message);
 
 #endif /* MEMORY_MANAGEMENT_H */

@@ -124,7 +124,7 @@ void createBMP(Image* image)
 
     /* write content to file */
     if (fwrite(bmpBuffer + 2, 1, bmpSize, image->file) != bmpSize)
-        xcustomExitOnFailure("ERR: create BMP");
+        customExitOnFailure("ERR: create BMP");
 
     xfree(bmpBuffer);
 }
@@ -146,7 +146,7 @@ static void readBmpHeader(FILE* file, BmpHeader* headerInformation)
     size_t bufferSize = sizeof(BmpHeader);
 
     if (fread( ((uint8_t*)headerInformation) + 2, 1, bufferSize - 2, file) != bufferSize - 2)
-        xcustomExitOnFailure("ERR: read BMP header information");
+        customExitOnFailure("ERR: read BMP header information");
 }
 
 /********************************************************************
@@ -170,7 +170,7 @@ static void readBmpBody(Image* image)
 
     /* read remaining file to buffer after readBmpHeader */
     if (fread(bmpBuffer, 1, bmpSize, image->file) != bmpSize)
-        xcustomExitOnFailure("ERR: invalid BMP body information");
+        customExitOnFailure("ERR: invalid BMP body information");
 
     /* calculate pixel Array */
     uint8_t* pBuffer = bmpBuffer;

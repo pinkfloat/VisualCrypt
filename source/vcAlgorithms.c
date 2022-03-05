@@ -1,5 +1,6 @@
 #include "settings.h"
 #include "memoryManagement.h"
+#include "fileManagement.h"
 #include "vcAlgorithms.h"
 
 /********************************************************************
@@ -30,8 +31,7 @@ void callAlgorithm(void (*algorithm)(AlgorithmData*))
 	drawShareFiles(shares, numberOfShares);
 	
 	/* cleanup */
-	closeShareFiles(shares, numberOfShares);
-	fclose(source.file);
+	xcloseAll();
 	xfreeAll();
 	fprintf(stdout, "Success!\n");
 }

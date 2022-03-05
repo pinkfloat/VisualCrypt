@@ -1,5 +1,6 @@
 #include <string.h>
 #include "memoryManagement.h"
+#include "fileManagement.h"
 #include "image.h"
 #include "handleBMP.h"
 
@@ -11,9 +12,7 @@
 ********************************************************************/
 static void openImageR(char* path, Image* image)
 {
-    image->file = fopen(path, "rb");
-    if ( image->file == NULL )
-        xcustomExitOnFailure("ERR: open readable image");
+    image->file = xfopen(path, "rb");
 }
 
 /********************************************************************
@@ -24,9 +23,7 @@ static void openImageR(char* path, Image* image)
 ********************************************************************/
 static void openImageW(char* path, Image* image)
 {
-    image->file = fopen(path, "wb");
-    if ( image->file == NULL )
-        xcustomExitOnFailure("ERR: open writeable image");
+    image->file = xfopen(path, "wb");
 }
 
 /********************************************************************
@@ -89,20 +86,4 @@ void drawShareFiles(Image* share, int numberOfShares)
     /* for each share */
     for(uint8_t i = 0; i < numberOfShares; i++)
         createBMP(share+i);
-}
-
-/********************************************************************
-* Function:     closeShareFiles
-*--------------------------------------------------------------------
-* Description:  Close the file share->file for each image structure
-*               "share".
-********************************************************************/
-void closeShareFiles(Image* share, int numberOfShares)
-{
-    /* for each share */
-    for(int i = 0; i < numberOfShares; i++)
-    {
-        if(share[i].file != NULL)
-            fclose(share[i].file);
-    }
 }

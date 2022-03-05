@@ -53,12 +53,4 @@ void createShareFiles(char* dirPath, Image* share, int numberOfShares);
 ********************************************************************/
 void drawShareFiles(Image* share, int numberOfShares);
 
-/********************************************************************
-* Function:     closeShareFiles
-*--------------------------------------------------------------------
-* Description:  Close the file share->file for each image structure
-*               "share".
-********************************************************************/
-void closeShareFiles(Image* share, int numberOfShares);
-
 #endif /* IMAGE_H */ 
