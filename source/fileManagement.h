@@ -21,6 +21,36 @@ extern List *fileList;
 FILE* xfopen(const char *filename, const char *mode);
 
 /********************************************************************
+* Function:     xfread
+*--------------------------------------------------------------------
+* Description:  Calls fread to read from a file, but exit the
+*               programm if the amount of characters that were read
+*               aren't correct.
+* Input:        ptr = block of memory with a minimum size of
+*                     size*nmemb bytes.
+*               size = size in bytes of each element to be read,
+*               nmemb = number of elements of "size"
+*               stream = pointer to an opened FILE input stream,
+*               errMessage = message printet on failure
+********************************************************************/
+void xfread(void *ptr, size_t size, size_t nmemb, FILE *stream, const char *errMessage);
+
+/********************************************************************
+* Function:     xfwrite
+*--------------------------------------------------------------------
+* Description:  Calls fwrite to write to a file, but exit the
+*               programm if the amount of characters that were wrote
+*               aren't correct.
+* Input:        ptr = block of memory with a minimum size of
+*                     size*nmemb bytes.
+*               size = size in bytes of each element to write,
+*               nmemb = number of elements of "size"
+*               errMessage = message printet on failure
+* Output:       stream = pointer to an opened FILE output stream,
+********************************************************************/
+void xfwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream, const char *errMessage);
+
+/********************************************************************
 * Function:     xfclose
 *--------------------------------------------------------------------
 * Description:  Calls fclose, but also removes the opened file

@@ -120,8 +120,7 @@ static void fillBasisMatrices(BooleanMatrix* B0, BooleanMatrix* B1)
 static inline uint8_t getRandomNumber(FILE* urandom, uint8_t min, uint8_t max)
 {
     uint8_t randNum;
-    if (fread(&randNum, sizeof(randNum), 1, urandom) != 1)
-        customExitOnFailure("ERR: read /dev/urandom");
+    xfread(&randNum, sizeof(randNum), 1, urandom, "ERR: read /dev/urandom");
     randNum = min + (randNum % max);
     return randNum;
 }

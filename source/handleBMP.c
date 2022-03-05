@@ -1,5 +1,6 @@
 #include "settings.h"
 #include "memoryManagement.h"
+#include "fileManagement.h"
 #include "handleBMP.h"
 
 #define SIZE_BMP_HEADER 54
@@ -123,8 +124,7 @@ void createBMP(Image* image)
     writeBmpBody(image->array, bmpBuffer + sizeof(BmpHeader), width, height);
 
     /* write content to file */
-    if (fwrite(bmpBuffer + 2, 1, bmpSize, image->file) != bmpSize)
-        customExitOnFailure("ERR: create BMP");
+    xfwrite(bmpBuffer + 2, 1, bmpSize, image->file,"ERR: create BMP");
 
     xfree(bmpBuffer);
 }
@@ -145,8 +145,7 @@ static void readBmpHeader(FILE* file, BmpHeader* headerInformation)
 {
     size_t bufferSize = sizeof(BmpHeader);
 
-    if (fread( ((uint8_t*)headerInformation) + 2, 1, bufferSize - 2, file) != bufferSize - 2)
-        customExitOnFailure("ERR: read BMP header information");
+    xfread( ((uint8_t*)headerInformation) + 2, 1, bufferSize - 2, file, "ERR: read BMP header information");
 }
 
 /********************************************************************
@@ -169,8 +168,7 @@ static void readBmpBody(Image* image)
     uint8_t* bmpBuffer = xmalloc(width * height * BYTES_PER_RGB_PIXEL);
 
     /* read remaining file to buffer after readBmpHeader */
-    if (fread(bmpBuffer, 1, bmpSize, image->file) != bmpSize)
-        customExitOnFailure("ERR: invalid BMP body information");
+    xfread(bmpBuffer, 1, bmpSize, image->file, "ERR: invalid BMP body information");
 
     /* calculate pixel Array */
     uint8_t* pBuffer = bmpBuffer;
