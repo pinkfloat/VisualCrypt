@@ -1,8 +1,8 @@
 #include <math.h>
-#include <time.h>
 #include <string.h>
 #include "image.h"
 #include "booleanMatrix.h"
+#include "fileManagement.h"
 #include "memoryManagement.h"
 #include "vcAlgorithms.h"
 
@@ -111,6 +111,22 @@ static void fillBasisMatrices(BooleanMatrix* B0, BooleanMatrix* B1)
 }
 
 /********************************************************************
+* Function:     getRandomNumber
+*--------------------------------------------------------------------
+* Description:  Return a random number between min and max, that was
+*               calculated from a value of /dev/urandom, containing
+*               cryptographically secure random numbers.
+********************************************************************/
+static inline uint8_t getRandomNumber(FILE* urandom, uint8_t min, uint8_t max)
+{
+    uint8_t randNum;
+    if (fread(&randNum, sizeof(randNum), 1, urandom) != 1)
+        customExitOnFailure("ERR: read /dev/urandom");
+    randNum = min + (randNum % max);
+    return randNum;
+}
+
+/********************************************************************
 * Function:     copyMatrixColumn
 *--------------------------------------------------------------------
 * Description:  This is a sort-Function for randomSort().
@@ -190,6 +206,8 @@ static void randomSort(int randNum, Pixel* checkList, MatrixCopy* copy, void (*s
 *               columnCheckList = containing zero's for unused
 *               basis matrix columns and one's for allready used
 *               ones
+*               urandom = the opened file /dev/urandom, containing
+*               random numbers
 * Output:       permutation = either the column-permutation of
 *               B0 or B1
 ********************************************************************/
@@ -199,7 +217,8 @@ static void permutateBasisMatrix(   BooleanMatrix* B0,
                                     Image* source,
                                     int i,
                                     int j,
-                                    Pixel* columnCheckList)
+                                    Pixel* columnCheckList,
+                                    FILE* urandom)
 {
     int m = B0->m;
     int randNum;
@@ -209,7 +228,7 @@ static void permutateBasisMatrix(   BooleanMatrix* B0,
     copy.dest = permutation;
     for (int permColumn = 0; permColumn < m; permColumn++)
     {
-        randNum = rand() % (m-permColumn)+1; /* number between 1 and m minus permColumn */
+        randNum = getRandomNumber(urandom, 1, m-permColumn); /* number between 1 and m minus permColumn */
         copy.destIdx = permColumn;
 
         /* if the pixel is black */
@@ -265,6 +284,8 @@ static void copyEncryptedPixelToShare(BooleanMatrix* encPixel, Image* share, int
 *               with an array of pixel per share.
 *               rowCheckList = containing zero's for unused basis
 *               matrix row and one's for allready used ones
+*               urandom = the opened file /dev/urandom, containing
+*               random numbers
 * Output:       encryptedPixel = temporary storage for an
 *               "encrypted pixel" before it is printed to one of the
 *               shares
@@ -277,7 +298,8 @@ static void fillPixelEncryptionToShares(    BooleanMatrix* permutation,
                                             Image* share,
                                             int i,
                                             int j,
-                                            Pixel* rowCheckList)
+                                            Pixel* rowCheckList,
+                                            FILE* urandom)
 {
     int n = permutation->n;
     int randNum;
@@ -291,7 +313,7 @@ static void fillPixelEncryptionToShares(    BooleanMatrix* permutation,
     for(int shareIdx = 0; shareIdx < n; shareIdx++)
     {
         /* choose random which share will get which permutation-array row */
-        randNum = rand() % (n-shareIdx)+1; /* number between 1 and "number-of-shares minus shareIdx" */
+        randNum = getRandomNumber(urandom, 1, n-shareIdx); /* number between 1 and "number-of-shares minus shareIdx" */
         randomSort(randNum, rowCheckList, &copy, fillEncryptedPixel);
         copyEncryptedPixelToShare(encryptedPixel, &share[shareIdx], i, j);
     }
@@ -315,8 +337,8 @@ static void fillDeterministicShareArrays(Image* source, Image* share, BooleanMat
     int deterministicHeight, deterministicWidth;
     calcPixelExpansion(&deterministicHeight, &deterministicWidth, n, m);
 
-    /* initialize random number generator */
-    srand(time(NULL));
+    /* open urandom, to get random numbers from it */
+    FILE* urandom = xfopen("/dev/urandom", "r");
 
     /*  create matrix of equal size as the basis matrices 
         to store the permutations of them.
@@ -342,11 +364,12 @@ static void fillDeterministicShareArrays(Image* source, Image* share, BooleanMat
     {
         for(int j = 0; j < source->width; j++)  /* columns */
         {
-            permutateBasisMatrix(B0, B1, &permutation, source, i, j, columnCheckList);
-            fillPixelEncryptionToShares(&permutation, &encryptedPixel, share,
-                                        i*deterministicHeight, j*deterministicWidth, rowCheckList);
+            permutateBasisMatrix(B0, B1, &permutation, source, i, j, columnCheckList, urandom);
+            fillPixelEncryptionToShares(&permutation, &encryptedPixel, share, i*deterministicHeight,
+                                        j*deterministicWidth, rowCheckList, urandom);
         }
     }
+    xfclose(urandom);
 }
 
 /********************************************************************
