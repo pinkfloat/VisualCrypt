@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
 	switch(choice)
 	{
 		case 1:     callAlgorithm(deterministicAlgorithm); 	break;
-		case 2: 	break;	
+		case 2: 	callAlgorithm(probabilisticAlgorithm); 	break;	
 		case 3: 	break;
 		default: 	break;
 	}

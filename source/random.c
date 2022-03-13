@@ -18,6 +18,20 @@ uint8_t getRandomNumber(FILE* urandom, uint8_t min, uint8_t max)
 }
 
 /********************************************************************
+* Function:     copyColumnElement
+*--------------------------------------------------------------------
+* Description:  This is a sort-Function for randomSort().
+*               The function will copy a chosen column element of
+*               the source vector (n x 1 matrix = matrix column)
+*               to the destination which is in this case just a pixel.
+********************************************************************/
+void copyColumnElement(MatrixCopy* copy)
+{
+    Pixel* randPixel = (Pixel*) copy->dest;
+    *randPixel = getPixel(copy->source, copy->sourceIdx, 0);
+}
+
+/********************************************************************
 * Function:     copyMatrixColumn
 *--------------------------------------------------------------------
 * Description:  This is a sort-Function for randomSort().
