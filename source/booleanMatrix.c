@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <time.h>
-
 #include "memoryManagement.h"
 #include "booleanMatrix.h"
 
@@ -106,4 +105,36 @@ void printBooleanMatrix(BooleanMatrix* B, char* name)
         fprintf(stdout, "\n");
     }
     fprintf(stdout, "\n");
+}
+
+/********************************************************************
+* Function:     fillBasisMatrices
+*--------------------------------------------------------------------
+* Description:  Calculate the basis matrices by creating subsets
+*               from a set with "n" elements. (n = number of shares.)
+*               The even cardinality set is used to fill the basis
+*               matrix B0. The odd cardinality set is used to fill B1.
+********************************************************************/
+void fillBasisMatrices(BooleanMatrix* B0, BooleanMatrix* B1)
+{
+    uint8_t n = B0->n;
+    uint8_t m = B0->m;
+    
+    /*  create set with n elements, holding subsets
+        with even and odd cardinalities of it
+    */
+    Set set = createSet(n, m);
+    printAllSubsets(&set);
+
+    for(uint8_t i = 0; i < n; i++)     /* rows */
+    {
+        for(uint8_t j = 0; j < m; j++) /* columns */
+        {
+            fillBasisMatrix(B0, set.even, i, j);
+            fillBasisMatrix(B1, set.odd, i, j);
+        }
+    }
+
+    printBooleanMatrix(B0, "B0");
+    printBooleanMatrix(B1, "B1");
 }

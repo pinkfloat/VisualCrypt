@@ -70,4 +70,14 @@ void fillBasisMatrix(BooleanMatrix* B, SubSet* set, uint8_t i, uint8_t j);
 ********************************************************************/
 void printBooleanMatrix(BooleanMatrix* B, char* name);
 
+/********************************************************************
+* Function:     fillBasisMatrices
+*--------------------------------------------------------------------
+* Description:  Calculate the basis matrices by creating subsets
+*               from a set with "n" elements. (n = number of shares.)
+*               The even cardinality set is used to fill the basis
+*               matrix B0. The odd cardinality set is used to fill B1.
+********************************************************************/
+void fillBasisMatrices(BooleanMatrix* B0, BooleanMatrix* B1);
+
 #endif /* BOOLEANMATRIX_H */
