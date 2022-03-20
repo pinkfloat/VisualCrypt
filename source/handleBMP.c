@@ -75,14 +75,14 @@ static void writeBmpHeader(BmpHeader* bmpHeader, int32_t width, int32_t height)
 * Description:  This function has to be called after writeBmpHeader()
 *               to create a bmp file properly. It will take the
 *               content of the pixel array "source", where the value
-*               "0" is considered as black and every other number is
-*               considered as white.
+*               "0" is considered as white and every other number is
+*               considered as black.
 *               If the source pixel is white, the rgb values of the
 *               corresponding destination pixel, interpreted as bmp
 *               color data, are all set to 255. For black pixel they
 *               are set to 0.
 * Input:        source = most likely a boolean pixel array with
-*                        the values 1 = white and 0 = black,
+*                        the values 0 = white and 1 = black,
 *               width = width of the new BMP file in pixel,
 *               height = height of the new BMP file in pixel,
 * Output:       destination = array that will get the rgb values of
@@ -94,7 +94,7 @@ static void writeBmpBody(const Pixel* source, Pixel* destination, int32_t width,
     int32_t paddedWidth = roundToMultipleOf4(3*width);
     for (int32_t row = 0; row < height; row++) {
         for (int32_t column = 0; column < width; column++) {
-            p_source = source[row * width + column] ? 255 : 0;          /* white = 255, black = 0 */
+            p_source = source[row * width + column] ? 0 : 255;          /* black = 0, white = 255 */
             destination[row * paddedWidth + column * 3]     = p_source; /* blue  */
             destination[row * paddedWidth + column * 3 + 1] = p_source; /* green */
             destination[row * paddedWidth + column * 3 + 2] = p_source; /* red   */
@@ -155,7 +155,7 @@ static void readBmpHeader(FILE* file, BmpHeader* headerInformation)
 *               It will read the rgb values of the opened bmp file
 *               image->file and, since the results are going to be
 *               black and white, calculates if a colored pixel is
-*               considered to be black(0) or white(1). The boolean
+*               considered to be white(0) or black(1). The boolean
 *               interpretation of the image will be stored in
 *               image->array.
 ********************************************************************/
@@ -182,7 +182,7 @@ static void readBmpBody(Image* image)
             red = *pBuffer * 0.2616;
             green = *(pBuffer+1) * 0.7152;
             blue = *(pBuffer+2) * 0.0722;
-            image->array[row * width + column] = (blue + green + red) > THRESHOLD ? 1 : 0; /* white = 1, black = 0 */
+            image->array[row * width + column] = (blue + green + red) > THRESHOLD ? 0 : 1; /* white = 0, black = 1 */
 
             pBuffer += 3;
         }
