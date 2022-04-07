@@ -2,7 +2,7 @@
 #define SETTINGS_H
 
 /* Main Settings */
-#define NUMBER_OF_SHARES 2
+#define NUMBER_OF_SHARES 4
 #define SOURCE_PATH "../image/colortest.bmp"
 #define DEST_PATH "../image"
 

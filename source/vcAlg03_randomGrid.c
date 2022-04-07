@@ -1,3 +1,4 @@
+#include "image.h"
 #include "random.h"
 #include "fileManagement.h"
 #include "vcAlgorithms.h"
@@ -69,11 +70,34 @@ static void randomGrid_22_Threshold(Image* source, Image* share1, Image* share2)
 ********************************************************************/
 void randomGrid_nn_Threshold(AlgorithmData* data)
 {
-    /* TODO: Finish for different amounts of shares */
-
     /* allocate pixel-arrays for the shares */
 	mallocSharesOfSourceSize(data->source, data->shares, data->numberOfShares);
 
-    /* fill two shares */
-    randomGrid_22_Threshold(data->source, &data->shares[0], &data->shares[1]);
+    if(data->numberOfShares == 2)
+    {
+        /* just call randomGrid_22_Threshold */
+        randomGrid_22_Threshold(data->source, &data->shares[0], &data->shares[1]);
+    }
+    else
+    {
+        Image tmp[2] = {{.height = data->source->height, .width = data->source->width},
+                        {.height = data->source->height, .width = data->source->width}};
+        mallocPixelArray(&tmp[0]);
+        mallocPixelArray(&tmp[1]);
+
+        /* fill the first two shares */
+        randomGrid_22_Threshold(data->source, &data->shares[0], &tmp[1]);
+
+        /* for number of shares */
+        for(int idx = 1; idx < data->numberOfShares-1; idx++)
+        {
+            uint8_t nr1 = (idx % 2);    /* switch between 1 and 0 */
+            uint8_t nr2 = nr1 ? 0 : 1;  /* switch between 0 and 1 */
+            randomGrid_22_Threshold(&tmp[nr1], &data->shares[idx], &tmp[nr2]);
+
+            /* save last image */
+            if(idx == data->numberOfShares-2)
+                data->shares[idx+1].array = tmp[nr2].array;
+        }
+    }
 }
