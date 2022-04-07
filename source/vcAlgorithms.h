@@ -66,4 +66,15 @@ void deterministicAlgorithm(AlgorithmData* data);
 ********************************************************************/
 void probabilisticAlgorithm(AlgorithmData* data);
 
+/********************************************************************
+* Function:     randomGrid_nn_Threshold
+*--------------------------------------------------------------------
+* Description:  This is an implementation of a (n,n)-threshold random
+*               grid algorithm introduced by Tzung-Her Chen and
+*               Kai-Hsiang Tsao. It will calculate the pixel of the
+*               share images by calling recursively the (2,2)-threshold
+*               random grid algorithm from O. Kafri and E. Karen.
+********************************************************************/
+void randomGrid_nn_Threshold(AlgorithmData* data);
+
 #endif /* VCALGORITHMS_H */  

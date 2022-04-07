@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
 	{
 		case 1:     callAlgorithm(deterministicAlgorithm); 	break;
 		case 2: 	callAlgorithm(probabilisticAlgorithm); 	break;	
-		case 3: 	break;
+		case 3: 	callAlgorithm(randomGrid_nn_Threshold); break;
 		default: 	break;
 	}
 	return 0;
