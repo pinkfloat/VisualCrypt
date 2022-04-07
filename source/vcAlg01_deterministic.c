@@ -42,14 +42,13 @@ static void calcPixelExpansion (int* deterministicHeight, int* deterministicWidt
 }
 
 /********************************************************************
-* Function:     mallocDeterministicShareArrays
+* Function:     mallocPixelExpandedShares
 *--------------------------------------------------------------------
-* Description:  An image is in fact a pixel array printed to a BMP
-*               file. The pixels are stored as array values with
-*               "1" being black and "0" being white. This function
-*               will allocate the buffer of the pixel arrays, stored
-*               in Image structs, for all of the shares, that will
-*               be printed to BMPs later.
+* Description:  This function will allocate the buffer of the share
+*               pixel arrays, that are going to be printed to the
+*               BMPs later. Since the deterministic algorithm has
+*               pixel expansion, they will be larger than the
+*               source file.
 * Input:        source = containing width and height of the source
 *               image,
 *               n = number of shares,
@@ -57,7 +56,7 @@ static void calcPixelExpansion (int* deterministicHeight, int* deterministicWidt
 * Output:       share->array will be correctly allocated for each
 *               share.
 ********************************************************************/
-static void mallocDeterministicShareArrays(Image* source, Image* share, int n, int m)
+static void mallocPixelExpandedShares(Image* source, Image* share, int n, int m)
 {
     int deterministicHeight, deterministicWidth;
     calcPixelExpansion(&deterministicHeight, &deterministicWidth, n, m);
@@ -269,7 +268,7 @@ void deterministicAlgorithm(AlgorithmData* data)
     uint8_t m = 1 << (n-1);     /* number of pixels in a share per pixel in source file = 2^{n-1} */
 
     /* allocate pixel-arrays for the shares */
-	mallocDeterministicShareArrays(data->source, data->shares, n, m);
+	mallocPixelExpandedShares(data->source, data->shares, n, m);
 
     /* allocate basis matrices */
     BooleanMatrix B0 = createBooleanMatrix(n,m);

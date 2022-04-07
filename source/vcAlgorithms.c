@@ -4,6 +4,31 @@
 #include "vcAlgorithms.h"
 
 /********************************************************************
+* Function:     mallocSharesOfSourceSize
+*--------------------------------------------------------------------
+* Description:  This function will allocate the buffer of the share
+*               pixel arrays, that are going to be printed to the
+*               BMPs later. The size will be the same as for the
+*				source file.
+* Input:        source = containing width and height of the source
+*               image,
+*               numberOfShares = amount of shares that will be
+*               created,
+* Output:       share->array will be correctly allocated for each
+*               share.
+********************************************************************/
+void mallocSharesOfSourceSize(Image* source, Image* share, int numberOfShares)
+{
+    /* for each share */
+    for(int i = 0; i < numberOfShares; i++)
+    {
+        share[i].height = source->height;
+        share[i].width = source->width;
+        mallocPixelArray(&share[i]);
+    }
+}
+
+/********************************************************************
 * Function:     callAlgorithm
 *--------------------------------------------------------------------
 * Description:  The function callAlgorithm will extract the data of

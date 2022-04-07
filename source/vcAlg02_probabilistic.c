@@ -5,33 +5,6 @@
 #include "vcAlgorithms.h"
 
 /********************************************************************
-* Function:     mallocProbabilisticShareArrays
-*--------------------------------------------------------------------
-* Description:  An image is in fact a pixel array printed to a BMP
-*               file. The pixels are stored as array values with
-*               "1" being black and "0" being white. This function
-*               will allocate the buffer of the pixel arrays, stored
-*               in Image structs, for all of the shares, that will
-*               be printed to BMPs later.
-* Input:        source = containing width and height of the source
-*               image,
-*               numberOfShares = amount of shares that will be
-*               created,
-* Output:       share->array will be correctly allocated for each
-*               share.
-********************************************************************/
-static void mallocProbabilisticShareArrays(Image* source, Image* share, int numberOfShares)
-{
-    /* for each share */
-    for(int i = 0; i < numberOfShares; i++)
-    {
-        share[i].height = source->height;
-        share[i].width = source->width;
-        mallocPixelArray(&share[i]);
-    }
-}
-
-/********************************************************************
 * Function:     getRandomMatrixColumn
 *--------------------------------------------------------------------
 * Description:  Get a random column of either B0 or B1 and store
@@ -192,7 +165,7 @@ void probabilisticAlgorithm(AlgorithmData* data)
     uint8_t m = 1 << (n-1);
 
     /* allocate pixel-arrays for the shares */
-	mallocProbabilisticShareArrays(data->source, data->shares, n);
+	mallocSharesOfSourceSize(data->source, data->shares, n);
 
     /* allocate basis matrices */
     BooleanMatrix B0 = createBooleanMatrix(n,m);
