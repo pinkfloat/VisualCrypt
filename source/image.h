@@ -60,4 +60,24 @@ void deleteShareFiles(char* dirPath);
 ********************************************************************/
 void drawShareFiles(Image* share, int numberOfShares);
 
+/********************************************************************
+* Function:     readShareFiles
+*--------------------------------------------------------------------
+* Description:  Read share files in dirPath starting at the share
+*               with the number given to first and end with the
+*               number given to last. They will be stored in Image
+*               structures that must have been allocated before.
+********************************************************************/
+void readShareFiles(char* dirPath, Image* share, int first, int last);
+
+/********************************************************************
+* Function:     createDecryptedImageFile
+*--------------------------------------------------------------------
+* Description:  Create a file for the Image decryption of the share
+*               files. The name of the decrypted image will be
+*               decrypted01.bmp if this name isn't used already, and
+*               get counted up to a maximum of decrypted99.bmp.
+********************************************************************/
+void createDecryptedImageFile(char* dirPath, Image* image);
+
 #endif /* IMAGE_H */ 

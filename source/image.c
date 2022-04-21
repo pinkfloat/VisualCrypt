@@ -1,4 +1,5 @@
 #include <string.h>
+#include <unistd.h>
 #include "memoryManagement.h"
 #include "fileManagement.h"
 #include "image.h"
@@ -102,4 +103,56 @@ void drawShareFiles(Image* share, int numberOfShares)
     /* for each share */
     for(uint8_t i = 0; i < numberOfShares; i++)
         createBMP(share+i);
+}
+
+/********************************************************************
+* Function:     readShareFiles
+*--------------------------------------------------------------------
+* Description:  Read share files in dirPath starting at the share
+*               with the number given to first and end with the
+*               number given to last. They will be stored in Image
+*               structures that must have been allocated before.
+********************************************************************/
+void readShareFiles(char* dirPath, Image* share, int first, int last)
+{
+    char path[100];
+    memset(path, '\0', sizeof(path));
+
+    /* for each used share */
+    for(uint8_t i = first; i <= last; i++)
+    {
+        snprintf(path, sizeof(path), "%s/share%02d.bmp", dirPath, i);
+        openImageR(path, share+i-first);
+        readBMP(share+i-first);
+    }
+}
+
+/********************************************************************
+* Function:     createDecryptedImageFile
+*--------------------------------------------------------------------
+* Description:  Create a file for the Image decryption of the share
+*               files. The name of the decrypted image will be
+*               decrypted01.bmp if this name isn't used already, and
+*               get counted up to a maximum of decrypted99.bmp.
+********************************************************************/
+void createDecryptedImageFile(char* dirPath, Image* image)
+{
+    int i = 1;
+    char path[100];
+    memset(path, '\0', sizeof(path));
+
+    /* don't overwrite already existing decrypted images if possible */
+    do
+    {
+        snprintf(path, sizeof(path), "%s/decrypted%02d.bmp", dirPath, i++);
+        if (i > 99)
+        {
+            snprintf(path, sizeof(path), "%s/decrypted01.bmp", dirPath);
+            remove(path);
+            fprintf(stdout, "replaced %s\n", path);
+            break;
+        }
+    } while( access(path, F_OK) != -1);
+
+	openImageW(path, image);
 }
