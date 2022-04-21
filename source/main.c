@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
 						"random grid algorithm",
 						"exit"
 					};
-
+					
 	choice = getMenu("Encrypt Image Deluxe", menu, 4, "Your Choice: ");
 	switch(choice)
 	{

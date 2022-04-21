@@ -75,6 +75,22 @@ void createShareFiles(char* dirPath, Image* share, int numberOfShares)
 }
 
 /********************************************************************
+* Function:     deleteShareFiles
+*--------------------------------------------------------------------
+* Description:  Remove all files named share*.bmp in dirPath.
+********************************************************************/
+void deleteShareFiles(char* dirPath)
+{
+    uint8_t i = 1;
+    char path[100];
+    memset(path, '\0', sizeof(path));
+    do
+    {
+        snprintf(path, sizeof(path), "%s/share%02d.bmp", dirPath, i++);
+    } while(remove(path) == 0);
+}
+
+/********************************************************************
 * Function:     drawShareFiles
 *--------------------------------------------------------------------
 * Description:  Uses the data stored in share->array for each image

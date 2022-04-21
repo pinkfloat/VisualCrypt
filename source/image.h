@@ -45,6 +45,13 @@ void createSourceImage(char* path, Image* image);
 void createShareFiles(char* dirPath, Image* share, int numberOfShares);
 
 /********************************************************************
+* Function:     deleteShareFiles
+*--------------------------------------------------------------------
+* Description:  Remove all files named share*.bmp in dirPath.
+********************************************************************/
+void deleteShareFiles(char* dirPath);
+
+/********************************************************************
 * Function:     drawShareFiles
 *--------------------------------------------------------------------
 * Description:  Uses the data stored in share->array for each image
