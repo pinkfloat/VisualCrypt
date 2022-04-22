@@ -12,16 +12,19 @@
 ********************************************************************/
 static void createRandomGrid(Image* share)
 {
+    int width = share->width;
+    int height = share->height;
+
     /* open urandom, to get random numbers from it */
     FILE* urandom = xfopen("/dev/urandom", "r");
 
     /* for each pixel of the array */
-    for(int i = 0; i < share->height; i++)     /* rows */
+    for(int i = 0; i < height; i++)     /* rows */
     {
-        for(int j = 0; j < share->width; j++)  /* columns */
+        for(int j = 0; j < width; j++)  /* columns */
         {
             /* get random 0/1 */
-            share->array[i * share->width + j] = getRandomNumber(urandom,0,2);
+            share->array[i * width + j] = getRandomNumber(urandom,0,2);
         }
     }
     xfclose(urandom);
@@ -38,23 +41,26 @@ static void createRandomGrid(Image* share)
 ********************************************************************/
 static void randomGrid_22_Threshold(Image* source, Image* share1, Image* share2)
 {
+    int width = source->width;
+    int height = source->height;
+
     /* make the first share a random grid */
     createRandomGrid(share1);
 
     /* fill the second share according to source and first share*/
-    for(int i = 0; i < share2->height; i++)     /* rows */
+    for(int i = 0; i < height; i++)     /* rows */
     {
-        for(int j = 0; j < share2->width; j++)  /* columns */
+        for(int j = 0; j < width; j++)  /* columns */
         {
             /* if the source pixel is black */
-            if (source->array[i * source->width + j])
+            if (source->array[i * width + j])
                 /* use the complementary value of share 1 */
-                share2->array[i * share2->width + j] = share1->array[i * share1->width + j] ? 0 : 1;
+                share2->array[i * width + j] = share1->array[i * width + j] ? 0 : 1;
 
             /* if the source pixel is white */
             else
                 /* copy value of share 1 */
-                share2->array[i * share2->width + j] = share1->array[i * share1->width + j];
+                share2->array[i * width + j] = share1->array[i * width + j];
         }
     }
 }
@@ -70,13 +76,15 @@ static void randomGrid_22_Threshold(Image* source, Image* share1, Image* share2)
 ********************************************************************/
 void randomGrid_nn_Threshold(AlgorithmData* data)
 {
+    int n = data->numberOfShares;
+
     /* allocate pixel-arrays for the shares */
-	mallocSharesOfSourceSize(data->source, data->shares, data->numberOfShares);
+	mallocSharesOfSourceSize(data->source, data->shares, n);
 
     if(data->numberOfShares == 2)
     {
         /* just call randomGrid_22_Threshold */
-        randomGrid_22_Threshold(data->source, &data->shares[0], &data->shares[1]);
+        randomGrid_22_Threshold(data->source, data->shares, &data->shares[1]);
     }
     else
     {
@@ -85,18 +93,18 @@ void randomGrid_nn_Threshold(AlgorithmData* data)
         mallocPixelArray(&tmp[0]);
         mallocPixelArray(&tmp[1]);
 
-        /* fill the first two shares */
-        randomGrid_22_Threshold(data->source, &data->shares[0], &tmp[1]);
+        /* fill the first share and a temporary one */
+        randomGrid_22_Threshold(data->source, data->shares, &tmp[1]);
 
         /* for number of shares */
-        for(int idx = 1; idx < data->numberOfShares-1; idx++)
+        for(int idx = 1; idx < n-1; idx++)
         {
             uint8_t nr1 = (idx % 2);    /* switch between 1 and 0 */
             uint8_t nr2 = nr1 ? 0 : 1;  /* switch between 0 and 1 */
             randomGrid_22_Threshold(&tmp[nr1], &data->shares[idx], &tmp[nr2]);
 
             /* save last image */
-            if(idx == data->numberOfShares-2)
+            if(idx == n-2)
                 data->shares[idx+1].array = tmp[nr2].array;
         }
     }
@@ -116,20 +124,23 @@ void randomGrid_nn_Threshold(AlgorithmData* data)
 ********************************************************************/
 void randomGrid_2n_Threshold(AlgorithmData* data)
 {
-    int width = data->source->width;
-    int height = data->source->height;
+    int n = data->numberOfShares;
+    Image* source = data->source;
+    Image* shares = data->shares;
+    int width = source->width;
+    int height = source->height;
 
     /* allocate pixel-arrays for the shares */
-	mallocSharesOfSourceSize(data->source, data->shares, data->numberOfShares);
+	mallocSharesOfSourceSize(source, shares, n);
 
     /* make the first share a random grid */
-    createRandomGrid(&data->shares[0]);
+    createRandomGrid(shares);
 
     /* open urandom, to get random numbers from it */
     FILE* urandom = xfopen("/dev/urandom", "r");
 
     /* for number of shares */
-    for(int idx = 1; idx < data->numberOfShares; idx++)
+    for(int idx = 1; idx < n; idx++)
     {
         /* for each pixel ... */
         /* fill the other shares according to source and first share */
@@ -138,15 +149,16 @@ void randomGrid_2n_Threshold(AlgorithmData* data)
             for(int j = 0; j < width; j++)  /* columns */
             {
                 /* if the source pixel is black */
-                if (data->source->array[i * width + j])
+                if (source->array[i * width + j])
                     /* get random 0/1 */
-                    data->shares[idx].array[i * width + j] = getRandomNumber(urandom,0,2);
+                    shares[idx].array[i * width + j] = getRandomNumber(urandom,0,2);
 
                 /* if the source pixel is white */
                 else
                     /* copy value of share 1 */
-                    data->shares[idx].array[i * width + j] = data->shares[0].array[i * width + j];
+                    shares[idx].array[i * width + j] = shares->array[i * width + j];
             }
         }
     }
+    xfclose(urandom);
 }
