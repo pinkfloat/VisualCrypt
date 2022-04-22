@@ -1,9 +1,6 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-/* Main Settings */
-#define NUMBER_OF_SHARES 4
-
 /*  SOURCE_PATH = the secret image
     SHARE_PATH = the directory where the shares
     and decryptions of the shares will be stored

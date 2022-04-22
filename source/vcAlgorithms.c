@@ -1,4 +1,4 @@
-#include "settings.h"
+#include "menu.h"
 #include "memoryManagement.h"
 #include "fileManagement.h"
 #include "vcAlgorithms.h"
@@ -39,7 +39,14 @@ void mallocSharesOfSourceSize(Image* source, Image* share, int numberOfShares)
 ********************************************************************/
 void callAlgorithm(void (*algorithm)(AlgorithmData*))
 {
-	int numberOfShares = NUMBER_OF_SHARES;
+	int valid = 0, numberOfShares;
+	/* get number of shares from user */
+	do
+	{
+		clear();
+		valid = getNumber("Enter number of shares:\n<min> = 2\n<max> = 8\n", 2, 8, &numberOfShares);
+	} while (!valid);
+
 	Image source, *shares = xmalloc(numberOfShares*sizeof(Image));
 
 	createSourceImage(&source);

@@ -1,4 +1,4 @@
-#include "settings.h"
+#include "menu.h"
 #include "decrypt.h"
 #include "handleBMP.h"
 #include "fileManagement.h"
@@ -59,15 +59,26 @@ static void fillDecryptedImage(Image* decrypted, Image* share, int numberOfShare
 ********************************************************************/
 void decryptShareFiles()
 {
-    int first = 1;
-    int last = NUMBER_OF_SHARES;
+    int valid = 0, first, last;
 
-/*
-    if(first < 1)
-        first = 1;
+	/* get number of first share from user*/
+	do
+	{
+		clear();
+        fprintf(stdout, "Shares can be decrypted from share01.bmp to share08.bmp\n");
+        fprintf(stdout, "The result will be stored in the same directory and named\n");
+        fprintf(stdout, "decrypted01.bmp to a maximum of decrypted99.bmp\n");
+        fprintf(stdout, "(decrypted01.bmp will be overwritten if max is reached)\n\n");
 
-    if(last > 99)
-        last = 99;
+		valid = getNumber("Enter number of the FIRST share to decrypt: ", 1, 8, &first);
+	} while (!valid);
+
+    /* get number of last share from user*/
+	do
+	{
+		clear();
+		valid = getNumber("Enter number of the LAST share to decrypt: ", 1, 8, &last);
+	} while (!valid);
 
     if(first > last)
     {
@@ -75,7 +86,6 @@ void decryptShareFiles()
         first = last;
         last = tmp;
     }
-*/
 
     int numberOfShares = (1+last-first);
 
