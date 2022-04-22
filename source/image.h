@@ -29,27 +29,28 @@ void mallocPixelArray(Image* image);
 /********************************************************************
 * Function:     createSourceImage
 *--------------------------------------------------------------------
-* Description:  Opens the bmp file located at "path" and stores the
-*               opened file path, width, height and black-and-white
-*               interpreted pixel array in the structure "image".
+* Description:  Opens the bmp file located at SOURCE_PATH and stores
+*               the opened file path, width, height and
+*               black-and-white interpreted pixel array in the
+*               structure "image".
 ********************************************************************/
-void createSourceImage(char* path, Image* image);
+void createSourceImage(Image* image);
 
 /********************************************************************
 * Function:     createShareFiles
 *--------------------------------------------------------------------
-* Description:  Creates empty .bmp files for the shares in the
-*               directory "dirPath" and names them share01, share02,
-*               etc. The opened files are stored in share->file.
+* Description:  Creates empty .bmp files for the shares and names
+*               them share01, share02, etc. The opened files are
+*               stored in share->file.
 ********************************************************************/
-void createShareFiles(char* dirPath, Image* share, int numberOfShares);
+void createShareFiles(Image* share, int numberOfShares);
 
 /********************************************************************
 * Function:     deleteShareFiles
 *--------------------------------------------------------------------
-* Description:  Remove all files named share*.bmp in dirPath.
+* Description:  Remove all files named share*.bmp
 ********************************************************************/
-void deleteShareFiles(char* dirPath);
+void deleteShareFiles();
 
 /********************************************************************
 * Function:     drawShareFiles
@@ -63,12 +64,12 @@ void drawShareFiles(Image* share, int numberOfShares);
 /********************************************************************
 * Function:     readShareFiles
 *--------------------------------------------------------------------
-* Description:  Read share files in dirPath starting at the share
-*               with the number given to first and end with the
-*               number given to last. They will be stored in Image
-*               structures that must have been allocated before.
+* Description:  Read share files starting at the share with the
+*               number given to first and end with the number given
+*               to last. They will be stored in Image structures that
+*               must have been allocated before.
 ********************************************************************/
-void readShareFiles(char* dirPath, Image* share, int first, int last);
+void readShareFiles(Image* share, int first, int last);
 
 /********************************************************************
 * Function:     createDecryptedImageFile
@@ -78,6 +79,6 @@ void readShareFiles(char* dirPath, Image* share, int first, int last);
 *               decrypted01.bmp if this name isn't used already, and
 *               get counted up to a maximum of decrypted99.bmp.
 ********************************************************************/
-void createDecryptedImageFile(char* dirPath, Image* image);
+void createDecryptedImageFile(Image* image);
 
 #endif /* IMAGE_H */ 

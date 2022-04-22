@@ -80,8 +80,8 @@ void decryptShareFiles()
     int numberOfShares = (1+last-first);
 
     Image result, *shares = xmalloc(numberOfShares*sizeof(Image));
-    readShareFiles(DEST_PATH, shares, first, last);
-    createDecryptedImageFile(DEST_PATH, &result);
+    readShareFiles(shares, first, last);
+    createDecryptedImageFile(&result);
     fillDecryptedImage(&result, shares, numberOfShares);
     createBMP(&result);
 

@@ -42,9 +42,9 @@ void callAlgorithm(void (*algorithm)(AlgorithmData*))
 	int numberOfShares = NUMBER_OF_SHARES;
 	Image source, *shares = xmalloc(numberOfShares*sizeof(Image));
 
-	createSourceImage(SOURCE_PATH, &source);
-	deleteShareFiles(DEST_PATH);
-    createShareFiles(DEST_PATH, shares, numberOfShares);
+	createSourceImage(&source);
+	deleteShareFiles();
+    createShareFiles(shares, numberOfShares);
 
 	/* call the algorithm */
 	AlgorithmData data = {
