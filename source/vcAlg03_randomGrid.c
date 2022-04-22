@@ -101,3 +101,52 @@ void randomGrid_nn_Threshold(AlgorithmData* data)
         }
     }
 }
+
+/********************************************************************
+* Function:     randomGrid_2n_Threshold
+*--------------------------------------------------------------------
+* Description:  This is an implementation of a (2,n)-threshold random
+*               grid algorithm introduced by Tzung-Her Chen and
+*               Kai-Hsiang Tsao. In contradistinction to the (n,n)
+*               algorithms this algorithm reveals the secret image
+*               as soon as two of the shares are stacked together,
+*               independent from the amount of shares existing.
+*               If more than two shares are stacked, the revealed
+*               image becomes clearer.
+********************************************************************/
+void randomGrid_2n_Threshold(AlgorithmData* data)
+{
+    int width = data->source->width;
+    int height = data->source->height;
+
+    /* allocate pixel-arrays for the shares */
+	mallocSharesOfSourceSize(data->source, data->shares, data->numberOfShares);
+
+    /* make the first share a random grid */
+    createRandomGrid(&data->shares[0]);
+
+    /* open urandom, to get random numbers from it */
+    FILE* urandom = xfopen("/dev/urandom", "r");
+
+    /* for number of shares */
+    for(int idx = 1; idx < data->numberOfShares; idx++)
+    {
+        /* for each pixel ... */
+        /* fill the other shares according to source and first share */
+        for(int i = 0; i < height; i++)     /* rows */
+        {
+            for(int j = 0; j < width; j++)  /* columns */
+            {
+                /* if the source pixel is black */
+                if (data->source->array[i * width + j])
+                    /* get random 0/1 */
+                    data->shares[idx].array[i * width + j] = getRandomNumber(urandom,0,2);
+
+                /* if the source pixel is white */
+                else
+                    /* copy value of share 1 */
+                    data->shares[idx].array[i * width + j] = data->shares[0].array[i * width + j];
+            }
+        }
+    }
+}

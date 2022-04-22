@@ -77,4 +77,18 @@ void probabilisticAlgorithm(AlgorithmData* data);
 ********************************************************************/
 void randomGrid_nn_Threshold(AlgorithmData* data);
 
+/********************************************************************
+* Function:     randomGrid_2n_Threshold
+*--------------------------------------------------------------------
+* Description:  This is an implementation of a (2,n)-threshold random
+*               grid algorithm introduced by Tzung-Her Chen and
+*               Kai-Hsiang Tsao. In contradistinction to the (n,n)
+*               algorithms this algorithm reveals the secret image
+*               as soon as two of the shares are stacked together,
+*               independent from the amount of shares existing.
+*               If more than two shares are stacked, the revealed
+*               image becomes clearer.
+********************************************************************/
+void randomGrid_2n_Threshold(AlgorithmData* data);
+
 #endif /* VCALGORITHMS_H */  

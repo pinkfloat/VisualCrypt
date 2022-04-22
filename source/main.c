@@ -13,9 +13,10 @@ int main(int argc, char* argv[])
 {
 	int choice;
 	char *menu [] = {
-						"deterministic algorithm",
-						"probabilistic algorithm",
-						"random grid algorithm",
+						"(n,n) deterministic algorithm",
+						"(n,n) probabilistic algorithm",
+						"(n,n) random grid algorithm",
+						"(2,n) random grid algorithm",
 						"decrypt shares",
 						"exit"
 					};
@@ -26,7 +27,8 @@ int main(int argc, char* argv[])
 		case 1:     callAlgorithm(deterministicAlgorithm); 	break;
 		case 2: 	callAlgorithm(probabilisticAlgorithm); 	break;	
 		case 3: 	callAlgorithm(randomGrid_nn_Threshold); break;
-		case 4:		decryptShareFiles();					break;
+		case 4: 	callAlgorithm(randomGrid_2n_Threshold); break;
+		case 5:		decryptShareFiles();					break;
 		default: 	break;
 	}
 	return 0;
