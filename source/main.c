@@ -17,18 +17,20 @@ int main(int argc, char* argv[])
 						"(n,n) probabilistic algorithm",
 						"(n,n) random grid algorithm",
 						"(2,n) random grid algorithm",
+						"(k,n) random grid algorithm",
 						"decrypt shares",
 						"exit"
 					};
 
-	choice = getMenu("Encrypt Image Deluxe", menu, 5, "Your Choice: ");
+	choice = getMenu("Visual Crypt Algorithms", menu, 6, "Your Choice: ");
 	switch(choice)
 	{
 		case 1:     callAlgorithm(deterministicAlgorithm); 	break;
 		case 2: 	callAlgorithm(probabilisticAlgorithm); 	break;	
 		case 3: 	callAlgorithm(randomGrid_nn_Threshold); break;
 		case 4: 	callAlgorithm(randomGrid_2n_Threshold); break;
-		case 5:		decryptShareFiles();					break;
+		case 5:		callAlgorithm(randomGrid_kn_Threshold);	break;
+		case 6:		decryptShareFiles();					break;
 		default: 	break;
 	}
 	return 0;

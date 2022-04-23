@@ -1,6 +1,9 @@
+#include <string.h>
 #include "image.h"
+#include "menu.h"
 #include "random.h"
 #include "fileManagement.h"
+#include "memoryManagement.h"
 #include "vcAlgorithms.h"
 
 /********************************************************************
@@ -158,4 +161,116 @@ void randomGrid_2n_Threshold(AlgorithmData* data)
         }
     }
     xfclose(urandom);
+}
+
+/********************************************************************
+* Function:     randomGrid_kn_Threshold
+*--------------------------------------------------------------------
+* Description:  This is an implementation of a (k,n)-threshold random
+*               grid algorithm introduced by Tzung-Her Chen and
+*               Kai-Hsiang Tsao. In contradistinction to the (n,n)
+*               algorithms this algorithm reveals the secret image
+*               as soon as <k> of the shares are stacked together,
+*               independent from the amount of shares existing.
+*               If more than <k> shares are stacked, the noise
+*               decreases the image quality.
+********************************************************************/
+void randomGrid_kn_Threshold(AlgorithmData* data)
+{
+    Image* source = data->source;
+    Image* shares = data->shares;
+    int width = source->width;
+    int height = source->height;
+    int n = data->numberOfShares;
+
+    /* allocate pixel-arrays for the shares */
+	mallocSharesOfSourceSize(source, shares, n);
+
+    if(n == 2)
+    {
+        /* just call randomGrid_22_Threshold */
+        randomGrid_22_Threshold(source, shares, &shares[1]);
+        return;
+    }
+
+    /* get k from user */
+    int valid = 0, k;
+    char prompt[50];
+    memset(prompt, '\0', sizeof(prompt));
+    snprintf(prompt, sizeof(prompt), "Enter number for k:\n<min> = 2\n<max> = %d\n", n);
+    do
+    {
+        clear();
+        valid = getNumber(prompt, 2, n, &k);
+    } while (!valid);
+
+    /* create k storage shares */
+    Image* storage = xmalloc(k*sizeof(Image));
+
+    AlgorithmData randgrids = {
+        .numberOfShares = k,
+        .shares = storage,
+        .source = source
+    };
+
+    /* fill the temporary shares */
+    randomGrid_nn_Threshold(&randgrids);
+
+    /* create vector with values from 1 to n */
+    BooleanMatrix setOfN = createBooleanMatrix(n, 1);
+    for (int i = 0; i < n; i++)
+    {
+        setPixel(&setOfN, i, 0, i+1);
+    }
+
+    /* open urandom, to get random numbers from it */
+    FILE* urandom = xfopen("/dev/urandom", "r");
+
+    /*  create vector with n elements */
+    BooleanMatrix columnVector = createBooleanMatrix(n, 1);
+
+    /*  create checklist of size n to store which values from 1 to n
+        has already been used in columnVector
+        0 = unused element, 1 = used
+    */
+    Pixel* checkList = xmalloc(n * sizeof(Pixel));
+
+    MatrixCopy copy;
+    copy.source = &setOfN;
+
+    /* for each pixel of the source */
+    for(int i = 0; i < height; i++)     /* rows */
+    {
+        for(int j = 0; j < width; j++)  /* columns */
+        {
+            memset(checkList, 0, n*sizeof(Pixel));
+
+            /*  fill columnVector randomly with integers from setOfN */
+            for(int idx = 0; idx < n; idx++)
+            {
+                copy.dest = (BooleanMatrix*) &columnVector.array[idx];
+                int randNum = getRandomNumber(urandom, 1, n-idx);
+                randomSort(randNum, checkList, &copy, copyColumnElement);
+            }
+
+            /* for each share */
+            for(int idx = 0; idx < n; idx++)
+            {
+                int found = -1;
+                /* if idx+1 is part of the first k elements of columnVector */
+                for (int idk = 0; idk < k; idk++)
+                {
+                   if (columnVector.array[idk] == idx+1)
+                   {
+                       found = idk;
+                       break;
+                   } 
+                }
+                if (found != -1)
+                    shares[idx].array[i * width + j] = storage[found].array[i * width + j];
+                else
+                    shares[idx].array[i * width + j] = getRandomNumber(urandom,0,2);
+            }
+        }
+    }
 }

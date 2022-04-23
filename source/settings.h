@@ -12,7 +12,7 @@
     that is at least 20 characters larger than
     the paths.
 */
-#define SOURCE_PATH "../image/colortest.bmp"
+#define SOURCE_PATH "../image/cameraman.bmp"
 #define SHARE_PATH "../image"
 #define PATH_LENGTH 100
 

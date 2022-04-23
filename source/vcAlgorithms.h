@@ -91,4 +91,18 @@ void randomGrid_nn_Threshold(AlgorithmData* data);
 ********************************************************************/
 void randomGrid_2n_Threshold(AlgorithmData* data);
 
+/********************************************************************
+* Function:     randomGrid_kn_Threshold
+*--------------------------------------------------------------------
+* Description:  This is an implementation of a (k,n)-threshold random
+*               grid algorithm introduced by Tzung-Her Chen and
+*               Kai-Hsiang Tsao. In contradistinction to the (n,n)
+*               algorithms this algorithm reveals the secret image
+*               as soon as <k> of the shares are stacked together,
+*               independent from the amount of shares existing.
+*               If more than <k> shares are stacked, the noise
+*               decreases the image quality.
+********************************************************************/
+void randomGrid_kn_Threshold(AlgorithmData* data);
+
 #endif /* VCALGORITHMS_H */  
