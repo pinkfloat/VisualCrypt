@@ -76,37 +76,34 @@ static void randomGrid_22_Threshold(Image* source, Image* share1, Image* share2)
 ********************************************************************/
 void randomGrid_nn_Threshold(AlgorithmData* data)
 {
+    Image* source = data->source;
+    Image* shares = data->shares;
     int n = data->numberOfShares;
 
     /* allocate pixel-arrays for the shares */
-	mallocSharesOfSourceSize(data->source, data->shares, n);
+	mallocSharesOfSourceSize(source, shares, n);
 
-    if(data->numberOfShares == 2)
-    {
-        /* just call randomGrid_22_Threshold */
-        randomGrid_22_Threshold(data->source, data->shares, &data->shares[1]);
-    }
-    else
-    {
-        Image tmp[2] = {{.height = data->source->height, .width = data->source->width},
-                        {.height = data->source->height, .width = data->source->width}};
-        mallocPixelArray(&tmp[0]);
-        mallocPixelArray(&tmp[1]);
+    /* fill the first two shares */
+    randomGrid_22_Threshold(source, shares, &shares[1]);
 
-        /* fill the first share and a temporary one */
-        randomGrid_22_Threshold(data->source, data->shares, &tmp[1]);
+    if(n > 2)
+    {
+        Image storage = {
+            .width = source->width,
+            .height = source->height
+        };
+        mallocPixelArray(&storage);
+        Pixel* tmp;
 
         /* for number of shares */
-        for(int idx = 1; idx < n-1; idx++)
+        for(int idx = 2; idx < n; idx++)
         {
-            uint8_t nr1 = (idx % 2);    /* switch between 1 and 0 */
-            uint8_t nr2 = nr1 ? 0 : 1;  /* switch between 0 and 1 */
-            randomGrid_22_Threshold(&tmp[nr1], &data->shares[idx], &tmp[nr2]);
-
-            /* save last image */
-            if(idx == n-2)
-                data->shares[idx+1].array = tmp[nr2].array;
+            tmp = storage.array;
+            storage.array = shares[idx-1].array;
+            shares[idx-1].array = tmp;
+            randomGrid_22_Threshold(&storage, &shares[idx-1], &shares[idx]);
         }
+        xfree(storage.array);
     }
 }
 
