@@ -27,9 +27,9 @@ int main(int argc, char* argv[])
 	{
 		case 1:     callAlgorithm(deterministicAlgorithm); 	break;
 		case 2: 	callAlgorithm(probabilisticAlgorithm); 	break;	
-		case 3: 	callAlgorithm(randomGrid_nn_Threshold); break;
-		case 4: 	callAlgorithm(randomGrid_2n_Threshold); break;
-		case 5:		callAlgorithm(randomGrid_kn_Threshold);	break;
+		case 3: 	callAlgorithm(alternate_nn_ThresholdRGA); break;
+		case 4: 	callAlgorithm(alternate_2n_ThresholdRGA); break;
+		case 5:		callAlgorithm(alternate_kn_ThresholdRGA); break;
 		case 6:		decryptShareFiles();					break;
 		default: 	break;
 	}
