@@ -76,6 +76,7 @@ void probabilisticAlgorithm(AlgorithmData* data);
 *               random grid algorithm from O. Kafri and E. Karen.
 ********************************************************************/
 void randomGrid_nn_Threshold(AlgorithmData* data);
+void alternate_nn_ThresholdRGA(AlgorithmData* data);
 
 /********************************************************************
 * Function:     randomGrid_2n_Threshold
@@ -90,6 +91,7 @@ void randomGrid_nn_Threshold(AlgorithmData* data);
 *               image becomes clearer.
 ********************************************************************/
 void randomGrid_2n_Threshold(AlgorithmData* data);
+void alternate_2n_ThresholdRGA(AlgorithmData* data);
 
 /********************************************************************
 * Function:     randomGrid_kn_Threshold
@@ -104,5 +106,6 @@ void randomGrid_2n_Threshold(AlgorithmData* data);
 *               decreases the image quality.
 ********************************************************************/
 void randomGrid_kn_Threshold(AlgorithmData* data);
+void alternate_kn_ThresholdRGA(AlgorithmData* data);
 
 #endif /* VCALGORITHMS_H */  
