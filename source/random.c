@@ -1,5 +1,6 @@
 #include "fileManagement.h"
 #include "memoryManagement.h"
+#include "booleanMatrix.h"
 #include "random.h"
 
 /********************************************************************
@@ -25,10 +26,25 @@ uint8_t getRandomNumber(FILE* urandom, uint8_t min, uint8_t max)
 *               the source vector (n x 1 matrix = matrix column)
 *               to the destination which is in this case just a pixel.
 ********************************************************************/
-void copyColumnElement(MatrixCopy* copy)
+void copyColumnElement(Copy* copy)
 {
-    Pixel* randPixel = (Pixel*) copy->dest;
-    *randPixel = getPixel(copy->source, copy->sourceIdx, 0);
+    BooleanMatrix* source = (BooleanMatrix*) copy->source;
+    Pixel* dest = (Pixel*) copy->dest;
+    *dest = getPixel(source, copy->sourceIdx, 0);
+}
+
+/********************************************************************
+* Function:     copyVectorElement
+*--------------------------------------------------------------------
+* Description:  This is a sort-Function for randomSort().
+*               The function will copy an element of the source
+*               vector to the destination vector.
+********************************************************************/
+void copyVectorElement(Copy* copy)
+{
+    Pixel* source = (Pixel*) copy->source;
+    Pixel* dest = (Pixel*) copy->dest;
+    dest[copy->destIdx] = source[copy->sourceIdx];
 }
 
 /********************************************************************
@@ -39,10 +55,12 @@ void copyColumnElement(MatrixCopy* copy)
 *               matrix (copy->sourceIdx) into a chosen column of the
 *               destination matrix (copy->destIdx).
 ********************************************************************/
-void copyMatrixColumn(MatrixCopy* copy)
+void copyMatrixColumn(Copy* copy)
 {
-    for(int row = 0; row < copy->source->n; row++)
-        setPixel(copy->dest, row, copy->destIdx, getPixel(copy->source, row, copy->sourceIdx));
+    BooleanMatrix* source = (BooleanMatrix*) copy->source;
+    BooleanMatrix* dest = (BooleanMatrix*) copy->dest;
+    for(int row = 0; row < source->n; row++)
+        setPixel(dest, row, copy->destIdx, getPixel(source, row, copy->sourceIdx));
 }
 
 /********************************************************************
@@ -54,11 +72,13 @@ void copyMatrixColumn(MatrixCopy* copy)
 *               pixel" (2D-array). It is part of the encryption of a
 *               specific pixel.
 ********************************************************************/
-void fillEncryptedPixel(MatrixCopy* copy)
+void fillEncryptedPixel(Copy* copy)
 {
+    BooleanMatrix* source = (BooleanMatrix*) copy->source;
+    BooleanMatrix* dest = (BooleanMatrix*) copy->dest;
     int row = copy->sourceIdx;
-    for(int column = 0; column < copy->source->m; column++)
-        copy->dest->array[column] = getPixel(copy->source, row, column);
+    for(int column = 0; column < source->m; column++)
+        dest->array[column] = getPixel(source, row, column);
 }
 
 /********************************************************************
@@ -77,7 +97,7 @@ void fillEncryptedPixel(MatrixCopy* copy)
 *               from one matrix to another, is part of the sorting
 *               function, given as last parameter to randomSort.
 ********************************************************************/
-void randomSort(int randNum, Pixel* checkList, MatrixCopy* copy, void (*sortFunc)(MatrixCopy*))
+void randomSort(int randNum, Pixel* checkList, Copy* copy, void (*sortFunc)(Copy*))
 {
     for(int checkIdx = 0, zeroCount = 0;; checkIdx++)
     {

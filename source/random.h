@@ -1,15 +1,22 @@
 #ifndef RANDOM_H
 #define RANDOM_H
 
+#include <stdint.h>
 #include <stdio.h>
-#include "booleanMatrix.h"
+
+#ifndef TYPE_PIXEL
+#define TYPE_PIXEL
+
+typedef uint8_t Pixel; /* black / white */
+
+#endif /* TYPE_PIXEL */
 
 typedef struct {
-    BooleanMatrix* source;
-    BooleanMatrix* dest;
+    void* source;
+    void* dest;
     int sourceIdx;
     int destIdx;
-} MatrixCopy;
+} Copy;
 
 /********************************************************************
 * Function:     getRandomNumber
@@ -28,7 +35,16 @@ uint8_t getRandomNumber(FILE* urandom, uint8_t min, uint8_t max);
 *               the source vector (n x 1 matrix = matrix column)
 *               to the destination which is in this case just a pixel.
 ********************************************************************/
-void copyColumnElement(MatrixCopy* copy);
+void copyColumnElement(Copy* copy);
+
+/********************************************************************
+* Function:     copyVectorElement
+*--------------------------------------------------------------------
+* Description:  This is a sort-Function for randomSort().
+*               The function will copy an element of the source
+*               vector to the destination vector.
+********************************************************************/
+void copyVectorElement(Copy* copy);
 
 /********************************************************************
 * Function:     copyMatrixColumn
@@ -38,7 +54,7 @@ void copyColumnElement(MatrixCopy* copy);
 *               matrix (copy->sourceIdx) into a chosen column of the
 *               destination matrix (copy->destIdx).
 ********************************************************************/
-void copyMatrixColumn(MatrixCopy* copy);
+void copyMatrixColumn(Copy* copy);
 
 /********************************************************************
 * Function:     fillEncryptedPixel
@@ -49,7 +65,7 @@ void copyMatrixColumn(MatrixCopy* copy);
 *               pixel" (2D-array). It is part of the encryption of a
 *               specific pixel.
 ********************************************************************/
-void fillEncryptedPixel(MatrixCopy* copy);
+void fillEncryptedPixel(Copy* copy);
 
 /********************************************************************
 * Function:     randomSort
@@ -67,6 +83,6 @@ void fillEncryptedPixel(MatrixCopy* copy);
 *               from one matrix to another, is part of the sorting
 *               function, given as last parameter to randomSort.
 ********************************************************************/
-void randomSort(int randNum, Pixel* checkList, MatrixCopy* copy, void (*sortFunc)(MatrixCopy*));
+void randomSort(int randNum, Pixel* checkList, Copy* copy, void (*sortFunc)(Copy*));
 
 #endif /* RANDOM_H */

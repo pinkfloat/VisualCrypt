@@ -217,26 +217,28 @@ void randomGrid_kn_Threshold(AlgorithmData* data)
     randomGrid_nn_Threshold(&randgrids);
 
     /* create vector with values from 1 to n */
-    BooleanMatrix setOfN = createBooleanMatrix(n, 1);
+    Pixel* setOfN = xmalloc(n * sizeof(Pixel));
     for (int i = 0; i < n; i++)
     {
-        setPixel(&setOfN, i, 0, i+1);
+        setOfN[i] = i+1;
     }
 
     /* open urandom, to get random numbers from it */
     FILE* urandom = xfopen("/dev/urandom", "r");
 
-    /*  create vector with n elements */
-    BooleanMatrix columnVector = createBooleanMatrix(n, 1);
+    /* create vector with n elements */
+    Pixel* randSortedSetOfN = xmalloc(n * sizeof(Pixel));
 
     /*  create checklist of size n to store which values from 1 to n
-        has already been used in columnVector
+        has already been used in randSortedSetOfN
         0 = unused element, 1 = used
     */
     Pixel* checkList = xmalloc(n * sizeof(Pixel));
 
-    MatrixCopy copy;
-    copy.source = &setOfN;
+    Copy copy = {
+        .source = setOfN,
+        .dest = randSortedSetOfN
+    };
 
     /* for each pixel of the source */
     for(int i = 0; i < height; i++)     /* rows */
@@ -245,22 +247,22 @@ void randomGrid_kn_Threshold(AlgorithmData* data)
         {
             memset(checkList, 0, n*sizeof(Pixel));
 
-            /*  fill columnVector randomly with integers from setOfN */
+            /*  fill randSortedSetOfN randomly with integers from setOfN */
             for(int idx = 0; idx < n; idx++)
             {
-                copy.dest = (BooleanMatrix*) &columnVector.array[idx];
+                copy.destIdx = idx;
                 int randNum = getRandomNumber(urandom, 1, n-idx);
-                randomSort(randNum, checkList, &copy, copyColumnElement);
+                randomSort(randNum, checkList, &copy, copyVectorElement);
             }
 
             /* for each share */
             for(int idx = 0; idx < n; idx++)
             {
                 int found = -1;
-                /* if idx+1 is part of the first k elements of columnVector */
+                /* if idx+1 is part of the first k elements of randSortedSetOfN */
                 for (int idk = 0; idk < k; idk++)
                 {
-                   if (columnVector.array[idk] == idx+1)
+                   if (randSortedSetOfN[idk] == idx+1)
                    {
                        found = idk;
                        break;

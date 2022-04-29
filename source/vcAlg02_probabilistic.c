@@ -2,6 +2,7 @@
 #include "fileManagement.h"
 #include "memoryManagement.h"
 #include "random.h"
+#include "booleanMatrix.h"
 #include "vcAlgorithms.h"
 
 /********************************************************************
@@ -87,11 +88,11 @@ static void copyColumnElementsToShares( BooleanMatrix* columnVector,
     int n = columnVector->n;
     int randNum;
     Pixel randPixel;
-    MatrixCopy copy;
+    Copy copy = {
+        .dest = &randPixel,
+        .source = columnVector
+    };
     memset(checkList, 0, n*sizeof(Pixel));
-
-    copy.dest = (BooleanMatrix*) &randPixel;
-    copy.source = columnVector;
 
     /* for each share */
     for(int shareIdx = 0; shareIdx < n; shareIdx++)

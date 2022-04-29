@@ -2,6 +2,7 @@
 #include <string.h>
 #include "image.h"
 #include "random.h"
+#include "booleanMatrix.h"
 #include "fileManagement.h"
 #include "memoryManagement.h"
 #include "vcAlgorithms.h"
@@ -100,7 +101,7 @@ static void permutateBasisMatrix(   BooleanMatrix* B0,
 {
     int m = B0->m;
     int randNum;
-    MatrixCopy copy;
+    Copy copy;
 
     memset(columnCheckList, 0, m*sizeof(Pixel));
     copy.dest = permutation;
@@ -181,7 +182,7 @@ static void fillPixelEncryptionToShares(    BooleanMatrix* permutation,
 {
     int n = permutation->n;
     int randNum;
-    MatrixCopy copy;
+    Copy copy;
     memset(rowCheckList, 0, n*sizeof(Pixel));
 
     copy.dest = encryptedPixel;
