@@ -91,7 +91,7 @@ static void writeBmpHeader(BmpHeader* bmpHeader, int32_t width, int32_t height)
 static void writeBmpBody(const Pixel* source, Pixel* destination, int32_t width, int32_t height)
 {
     Pixel p_source;
-    int32_t paddedWidth = roundToMultipleOf4(3*width);
+    int32_t paddedWidth = roundToMultipleOf4(BYTES_PER_RGB_PIXEL*width);
     for (int32_t row = 0; row < height; row++) {
         for (int32_t column = 0; column < width; column++) {
             p_source = source[row * width + column] ? 0 : 255;          /* black = 0, white = 255 */
@@ -115,7 +115,7 @@ void createBMP(Image* image)
 {
     int32_t width = image->width;
     int32_t height = image->height;
-    uint32_t bmpSize = SIZE_BMP_HEADER + roundToMultipleOf4(3*width) * height;
+    uint32_t bmpSize = SIZE_BMP_HEADER + roundToMultipleOf4(BYTES_PER_RGB_PIXEL*width) * height;
 
     /* create BMP file content */
     uint8_t* bmpBuffer = xmalloc(bmpSize + 2);
@@ -164,8 +164,9 @@ static void readBmpBody(Image* image)
     int32_t width = image->width;
     int32_t height = image->height;
 
-    uint32_t bmpSize = roundToMultipleOf4(3*width) * height;
-    uint8_t* bmpBuffer = xmalloc(width * height * BYTES_PER_RGB_PIXEL);
+    uint32_t paddedWidth = roundToMultipleOf4(width * BYTES_PER_RGB_PIXEL) ;
+    uint32_t bmpSize = paddedWidth * height;
+    uint8_t* bmpBuffer = xmalloc(bmpSize);
 
     /* read remaining file to buffer after readBmpHeader */
     xfread(bmpBuffer, 1, bmpSize, image->file, "ERR: invalid BMP body information");
@@ -179,12 +180,11 @@ static void readBmpBody(Image* image)
 
             /* weighted the color values of an rgb-image and determines whether
             a pixel of the result is supposed to be black or white */
+            pBuffer = bmpBuffer + (row * paddedWidth + column * BYTES_PER_RGB_PIXEL);
             red = *pBuffer * 0.2616;
-            green = *(pBuffer+1) * 0.7152;
-            blue = *(pBuffer+2) * 0.0722;
+            green = pBuffer[1] * 0.7152;
+            blue = pBuffer[2] * 0.0722;
             image->array[row * width + column] = (blue + green + red) > THRESHOLD ? 0 : 1; /* white = 0, black = 1 */
-
-            pBuffer += 3;
         }
     }
     xfree(bmpBuffer);
