@@ -16,13 +16,8 @@ static void orTwoPixelArrays(Image* dest, Image* source)
     int width = dest->width;
 
     /* for each pixel */
-    for(int i = 0; i < height; i++)     /* rows */
-    {
-        for(int j = 0; j < width; j++)  /* columns */
-        {
-            dest->array[i * width + j] |= source->array[i * width + j];
-        }
-    }
+    for(int i = 0; i < height*width; i++)
+        dest->array[i] |= source->array[i];
 }
 
 /********************************************************************
@@ -44,9 +39,7 @@ static void fillDecryptedImage(Image* decrypted, Image* share, int numberOfShare
 
     /* for each share */
     for(uint8_t i = 1; i < numberOfShares; i++)
-    {
         orTwoPixelArrays(decrypted, share+i);
-    }
 }
 
 /********************************************************************
@@ -65,10 +58,10 @@ void decryptShareFiles()
 	do
 	{
 		clear();
-        fprintf(stdout, "Shares can be decrypted from share01.bmp to share08.bmp\n");
-        fprintf(stdout, "The result will be stored in the same directory and named\n");
-        fprintf(stdout, "decrypted01.bmp to a maximum of decrypted99.bmp\n");
-        fprintf(stdout, "(decrypted01.bmp will be overwritten if max is reached)\n\n");
+        fprintf(stdout, "Shares can be decrypted from share01.bmp to share08.bmp\n"
+                        "The result will be stored in the same directory and named\n"
+                        "decrypted01.bmp to a maximum of decrypted99.bmp\n"
+                        "(decrypted01.bmp will be overwritten if max is reached)\n\n");
 
 		valid = getNumber("Enter number of the FIRST share to decrypt: ", 1, 8, &first);
 	} while (!valid);

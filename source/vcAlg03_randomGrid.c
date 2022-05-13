@@ -15,20 +15,16 @@
 ********************************************************************/
 static void createRandomGrid(Image* share)
 {
-    int width = share->width;
-    int height = share->height;
+    int arraySize = share->width * share->height;
 
     /* open urandom, to get random numbers from it */
     FILE* urandom = xfopen("/dev/urandom", "r");
 
-    /* for each pixel of the array */
-    for(int i = 0; i < height; i++)     /* rows */
+    /* for each pixel */
+    for(int i = 0; i < arraySize; i++)
     {
-        for(int j = 0; j < width; j++)  /* columns */
-        {
-            /* get random 0/1 */
-            share->array[i * width + j] = getRandomNumber(urandom,0,2);
-        }
+        /* get random 0/1 */
+        share->array[i] = getRandomNumber(urandom,0,2);
     }
     xfclose(urandom);
 }
@@ -44,27 +40,23 @@ static void createRandomGrid(Image* share)
 ********************************************************************/
 static void randomGrid_22_Threshold(Image* source, Image* share1, Image* share2)
 {
-    int width = source->width;
-    int height = source->height;
+    int arraySize = source->width * source->height;
 
     /* make the first share a random grid */
     createRandomGrid(share1);
 
     /* fill the second share according to source and first share*/
-    for(int i = 0; i < height; i++)     /* rows */
+    for(int i = 0; i < arraySize; i++)
     {
-        for(int j = 0; j < width; j++)  /* columns */
-        {
-            /* if the source pixel is black */
-            if (source->array[i * width + j])
-                /* use the complementary value of share 1 */
-                share2->array[i * width + j] = share1->array[i * width + j] ? 0 : 1;
+        /* if the source pixel is black */
+        if (source->array[i])
+            /* use the complementary value of share 1 */
+            share2->array[i] = share1->array[i] ? 0 : 1;
 
-            /* if the source pixel is white */
-            else
-                /* copy value of share 1 */
-                share2->array[i * width + j] = share1->array[i * width + j];
-        }
+        /* if the source pixel is white */
+        else
+            /* copy value of share 1 */
+            share2->array[i] = share1->array[i];
     }
 }
 
@@ -127,8 +119,7 @@ void randomGrid_2n_Threshold(AlgorithmData* data)
     int n = data->numberOfShares;
     Image* source = data->source;
     Image* shares = data->shares;
-    int width = source->width;
-    int height = source->height;
+    int arraySize = source->width * source->height;
 
     /* allocate pixel-arrays for the shares */
 	mallocSharesOfSourceSize(source, shares, n);
@@ -139,25 +130,22 @@ void randomGrid_2n_Threshold(AlgorithmData* data)
     /* open urandom, to get random numbers from it */
     FILE* urandom = xfopen("/dev/urandom", "r");
 
-    /* for number of shares */
+    /* for each share */
     for(int idx = 1; idx < n; idx++)
     {
         /* for each pixel ... */
         /* fill the other shares according to source and first share */
-        for(int i = 0; i < height; i++)     /* rows */
+        for(int i = 0; i < arraySize; i++)
         {
-            for(int j = 0; j < width; j++)  /* columns */
-            {
-                /* if the source pixel is black */
-                if (source->array[i * width + j])
-                    /* get random 0/1 */
-                    shares[idx].array[i * width + j] = getRandomNumber(urandom,0,2);
+            /* if the source pixel is black */
+            if (source->array[i])
+                /* get random 0/1 */
+                shares[idx].array[i] = getRandomNumber(urandom,0,2);
 
-                /* if the source pixel is white */
-                else
-                    /* copy value of share 1 */
-                    shares[idx].array[i * width + j] = shares->array[i * width + j];
-            }
+            /* if the source pixel is white */
+            else
+                /* copy value of share 1 */
+                shares[idx].array[i] = shares->array[i];
         }
     }
     xfclose(urandom);
@@ -179,8 +167,7 @@ void randomGrid_kn_Threshold(AlgorithmData* data)
 {
     Image* source = data->source;
     Image* shares = data->shares;
-    int width = source->width;
-    int height = source->height;
+    int arraySize = source->width * source->height;
     int n = data->numberOfShares;
 
     /* allocate pixel-arrays for the shares */
@@ -226,13 +213,7 @@ void randomGrid_kn_Threshold(AlgorithmData* data)
     /* open urandom, to get random numbers from it */
     FILE* urandom = xfopen("/dev/urandom", "r");
 
-    /* create vector with n elements */
     Pixel* randSortedSetOfN = xmalloc(n * sizeof(Pixel));
-
-    /*  create checklist of size n to store which values from 1 to n
-        has already been used in randSortedSetOfN
-        0 = unused element, 1 = used
-    */
     Pixel* checkList = xmalloc(n * sizeof(Pixel));
 
     Copy copy = {
@@ -240,39 +221,36 @@ void randomGrid_kn_Threshold(AlgorithmData* data)
         .dest = randSortedSetOfN
     };
 
-    /* for each pixel of the source */
-    for(int i = 0; i < height; i++)     /* rows */
+    /* for each pixel */
+    for(int i = 0; i < arraySize; i++)
     {
-        for(int j = 0; j < width; j++)  /* columns */
+        memset(checkList, 0, n*sizeof(Pixel));
+
+        /* fill randSortedSetOfN randomly with integers from setOfN */
+        for(int idx = 0; idx < n; idx++)
         {
-            memset(checkList, 0, n*sizeof(Pixel));
+            copy.destIdx = idx;
+            int randNum = getRandomNumber(urandom, 1, n-idx);
+            randomSort(randNum, checkList, &copy, copyVectorElement);
+        }
 
-            /*  fill randSortedSetOfN randomly with integers from setOfN */
-            for(int idx = 0; idx < n; idx++)
+        /* for each share */
+        for(int idx = 0; idx < n; idx++)
+        {
+            int found = -1;
+            /* if idx+1 is part of the first k elements of randSortedSetOfN */
+            for (int idk = 0; idk < k; idk++)
             {
-                copy.destIdx = idx;
-                int randNum = getRandomNumber(urandom, 1, n-idx);
-                randomSort(randNum, checkList, &copy, copyVectorElement);
-            }
-
-            /* for each share */
-            for(int idx = 0; idx < n; idx++)
-            {
-                int found = -1;
-                /* if idx+1 is part of the first k elements of randSortedSetOfN */
-                for (int idk = 0; idk < k; idk++)
+                if (randSortedSetOfN[idk] == idx+1)
                 {
-                   if (randSortedSetOfN[idk] == idx+1)
-                   {
-                       found = idk;
-                       break;
-                   } 
-                }
-                if (found != -1)
-                    shares[idx].array[i * width + j] = storage[found].array[i * width + j];
-                else
-                    shares[idx].array[i * width + j] = getRandomNumber(urandom,0,2);
+                    found = idk;
+                    break;
+                } 
             }
+            if (found != -1)
+                shares[idx].array[i] = storage[found].array[i];
+            else
+                shares[idx].array[i] = getRandomNumber(urandom,0,2);
         }
     }
 }

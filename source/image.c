@@ -121,11 +121,11 @@ void readShareFiles(Image* share, int first, int last)
     memset(path, '\0', sizeof(path));
 
     /* for each used share */
-    for(uint8_t i = first; i <= last; i++)
+    for(uint8_t i = 0; i <= last-first; i++)
     {
-        snprintf(path, sizeof(path), "%s/share%02d.bmp", SHARE_PATH, i);
-        openImageR(path, share+i-first);
-        readBMP(share+i-first);
+        snprintf(path, sizeof(path), "%s/share%02d.bmp", SHARE_PATH, i+first);
+        openImageR(path, share+i);
+        readBMP(share+i);
     }
 }
 

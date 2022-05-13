@@ -30,8 +30,7 @@ void alternate_nn_ThresholdRGA(AlgorithmData* data)
     int n = data->numberOfShares;
     Image* source = data->source;
     Image* shares = data->shares;
-    int width = source->width;
-    int height = source->height;
+    int arraySize = source->width * source->height;
 
     /* allocate pixel-arrays for the shares */
 	mallocSharesOfSourceSize(source, shares, n);
@@ -41,15 +40,14 @@ void alternate_nn_ThresholdRGA(AlgorithmData* data)
     /* open urandom, to get random numbers from it */
     FILE* urandom = xfopen("/dev/urandom", "r");
 
-    for(int i = 0; i < height; i++)     /* rows */
+    /* for each pixel */
+    for(int i = 0; i < arraySize; i++)
     {
-        for(int j = 0; j < width; j++)  /* columns */
+        fillPixelRG(source->array[i], sharePixel, n, urandom);
+        /* for each share */
+        for (int idx = 0; idx < n; idx++)
         {
-            fillPixelRG(source->array[i * width + j], sharePixel, n, urandom);
-            for (int idx = 0; idx < n; idx++)
-            {
-                shares[idx].array[i * width + j] = sharePixel[idx];
-            }
+            shares[idx].array[i] = sharePixel[idx];
         }
     }
     xfree(sharePixel);
@@ -61,8 +59,7 @@ void alternate_2n_ThresholdRGA(AlgorithmData* data)
     int n = data->numberOfShares;
     Image* source = data->source;
     Image* shares = data->shares;
-    int width = source->width;
-    int height = source->height;
+    int arraySize = source->width * source->height;
 
     /* allocate pixel-arrays for the shares */
 	mallocSharesOfSourceSize(source, shares, n);
@@ -72,26 +69,23 @@ void alternate_2n_ThresholdRGA(AlgorithmData* data)
 
     /* for each pixel ... */
     /* fill the other shares according to source and first share */
-    for(int i = 0; i < height; i++)     /* rows */
+    for(int i = 0; i < arraySize; i++)
     {
-        for(int j = 0; j < width; j++)  /* columns */
+        /* fill share 1 random */
+        shares->array[i] = getRandomNumber(urandom,0,2);
+
+        /* for each share */
+        for(int idx = 1; idx < n; idx++)
         {
-            /* fill share 1 random */
-            shares->array[i * width + j] = getRandomNumber(urandom,0,2);
+            /* if the source pixel is black */
+            if (source->array[i])
+                /* get random 0/1 */
+                shares[idx].array[i] = getRandomNumber(urandom,0,2);
 
-            /* for number of shares */
-            for(int idx = 1; idx < n; idx++)
-            {
-                /* if the source pixel is black */
-                if (source->array[i * width + j])
-                    /* get random 0/1 */
-                    shares[idx].array[i * width + j] = getRandomNumber(urandom,0,2);
-
-                /* if the source pixel is white */
-                else
-                    /* copy value of share 1 */
-                    shares[idx].array[i * width + j] = shares->array[i * width + j];
-            }
+            /* if the source pixel is white */
+            else
+                /* copy value of share 1 */
+                shares[idx].array[i] = shares->array[i];
         }
     }
     xfclose(urandom);
@@ -101,8 +95,7 @@ void alternate_kn_ThresholdRGA(AlgorithmData* data)
 {
     Image* source = data->source;
     Image* shares = data->shares;
-    int width = source->width;
-    int height = source->height;
+    int arraySize = source->width * source->height;
     int n = data->numberOfShares;
     int k = 2;
 
@@ -133,14 +126,8 @@ void alternate_kn_ThresholdRGA(AlgorithmData* data)
     /* open urandom, to get random numbers from it */
     FILE* urandom = xfopen("/dev/urandom", "r");
 
-    /* create vector with n elements */
     Pixel* randSortedSetOfN = xmalloc(n * sizeof(Pixel));
     Pixel* calculatedValues = xmalloc(k * sizeof(Pixel));
-
-    /*  create checklist of size n to store which values from 1 to n
-        has already been used in randSortedSetOfN
-        0 = unused element, 1 = used
-    */
     Pixel* checkList = xmalloc(n * sizeof(Pixel));
 
     Copy copy = {
@@ -149,77 +136,73 @@ void alternate_kn_ThresholdRGA(AlgorithmData* data)
     };
 
     /* for each pixel of the source */
-    for(int i = 0; i < height; i++)     /* rows */
+    for(int i = 0; i < arraySize; i++)
     {
-        for(int j = 0; j < width; j++)  /* columns */
+        memset(checkList, 0, n*sizeof(Pixel));
+
+        /*  fill randSortedSetOfN randomly with integers from setOfN */
+        for(int idx = 0; idx < n; idx++)
         {
-            memset(checkList, 0, n*sizeof(Pixel));
+            copy.destIdx = idx;
+            int randNum = getRandomNumber(urandom, 1, n-idx);
+            randomSort(randNum, checkList, &copy, copyVectorElement);
+        }
 
-            /*  fill randSortedSetOfN randomly with integers from setOfN */
+        /*  create values of calculatedValues according to traditional
+            RG-based VSS to encode a pixel
+        */
+        fillPixelRG(source->array[i], calculatedValues, k, urandom);
+
+        //###debug print###
+        if (i<15) {
+            printf("{");
             for(int idx = 0; idx < n; idx++)
             {
-                copy.destIdx = idx;
-                int randNum = getRandomNumber(urandom, 1, n-idx);
-                randomSort(randNum, checkList, &copy, copyVectorElement);
+                printf(" %d,", randSortedSetOfN[idx]);
             }
-
-            /*  create values of calculatedValues according to traditional
-                RG-based VSS to encode a pixel
-            */
-            fillPixelRG(source->array[i * width + j], calculatedValues, k, urandom);
-
-            //###debug print###
-            if (i<3 && j < 5) {
-                printf("{");
-                for(int idx = 0; idx < n; idx++)
-                {
-                    printf(" %d,", randSortedSetOfN[idx]);
-                }
-                printf("}\n{");
-                for(int idk = 0; idk < k; idk++)
-                {
-                    printf(" %d,", randSortedSetOfN[idk]);
-                }
-                printf("}\n");
-            }
-
-
-            /* for each share */
-            for(int idx = 0; idx < n; idx++)
+            printf("}\n{");
+            for(int idk = 0; idk < k; idk++)
             {
-                int found = -1;
-                /* if idx+1 is part of the first k elements of randSortedSetOfN */
-                for (int idk = 0; idk < k; idk++)
-                {
-                   if (randSortedSetOfN[idk] == idx+1)
-                   {
-                       found = idk;
-                       break;
-                   }
-                }
-                if (found != -1)
-                {
-                    shares[idx].array[i * width + j] = calculatedValues[found];
+                printf(" %d,", randSortedSetOfN[idk]);
+            }
+            printf("}\n");
+        }
 
-                    //###debug print###
-                    if (i<3 && j < 5) {
-                        printf("share %d got r %d\n", idx+1, found+1);
-                    }
-                }
-                else
+        /* for each share */
+        for(int idx = 0; idx < n; idx++)
+        {
+            int found = -1;
+            /* if idx+1 is part of the first k elements of randSortedSetOfN */
+            for (int idk = 0; idk < k; idk++)
+            {
+                if (randSortedSetOfN[idk] == idx+1)
                 {
-                    shares[idx].array[i * width + j] = getRandomNumber(urandom,0,2);
-
-                    //###debug print###
-                    if (i<3 && j < 5) {
-                        printf("share %d got random number\n", idx+1);
-                    }
+                    found = idk;
+                    break;
                 }
+            }
+            if (found != -1)
+            {
+                shares[idx].array[i] = calculatedValues[found];
 
                 //###debug print###
-                if (i<3 && j < 5 && idx == n-1) {
-                    printf("\n");
+                if (i<15) {
+                    printf("share %d got r %d\n", idx+1, found+1);
                 }
+            }
+            else
+            {
+                shares[idx].array[i] = getRandomNumber(urandom,0,2);
+
+                //###debug print###
+                if (i<15) {
+                    printf("share %d got random number\n", idx+1);
+                }
+            }
+
+            //###debug print###
+            if (i<15 && idx == n-1) {
+                printf("\n");
             }
         }
     }

@@ -12,10 +12,7 @@
 *               it the vector "columnVector".
 * Input:        B0 = Basis matrix for white share-pixels
 *               B1 = Basis matrix for black share-pixels
-*               source = the secret image, containing an array of
-*               black and white pixel
-*               i = line of the source pixel we are looking at
-*               j = columns of the source pixel we are looking at
+*               sourcePixel = pixel of the secret image (0/1)
 *               urandom = the opened file /dev/urandom, containing
 *               random numbers
 * Output:       columnVector = stores the randomly chosen column
@@ -23,9 +20,7 @@
 static void getRandomMatrixColumn(  BooleanMatrix* B0,
                                     BooleanMatrix* B1, 
                                     BooleanMatrix* columnVector,
-                                    Image* source,
-                                    int i,
-                                    int j,
+                                    Pixel sourcePixel,
                                     FILE* urandom)
 {
     int n = B0->n; /* number of rows */
@@ -34,7 +29,7 @@ static void getRandomMatrixColumn(  BooleanMatrix* B0,
     int randNum = getRandomNumber(urandom, 0, m);
 
     /* if the source pixel is black */
-    if (source->array[i * source->width + j])
+    if (sourcePixel)
     {
         /* get column of basis matrix B1 */
         for(int idx = 0; idx < n; idx++)
@@ -50,17 +45,6 @@ static void getRandomMatrixColumn(  BooleanMatrix* B0,
 }
 
 /********************************************************************
-* Function:     copyRandomPixelToShare
-*--------------------------------------------------------------------
-* Description:  The function will copy value of "randPixel" to the
-*               share file array on row posY and column posX.
-********************************************************************/
-static inline void copyRandomPixelToShare(Pixel* randPixel, Image* share, int posY, int posX)
-{
-    share->array[posY * share->width + posX] = *randPixel;
-}
-
-/********************************************************************
 * Function:     copyColumnElementsToShares
 *--------------------------------------------------------------------
 * Description:  Get use the vector "columnVector" to copy one random
@@ -68,8 +52,8 @@ static inline void copyRandomPixelToShare(Pixel* randPixel, Image* share, int po
 *               vector element twice.
 * Input:        columnVector = a randomly chosen column of a basis
 *               matrix
-*               i = line of the destination pixel in a share,
-*               j = column of the destination pixel in a share,
+*               sharePixelPosition = location where the pixel should
+*               be copied to
 *               checkList = containing zero's for unused elements
 *               one's for allready used ones
 *               urandom = the opened file /dev/urandom, containing
@@ -80,8 +64,7 @@ static inline void copyRandomPixelToShare(Pixel* randPixel, Image* share, int po
 ********************************************************************/
 static void copyColumnElementsToShares( BooleanMatrix* columnVector,
                                         Image* share,
-                                        int i,
-                                        int j,
+                                        int sharePixelPosition,
                                         Pixel* checkList,
                                         FILE* urandom)
 {
@@ -98,9 +81,9 @@ static void copyColumnElementsToShares( BooleanMatrix* columnVector,
     for(int shareIdx = 0; shareIdx < n; shareIdx++)
     {
         /* choose random which share will get which column element */
-        randNum = getRandomNumber(urandom, 1, n-shareIdx); /* number between 1 and "number-of-shares minus shareIdx" */
+        randNum = getRandomNumber(urandom, 1, n-shareIdx);
         randomSort(randNum, checkList, &copy, copyColumnElement);
-        copyRandomPixelToShare(&randPixel, &share[shareIdx], i, j);
+        share[shareIdx].array[sharePixelPosition] = randPixel;
     }
 }
 
@@ -118,6 +101,8 @@ static void copyColumnElementsToShares( BooleanMatrix* columnVector,
 static void fillProbabilisticShareArrays(Image* source, Image* share, BooleanMatrix* B0, BooleanMatrix* B1)
 {
     int n = B0->n;
+    int width = source->width;
+    int height = source->height;
 
     /* open urandom, to get random numbers from it */
     FILE* urandom = xfopen("/dev/urandom", "r");
@@ -135,12 +120,14 @@ static void fillProbabilisticShareArrays(Image* source, Image* share, BooleanMat
     Pixel* checkList = xmalloc(n * sizeof(Pixel));
 
     /* for each pixel of the source */
-    for(int i = 0; i < source->height; i++)     /* rows */
+    for(int i = 0; i < height; i++)     /* rows */
     {
-        for(int j = 0; j < source->width; j++)  /* columns */
+        for(int j = 0; j < width; j++)  /* columns */
         {
-            getRandomMatrixColumn(B0, B1, &columnVector, source, i, j, urandom);
-            copyColumnElementsToShares(&columnVector, share, i, j, checkList, urandom);
+            int sharePixelPosition = i * width + j;
+            int sourcePixel = source->array[sharePixelPosition];
+            getRandomMatrixColumn(B0, B1, &columnVector, sourcePixel, urandom);
+            copyColumnElementsToShares(&columnVector, share, sharePixelPosition, checkList, urandom);
         }
     }
     xfclose(urandom);

@@ -78,10 +78,7 @@ static void mallocPixelExpandedShares(Image* source, Image* share, int n, int m)
 *               the permutation in the array "permutation".
 * Input:        B0 = Basis matrix for white share-pixels
 *               B1 = Basis matrix for black share-pixels
-*               source = the secret image, containing an array of
-*               black and white pixel
-*               i = line of the source pixel we are looking at
-*               j = columns of the source pixel we are looking at
+*               sourcePixel = pixel of the secret image (0/1)
 *               columnCheckList = containing zero's for unused
 *               basis matrix columns and one's for allready used
 *               ones
@@ -93,9 +90,7 @@ static void mallocPixelExpandedShares(Image* source, Image* share, int n, int m)
 static void permutateBasisMatrix(   BooleanMatrix* B0,
                                     BooleanMatrix* B1, 
                                     BooleanMatrix* permutation,
-                                    Image* source,
-                                    int i,
-                                    int j,
+                                    Pixel sourcePixel,
                                     Pixel* columnCheckList,
                                     FILE* urandom)
 {
@@ -111,7 +106,7 @@ static void permutateBasisMatrix(   BooleanMatrix* B0,
         copy.destIdx = permColumn;
 
         /* if the pixel is black */
-        if (source->array[i * source->width + j])
+        if (sourcePixel)
             /* permutate columns of basis matrix B1 */
             copy.source = B1;
 
@@ -213,6 +208,8 @@ static void fillDeterministicShareArrays(Image* source, Image* share, BooleanMat
 {
     int n = B0->n;
     int m = B0->m;
+    int width = source->width;
+    int height = source->height;
     int deterministicHeight, deterministicWidth;
     calcPixelExpansion(&deterministicHeight, &deterministicWidth, n, m);
 
@@ -239,11 +236,12 @@ static void fillDeterministicShareArrays(Image* source, Image* share, BooleanMat
     Pixel* columnCheckList = xmalloc(m * sizeof(Pixel));
 
     /* for each pixel of the source */
-    for(int i = 0; i < source->height; i++)     /* rows */
+    for(int i = 0; i < height; i++)     /* rows */
     {
-        for(int j = 0; j < source->width; j++)  /* columns */
+        for(int j = 0; j < width; j++)  /* columns */
         {
-            permutateBasisMatrix(B0, B1, &permutation, source, i, j, columnCheckList, urandom);
+            Pixel sourcePixel = source->array[i * width + j];
+            permutateBasisMatrix(B0, B1, &permutation, sourcePixel, columnCheckList, urandom);
             fillPixelEncryptionToShares(&permutation, &encryptedPixel, share, i*deterministicHeight,
                                         j*deterministicWidth, rowCheckList, urandom);
         }
