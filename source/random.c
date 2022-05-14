@@ -14,6 +14,9 @@ uint8_t getRandomNumber(FILE* urandom, uint8_t min, uint8_t max)
 {
     uint8_t randNum;
     xfread(&randNum, sizeof(randNum), 1, urandom, "ERR: read /dev/urandom");
+
+    // TODO: find a more secure way
+    // https://stackoverflow.com/questions/49878942/why-is-rand6-biased
     randNum = min + (randNum % max);
     return randNum;
 }
@@ -99,6 +102,13 @@ void fillEncryptedPixel(Copy* copy)
 ********************************************************************/
 void randomSort(int randNum, Pixel* checkList, Copy* copy, void (*sortFunc)(Copy*))
 {
+    /* alternate version with lower complexity:
+        Fill the array with the numbers from 1 to n. 
+        Repeat for i = 0 to n - 1:
+        Generate a random number r such that 0 ≤ r < n - i.
+        Exchange array [i] and array [i + r]
+    */
+    
     for(int checkIdx = 0, zeroCount = 0;; checkIdx++)
     {
         if(checkList[checkIdx] == 0)
