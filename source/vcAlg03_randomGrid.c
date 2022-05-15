@@ -135,7 +135,7 @@ void randomGrid_nn_Threshold(AlgorithmData* data)
 }
 
 /********************************************************************
-* Function:     randomGrid_2n_Threshold
+* Function:     __randomGrid_2n_Threshold
 *--------------------------------------------------------------------
 * Description:  This is an implementation of a (2,n)-threshold random
 *               grid algorithm introduced by Tzung-Her Chen and
@@ -146,31 +146,20 @@ void randomGrid_nn_Threshold(AlgorithmData* data)
 *               If more than two shares are stacked, the revealed
 *               image becomes clearer.
 ********************************************************************/
-void randomGrid_2n_Threshold(AlgorithmData* data)
+void __randomGrid_2n_Threshold(Pixel* sourceArray, Image* shares, FILE* urandom, int arraySize, int numberOfShares)
 {
-    int n = data->numberOfShares;
-    Image* source = data->source;
-    Image* shares = data->shares;
-    int arraySize = source->width * source->height;
-
-    /* allocate pixel-arrays for the shares */
-	mallocSharesOfSourceSize(source, shares, n);
-
-    /* open urandom, to get random numbers from it */
-    FILE* urandom = xfopen("/dev/urandom", "r");
-
     /* make the first share a random grid */
     createRandomGrid(shares, urandom);
 
     /* for each share */
-    for(int idx = 1; idx < n; idx++)
+    for(int idx = 1; idx < numberOfShares; idx++)
     {
         /* for each pixel ... */
         /* fill the other shares according to source and first share */
         for(int i = 0; i < arraySize; i++)
         {
             /* if the source pixel is black */
-            if (source->array[i])
+            if (sourceArray[i])
                 /* get random 0/1 */
                 shares[idx].array[i] = getRandomNumber(urandom,0,2);
 
@@ -180,6 +169,30 @@ void randomGrid_2n_Threshold(AlgorithmData* data)
                 shares[idx].array[i] = shares->array[i];
         }
     }
+}
+
+/********************************************************************
+* Function:     randomGrid_2n_Threshold
+*--------------------------------------------------------------------
+* Description:  This is a wrapper for the (2,n)-threshold random
+*               grid algorithm introduced by Tzung-Her Chen and
+*               Kai-Hsiang Tsao.
+********************************************************************/
+void randomGrid_2n_Threshold(AlgorithmData* data)
+{
+    int numberOfShares = data->numberOfShares;
+    Image* source = data->source;
+    Image* shares = data->shares;
+    int arraySize = source->width * source->height;
+
+    /* allocate pixel-arrays for the shares */
+	mallocSharesOfSourceSize(source, shares, numberOfShares);
+
+    /* open urandom, to get random numbers from it */
+    FILE* urandom = xfopen("/dev/urandom", "r");
+
+    __randomGrid_2n_Threshold(source->array, shares, urandom, arraySize, numberOfShares);
+    
     xfclose(urandom);
 }
 

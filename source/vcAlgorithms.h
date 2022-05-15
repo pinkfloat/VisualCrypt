@@ -139,7 +139,7 @@ void randomGrid_nn_Threshold(AlgorithmData* data);
 void alternate_nn_ThresholdRGA(AlgorithmData* data);
 
 /********************************************************************
-* Function:     randomGrid_2n_Threshold
+* Function:     __randomGrid_2n_Threshold
 *--------------------------------------------------------------------
 * Description:  This is an implementation of a (2,n)-threshold random
 *               grid algorithm introduced by Tzung-Her Chen and
@@ -149,6 +149,15 @@ void alternate_nn_ThresholdRGA(AlgorithmData* data);
 *               independent from the amount of shares existing.
 *               If more than two shares are stacked, the revealed
 *               image becomes clearer.
+********************************************************************/
+void __randomGrid_2n_Threshold(Pixel* sourceArray, Image* shares, FILE* urandom, int arraySize, int numberOfShares);
+
+/********************************************************************
+* Function:     randomGrid_2n_Threshold
+*--------------------------------------------------------------------
+* Description:  This is a wrapper for the (2,n)-threshold random
+*               grid algorithm introduced by Tzung-Her Chen and
+*               Kai-Hsiang Tsao.
 ********************************************************************/
 void randomGrid_2n_Threshold(AlgorithmData* data);
 void alternate_2n_ThresholdRGA(AlgorithmData* data);
