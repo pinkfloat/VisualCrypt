@@ -153,20 +153,6 @@ void alternate_kn_ThresholdRGA(AlgorithmData* data)
         */
         fillPixelRG(source->array[i], calculatedValues, k, urandom);
 
-        //###debug print###
-        if (i<15) {
-            printf("{");
-            for(int idx = 0; idx < n; idx++)
-            {
-                printf(" %d,", randSortedSetOfN[idx]);
-            }
-            printf("}\n{");
-            for(int idk = 0; idk < k; idk++)
-            {
-                printf(" %d,", randSortedSetOfN[idk]);
-            }
-            printf("}\n");
-        }
 
         /* for each share */
         for(int idx = 0; idx < n; idx++)
@@ -184,25 +170,10 @@ void alternate_kn_ThresholdRGA(AlgorithmData* data)
             if (found != -1)
             {
                 shares[idx].array[i] = calculatedValues[found];
-
-                //###debug print###
-                if (i<15) {
-                    printf("share %d got r %d\n", idx+1, found+1);
-                }
             }
             else
             {
                 shares[idx].array[i] = getRandomNumber(urandom,0,2);
-
-                //###debug print###
-                if (i<15) {
-                    printf("share %d got random number\n", idx+1);
-                }
-            }
-
-            //###debug print###
-            if (i<15 && idx == n-1) {
-                printf("\n");
             }
         }
     }
