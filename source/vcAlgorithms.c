@@ -37,7 +37,7 @@ void mallocSharesOfSourceSize(Image* source, Image* share, int numberOfShares)
 *               the algorithm is finished. It will use the settings
 *               stored in "settings.h".
 ********************************************************************/
-void callAlgorithm(void (*algorithm)(AlgorithmData*))
+void callAlgorithm(void (*algorithm)(AlgorithmData*), uint8_t algorithmNumber)
 {
 	int valid = 0, numberOfShares;
 	/* get number of shares from user */
@@ -53,11 +53,16 @@ void callAlgorithm(void (*algorithm)(AlgorithmData*))
 	deleteShareFiles();
     createShareFiles(shares, numberOfShares);
 
+	/* open urandom, to get random numbers from it */
+    FILE* urandom = xfopen("/dev/urandom", "r");
+
 	/* call the algorithm */
 	AlgorithmData data = {
 		.source = &source,
 		.shares = shares,
 		.numberOfShares = numberOfShares,
+		.algorithmNumber = algorithmNumber,
+		.urandom = urandom
 	};
 	algorithm(&data);
 

@@ -147,9 +147,6 @@ void probabilisticAlgorithm(AlgorithmData* data)
     BooleanMatrix B1 = createBooleanMatrix(n,m);
     fillBasisMatrices(&B0, &B1);
 
-    /* open urandom, to get random numbers from it */
-    FILE* urandom = xfopen("/dev/urandom", "r");
-
     /*  create vector with the length of a matrix column
         to store a random column later on in it
     */
@@ -169,12 +166,10 @@ void probabilisticAlgorithm(AlgorithmData* data)
         .sourceArray = data->source->array,
         .checkList = checkList,
         .share = data->shares,
-        .urandom = urandom,
+        .urandom = data->urandom,
         .width = data->source->width,
         .height = data->source->height
     };
 
     __probabilisticAlgorithm(&pData);
-
-    xfclose(urandom);
 }

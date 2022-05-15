@@ -27,7 +27,7 @@ static void createRandomGrid(Image* share, FILE* urandom)
 }
 
 /********************************************************************
-* Function:     __randomGrid_22_Threshold
+* Function:     randomGrid_22_Threshold
 *--------------------------------------------------------------------
 * Description:  This is an implementation of the (2,2)-threshold
 *               random grid algorithm introduced by O. Kafri and
@@ -35,7 +35,7 @@ static void createRandomGrid(Image* share, FILE* urandom)
 *               a completely random filled image and calculates
 *               share2 by using share1 and the source.
 ********************************************************************/
-static void __randomGrid_22_Threshold(Pixel* source, Image* shares, FILE* urandom, int arraySize)
+static void randomGrid_22_Threshold(Pixel* source, Image* shares, FILE* urandom, int arraySize)
 {
     Pixel* share1 = shares->array;
     Pixel* share2 = shares[1].array;
@@ -59,34 +59,7 @@ static void __randomGrid_22_Threshold(Pixel* source, Image* shares, FILE* urando
 }
 
 /********************************************************************
-* Function:     randomGrid_22_Threshold
-*--------------------------------------------------------------------
-* Description:  This is a wrapper for the (2,2)-threshold
-*               random grid algorithm introduced by O. Kafri and
-*               E. Karen.
-********************************************************************/
-static void randomGrid_22_Threshold(AlgorithmData* data)
-{
-    Image* source = data->source;
-    Image* shares = data->shares;
-    int numberOfShares = data->numberOfShares;
-
-    Pixel* sourceArray = source->array;
-    int arraySize = source->width * source->height;
-
-    /* allocate pixel-arrays for the shares */
-	mallocSharesOfSourceSize(source, shares, numberOfShares);
-
-    /* open urandom, to get random numbers from it */
-    FILE* urandom = xfopen("/dev/urandom", "r");
-
-    __randomGrid_22_Threshold(sourceArray, shares, urandom, arraySize);
-
-    xfclose(urandom);
-}
-
-/********************************************************************
-* Function:     __randomGrid_nn_Threshold
+* Function:     randomGrid_nn_Threshold
 *--------------------------------------------------------------------
 * Description:  This is an implementation of a (n,n)-threshold random
 *               grid algorithm introduced by Tzung-Her Chen and
@@ -94,12 +67,12 @@ static void randomGrid_22_Threshold(AlgorithmData* data)
 *               share images by calling recursively the (2,2)-threshold
 *               random grid algorithm from O. Kafri and E. Karen.
 ********************************************************************/
-void __randomGrid_nn_Threshold(Pixel* sourceArray, Image* shares, Pixel** storage, FILE* urandom, int arraySize, int numberOfShares)
+void randomGrid_nn_Threshold(Pixel* sourceArray, Image* shares, Pixel** storage, FILE* urandom, int arraySize, int numberOfShares)
 {
     Pixel* tmp;
     
     /* fill the first two shares */
-    __randomGrid_22_Threshold(sourceArray, shares, urandom, arraySize);
+    randomGrid_22_Threshold(sourceArray, shares, urandom, arraySize);
 
     if(numberOfShares > 2)
     {
@@ -108,40 +81,13 @@ void __randomGrid_nn_Threshold(Pixel* sourceArray, Image* shares, Pixel** storag
             tmp = *storage;
             *storage = shares[idx-1].array;
             shares[idx-1].array = tmp;
-            __randomGrid_22_Threshold(*storage, &shares[idx-1], urandom, arraySize);
+            randomGrid_22_Threshold(*storage, &shares[idx-1], urandom, arraySize);
         }
     }
 }
 
 /********************************************************************
-* Function:     randomGrid_nn_Threshold
-*--------------------------------------------------------------------
-* Description:  This is a wrapper for the (n,n)-threshold random
-*               grid algorithm introduced by Tzung-Her Chen and
-*               Kai-Hsiang Tsao.
-********************************************************************/
-void randomGrid_nn_Threshold(AlgorithmData* data)
-{
-    Image* source = data->source;
-    Image* shares = data->shares;
-    int numberOfShares = data->numberOfShares;
-    int arraySize = source->width * source->height;
-
-    /* allocate pixel-arrays for the shares */
-	mallocSharesOfSourceSize(source, shares, numberOfShares);
-    Pixel* storage = xmalloc(arraySize);
-
-    /* open urandom, to get random numbers from it */
-    FILE* urandom = xfopen("/dev/urandom", "r");
-
-    __randomGrid_nn_Threshold(source->array, shares, &storage, urandom, arraySize, numberOfShares);
-
-    xfree(storage);
-    xfclose(urandom);
-}
-
-/********************************************************************
-* Function:     __randomGrid_2n_Threshold
+* Function:     randomGrid_2n_Threshold
 *--------------------------------------------------------------------
 * Description:  This is an implementation of a (2,n)-threshold random
 *               grid algorithm introduced by Tzung-Her Chen and
@@ -152,7 +98,7 @@ void randomGrid_nn_Threshold(AlgorithmData* data)
 *               If more than two shares are stacked, the revealed
 *               image becomes clearer.
 ********************************************************************/
-void __randomGrid_2n_Threshold(Pixel* sourceArray, Image* shares, FILE* urandom, int arraySize, int numberOfShares)
+void randomGrid_2n_Threshold(Pixel* sourceArray, Image* shares, FILE* urandom, int arraySize, int numberOfShares)
 {
     /* make the first share a random grid */
     createRandomGrid(shares, urandom);
@@ -178,31 +124,6 @@ void __randomGrid_2n_Threshold(Pixel* sourceArray, Image* shares, FILE* urandom,
 }
 
 /********************************************************************
-* Function:     randomGrid_2n_Threshold
-*--------------------------------------------------------------------
-* Description:  This is a wrapper for the (2,n)-threshold random
-*               grid algorithm introduced by Tzung-Her Chen and
-*               Kai-Hsiang Tsao.
-********************************************************************/
-void randomGrid_2n_Threshold(AlgorithmData* data)
-{
-    int numberOfShares = data->numberOfShares;
-    Image* source = data->source;
-    Image* shares = data->shares;
-    int arraySize = source->width * source->height;
-
-    /* allocate pixel-arrays for the shares */
-	mallocSharesOfSourceSize(source, shares, numberOfShares);
-
-    /* open urandom, to get random numbers from it */
-    FILE* urandom = xfopen("/dev/urandom", "r");
-
-    __randomGrid_2n_Threshold(source->array, shares, urandom, arraySize, numberOfShares);
-    
-    xfclose(urandom);
-}
-
-/********************************************************************
 * Function:     __randomGrid_kn_Threshold
 *--------------------------------------------------------------------
 * Description:  This is an implementation of a (k,n)-threshold random
@@ -220,7 +141,7 @@ void __randomGrid_kn_Threshold(kn_randomGridData* data)
     Pixel* randSortedSetOfN = data->randSortedSetOfN;
     Pixel* checkList = data->checkList;
     Image* shares = data->shares;
-    Image* storage = data->storage;
+    Image* extraShares = data->extraShares;
     FILE* urandom = data->urandom;
     int arraySize = data->arraySize;
     int n = data->n;
@@ -258,7 +179,7 @@ void __randomGrid_kn_Threshold(kn_randomGridData* data)
                 } 
             }
             if (found != -1)
-                shares[idx].array[i] = storage[found].array[i];
+                shares[idx].array[i] = extraShares[found].array[i];
             else
                 shares[idx].array[i] = getRandomNumber(urandom,0,2);
         }
@@ -272,22 +193,15 @@ void __randomGrid_kn_Threshold(kn_randomGridData* data)
 *               grid algorithm introduced by Tzung-Her Chen and
 *               Kai-Hsiang Tsao.
 ********************************************************************/
-void randomGrid_kn_Threshold(AlgorithmData* data)
+void randomGrid_kn_Threshold(Image* source, Image* shares, Pixel** storage, FILE* urandom, int arraySize, int n)
 {
-    int n = data->numberOfShares;
+    Pixel* sourceArray = source->array;
 
     if(n == 2)
     {
-        randomGrid_22_Threshold(data);
+        randomGrid_22_Threshold(sourceArray, shares, urandom, arraySize);
         return;
     }
-
-    Image* source = data->source;
-    Image* shares = data->shares;
-    int arraySize = source->width * source->height;
-
-    /* allocate pixel-arrays for the shares */
-    mallocSharesOfSourceSize(source, shares, n);
 
     /* get k from user */
     int valid = 0, k;
@@ -300,9 +214,6 @@ void randomGrid_kn_Threshold(AlgorithmData* data)
         valid = getNumber(prompt, 2, n, &k);
     } while (!valid);
 
-    /* open urandom, to get random numbers from it */
-    FILE* urandom = xfopen("/dev/urandom", "r");
-
     /* create vector with values from 1 to n */
     Pixel* setOfN = xmalloc(n * sizeof(Pixel));
     for (int i = 0; i < n; i++)
@@ -311,14 +222,14 @@ void randomGrid_kn_Threshold(AlgorithmData* data)
     Pixel* randSortedSetOfN = xmalloc(n * sizeof(Pixel));
     Pixel* checkList = xmalloc(n * sizeof(Pixel));
 
-    /* create k storage shares */
-    Image* storage = xmalloc(k*sizeof(Image));
-
-    AlgorithmData randgrids = {
-        .numberOfShares = k,
-        .shares = storage,
-        .source = source
-    };
+    /* create additional k shares */
+    Image* extraShares = xmalloc(k*sizeof(Image));
+    for(int i = 0; i < k; i++)
+    {
+        extraShares[i].width = source->width;
+        extraShares[i].height = source->height;
+        mallocPixelArray(&extraShares[i]);
+    }
 
     kn_randomGridData rgData = {
         .setOfN = setOfN,
@@ -327,7 +238,7 @@ void randomGrid_kn_Threshold(AlgorithmData* data)
         .calculatedValues = NULL,
         .sourceArray = NULL,
         .shares = shares,
-        .storage = storage,
+        .extraShares = extraShares,
         .urandom = urandom,
         .arraySize = arraySize,
         .n = n,
@@ -335,9 +246,38 @@ void randomGrid_kn_Threshold(AlgorithmData* data)
     };
 
     /* fill the temporary shares */
-    randomGrid_nn_Threshold(&randgrids);
+    randomGrid_nn_Threshold(sourceArray, extraShares, storage, urandom, arraySize, k);
 
     __randomGrid_kn_Threshold(&rgData);
+}
 
-    xfclose(urandom);
+/********************************************************************
+* Function:     callRandomGridAlgorithm(
+*--------------------------------------------------------------------
+* Description:  Prepares data which is needed by all or at least
+*               multiple random grid algorithms and calls the chosen
+*               algorithm with the data.
+********************************************************************/
+void callRandomGridAlgorithm(AlgorithmData* data)
+{
+    Image* source = data->source;
+    Image* shares = data->shares;
+    uint8_t n = data->numberOfShares;
+    uint8_t algorithmNumber = data->algorithmNumber;
+    FILE* urandom = data->urandom;
+
+    Pixel* sourceArray = source->array;
+    int arraySize = source->width * source->height;
+
+    /* allocate pixel-arrays for the shares */
+    mallocSharesOfSourceSize(source, shares, n);
+    Pixel* storage = xmalloc(arraySize);
+
+    switch(algorithmNumber)
+	{
+		case 1: randomGrid_nn_Threshold(sourceArray, shares, &storage, urandom, arraySize, n);  break;
+		case 2: randomGrid_2n_Threshold(sourceArray, shares, urandom, arraySize, n);            break;
+		case 3:	randomGrid_kn_Threshold(source, shares, &storage, urandom, arraySize, n);       break;
+		default: 	break;
+	}
 }

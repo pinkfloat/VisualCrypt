@@ -25,11 +25,11 @@ int main(int argc, char* argv[])
 	choice = getMenu("Visual Crypt Algorithms", menu, 6, "Your Choice: ");
 	switch(choice)
 	{
-		case 1:     callAlgorithm(deterministicAlgorithm); 	break;
-		case 2: 	callAlgorithm(probabilisticAlgorithm); 	break;	
-		case 3: 	callAlgorithm(alternate_nn_ThresholdRGA); break;
-		case 4: 	callAlgorithm(alternate_2n_ThresholdRGA); break;
-		case 5:		callAlgorithm(alternate_kn_ThresholdRGA); break;
+		case 1:     callAlgorithm(deterministicAlgorithm, 0); 	break;
+		case 2: 	callAlgorithm(probabilisticAlgorithm, 0); 	break;	
+		case 3: 	callAlgorithm(callRandomGridAlgorithm, 1); break;
+		case 4: 	callAlgorithm(callRandomGridAlgorithm, 2); break;
+		case 5:		callAlgorithm(callRandomGridAlgorithm, 3); break;
 		case 6:		decryptShareFiles();					break;
 		default: 	break;
 	}

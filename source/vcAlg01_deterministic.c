@@ -258,9 +258,6 @@ void deterministicAlgorithm(AlgorithmData* data)
     int deterministicHeight, deterministicWidth;
     calcPixelExpansion(&deterministicHeight, &deterministicWidth, n, m);
 
-    /* open urandom, to get random numbers from it */
-    FILE* urandom = xfopen("/dev/urandom", "r");
-
     /*  create matrix of equal size as the basis matrices 
         to store the permutations of them.
     */
@@ -289,7 +286,7 @@ void deterministicAlgorithm(AlgorithmData* data)
         .columnCheckList = columnCheckList,
         .rowCheckList = rowCheckList,
         .share = data->shares,
-        .urandom = urandom,
+        .urandom = data->urandom,
         .width = data->source->width,
         .height = data->source->height,
         .deterministicWidth = deterministicWidth,
@@ -297,6 +294,4 @@ void deterministicAlgorithm(AlgorithmData* data)
     };
 
     __deterministicAlgorithm(&dData);
-
-    xfclose(urandom);
 }

@@ -8,6 +8,8 @@ typedef struct {
     Image* source;
     Image* shares;
     uint8_t numberOfShares;
+    uint8_t algorithmNumber;
+    FILE* urandom;
 } AlgorithmData;
 
 typedef struct {
@@ -45,7 +47,7 @@ typedef struct {
     Pixel* calculatedValues;
     Pixel* sourceArray;
     Image* shares;
-    Image* storage;
+    Image* extraShares;
     FILE* urandom;
     int arraySize;
     int n;
@@ -61,7 +63,7 @@ typedef struct {
 *               the algorithm is finished. It will use the settings
 *               stored in "settings.h".
 ********************************************************************/
-void callAlgorithm(void (*algorithm)(AlgorithmData*));
+void callAlgorithm(void (*algorithm)(AlgorithmData*), uint8_t algorithmNumber);
 
 /********************************************************************
 * Function:     mallocSharesOfSourceSize
@@ -132,7 +134,7 @@ void __probabilisticAlgorithm(probabilisticData* data);
 void probabilisticAlgorithm(AlgorithmData* data);
 
 /********************************************************************
-* Function:     __randomGrid_nn_Threshold
+* Function:     randomGrid_nn_Threshold
 *--------------------------------------------------------------------
 * Description:  This is an implementation of a (n,n)-threshold random
 *               grid algorithm introduced by Tzung-Her Chen and
@@ -140,21 +142,10 @@ void probabilisticAlgorithm(AlgorithmData* data);
 *               share images by calling recursively the (2,2)-threshold
 *               random grid algorithm from O. Kafri and E. Karen.
 ********************************************************************/
-void __randomGrid_nn_Threshold(Pixel* sourceArray, Image* shares, Pixel** storage, FILE* urandom, int arraySize, int numberOfShares);
-void __alternate_nn_ThresholdRGA(Pixel* sourceArray, Image* shares, Pixel* tmpSharePixel, FILE* urandom, int arraySize, int numberOfShares);
+void randomGrid_nn_Threshold(Pixel* sourceArray, Image* shares, Pixel** storage, FILE* urandom, int arraySize, int numberOfShares);
 
 /********************************************************************
-* Function:     randomGrid_nn_Threshold
-*--------------------------------------------------------------------
-* Description:  This is a wrapper for the (n,n)-threshold random
-*               grid algorithm introduced by Tzung-Her Chen and
-*               Kai-Hsiang Tsao.
-********************************************************************/
-void randomGrid_nn_Threshold(AlgorithmData* data);
-void alternate_nn_ThresholdRGA(AlgorithmData* data);
-
-/********************************************************************
-* Function:     __randomGrid_2n_Threshold
+* Function:     randomGrid_2n_Threshold
 *--------------------------------------------------------------------
 * Description:  This is an implementation of a (2,n)-threshold random
 *               grid algorithm introduced by Tzung-Her Chen and
@@ -165,18 +156,7 @@ void alternate_nn_ThresholdRGA(AlgorithmData* data);
 *               If more than two shares are stacked, the revealed
 *               image becomes clearer.
 ********************************************************************/
-void __randomGrid_2n_Threshold(Pixel* sourceArray, Image* shares, FILE* urandom, int arraySize, int numberOfShares);
-void __alternate_2n_ThresholdRGA(Pixel* sourceArray, Image* shares, FILE* urandom, int arraySize, int numberOfShares);
-
-/********************************************************************
-* Function:     randomGrid_2n_Threshold
-*--------------------------------------------------------------------
-* Description:  This is a wrapper for the (2,n)-threshold random
-*               grid algorithm introduced by Tzung-Her Chen and
-*               Kai-Hsiang Tsao.
-********************************************************************/
-void randomGrid_2n_Threshold(AlgorithmData* data);
-void alternate_2n_ThresholdRGA(AlgorithmData* data);
+void randomGrid_2n_Threshold(Pixel* sourceArray, Image* shares, FILE* urandom, int arraySize, int numberOfShares);
 
 /********************************************************************
 * Function:     __randomGrid_kn_Threshold
@@ -191,7 +171,6 @@ void alternate_2n_ThresholdRGA(AlgorithmData* data);
 *               decreases the image quality.
 ********************************************************************/
 void __randomGrid_kn_Threshold(kn_randomGridData* data);
-void __alternate_kn_ThresholdRGA(kn_randomGridData* data);
 
 /********************************************************************
 * Function:     randomGrid_kn_Threshold
@@ -200,7 +179,15 @@ void __alternate_kn_ThresholdRGA(kn_randomGridData* data);
 *               grid algorithm introduced by Tzung-Her Chen and
 *               Kai-Hsiang Tsao.
 ********************************************************************/
-void randomGrid_kn_Threshold(AlgorithmData* data);
-void alternate_kn_ThresholdRGA(AlgorithmData* data);
+void randomGrid_kn_Threshold(Image* source, Image* shares, Pixel** storage, FILE* urandom, int arraySize, int n);
+
+/********************************************************************
+* Function:     callRandomGridAlgorithm
+*--------------------------------------------------------------------
+* Description:  Prepares data which is needed by all or at least
+*               multiple random grid algorithms and calls the chosen
+*               algorithm with the data.
+********************************************************************/
+void callRandomGridAlgorithm(AlgorithmData* data);
 
 #endif /* VCALGORITHMS_H */  

@@ -206,7 +206,7 @@ void alternate_kn_ThresholdRGA(AlgorithmData* data)
         .calculatedValues = calculatedValues,
         .sourceArray = source->array,
         .shares = shares,
-        .storage = NULL,
+        .extraShares = NULL,
         .urandom = urandom,
         .arraySize = arraySize,
         .n = n,
