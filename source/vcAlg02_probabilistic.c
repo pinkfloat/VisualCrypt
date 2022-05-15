@@ -2,7 +2,6 @@
 #include "fileManagement.h"
 #include "memoryManagement.h"
 #include "random.h"
-#include "booleanMatrix.h"
 #include "vcAlgorithms.h"
 
 /********************************************************************
@@ -88,21 +87,65 @@ static void copyColumnElementsToShares( BooleanMatrix* columnVector,
 }
 
 /********************************************************************
-* Function:     fillProbabilisticShareArrays
+* Function:     __probabilisticAlgorithm
 *--------------------------------------------------------------------
-* Description:  This function will fill the pixel arrays of the
-*               shares with the values "1" being black and "0" being
-*               white. Therefore the already calculated basis
-*               matrices B0 and B1 are used. For a black Pixel,
-*               each share will get an other element of a random
-*               column of B1, and for a white Pixel, the same
-*               happens with a column of B0.
+* Description:  This is an implementation of the so called
+*               "probabilistic Algorithm" from Ryo Ito, Hidenori
+*               Kuwakado and Hatsukazu Tanaka. It will calculate the
+*               pixel of the share images from the pixel in the source
+*               file, by creating basis matrices out of the number of
+*               the share files, in the same way, the deterministic
+*               algorithm does. For each pixel of the source file,
+*               one column of the basis matrix will be randomly chosen
+*               and each share will get a different element of the
+*               column as pixel value.
 ********************************************************************/
-static void fillProbabilisticShareArrays(Image* source, Image* share, BooleanMatrix* B0, BooleanMatrix* B1)
+void __probabilisticAlgorithm(probabilisticData* data)
 {
-    int n = B0->n;
-    int width = source->width;
-    int height = source->height;
+    BooleanMatrix* B0 = data->B0;
+    BooleanMatrix* B1 = data->B1;
+    BooleanMatrix* columnVector = data->columnVector;
+    Pixel* sourceArray = data->sourceArray;
+    Pixel* checkList = data->checkList;
+    Image* share = data->share;
+    FILE* urandom = data->urandom;
+    int width = data->width;
+    int height = data->height;
+
+    /* for each pixel of the source */
+    for(int i = 0; i < height; i++)     /* rows */
+    {
+        for(int j = 0; j < width; j++)  /* columns */
+        {
+            int sharePixelPosition = i * width + j;
+            int sourcePixel = sourceArray[sharePixelPosition];
+            getRandomMatrixColumn(B0, B1, columnVector, sourcePixel, urandom);
+            copyColumnElementsToShares(columnVector, share, sharePixelPosition, checkList, urandom);
+        }
+    }
+}
+
+/********************************************************************
+* Function:     probabilisticAlgorithm
+*--------------------------------------------------------------------
+* Description:  This is a wrapper for the "probabilistic Algorithm"
+*               from Ryo Ito, Hidenori Kuwakado and Hatsukazu Tanaka.
+*               It will allocate all data that needs allocation and
+*               prepares the basis matrices which doesn't change for
+*               the same amount of share files.
+********************************************************************/
+void probabilisticAlgorithm(AlgorithmData* data)
+{
+    uint8_t n = data->numberOfShares;
+    uint8_t m = 1 << (n-1);
+
+    /* allocate pixel-arrays for the shares */
+	mallocSharesOfSourceSize(data->source, data->shares, n);
+
+    /* create basis matrices */
+    BooleanMatrix B0 = createBooleanMatrix(n,m);
+    BooleanMatrix B1 = createBooleanMatrix(n,m);
+    fillBasisMatrices(&B0, &B1);
 
     /* open urandom, to get random numbers from it */
     FILE* urandom = xfopen("/dev/urandom", "r");
@@ -119,48 +162,19 @@ static void fillProbabilisticShareArrays(Image* source, Image* share, BooleanMat
     */
     Pixel* checkList = xmalloc(n * sizeof(Pixel));
 
-    /* for each pixel of the source */
-    for(int i = 0; i < height; i++)     /* rows */
-    {
-        for(int j = 0; j < width; j++)  /* columns */
-        {
-            int sharePixelPosition = i * width + j;
-            int sourcePixel = source->array[sharePixelPosition];
-            getRandomMatrixColumn(B0, B1, &columnVector, sourcePixel, urandom);
-            copyColumnElementsToShares(&columnVector, share, sharePixelPosition, checkList, urandom);
-        }
-    }
+    probabilisticData pData = {
+        .B0 = &B0,
+        .B1 = &B1,
+        .columnVector = &columnVector,
+        .sourceArray = data->source->array,
+        .checkList = checkList,
+        .share = data->shares,
+        .urandom = urandom,
+        .width = data->source->width,
+        .height = data->source->height
+    };
+
+    __probabilisticAlgorithm(&pData);
+
     xfclose(urandom);
-}
-
-/********************************************************************
-* Function:     probabilisticAlgorithm
-*--------------------------------------------------------------------
-* Description:  This is an implementation of the so called
-*               "probabilistic Algorithm" from Ryo Ito, Hidenori
-*               Kuwakado and Hatsukazu Tanaka. It will calculate the
-*               pixel of the share images from the pixel in the source
-*               file, by creating basis matrices out of the number of
-*               the share files, in the same way, the deterministic
-*               algorithm does. For each pixel of the source file,
-*               one column of the basis matrix will be randomly chosen
-*               and each share will get a different element of the
-*               column as pixel value.
-********************************************************************/
-void probabilisticAlgorithm(AlgorithmData* data)
-{
-    uint8_t n = data->numberOfShares;
-    uint8_t m = 1 << (n-1);
-
-    /* allocate pixel-arrays for the shares */
-	mallocSharesOfSourceSize(data->source, data->shares, n);
-
-    /* allocate basis matrices */
-    BooleanMatrix B0 = createBooleanMatrix(n,m);
-    BooleanMatrix B1 = createBooleanMatrix(n,m);
-
-    fillBasisMatrices(&B0, &B1);
-    
-    /* Fill pixel-arrays of the shares */
-    fillProbabilisticShareArrays(data->source, data->shares, &B0, &B1);
 }
