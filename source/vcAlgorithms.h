@@ -2,12 +2,29 @@
 #define VCALGORITHMS_H
 
 #include "image.h"
+#include "booleanMatrix.h"
 
 typedef struct {
     Image* source;
     Image* shares;
     uint8_t numberOfShares;
 } AlgorithmData;
+
+typedef struct {
+    BooleanMatrix* B0;
+    BooleanMatrix* B1;
+    BooleanMatrix* permutation;
+    BooleanMatrix* encryptedPixel;
+    Pixel* sourceArray;
+    Pixel* columnCheckList;
+    Pixel* rowCheckList;
+    Image* share;
+    FILE* urandom;
+    int width;
+    int height;
+    int deterministicWidth;
+    int deterministicHeight;
+} deterministicData;
 
 /********************************************************************
 * Function:     callAlgorithm
@@ -37,7 +54,7 @@ void callAlgorithm(void (*algorithm)(AlgorithmData*));
 void mallocSharesOfSourceSize(Image* source, Image* share, int numberOfShares);
 
 /********************************************************************
-* Function:     deterministicAlgorithm
+* Function:     __deterministicAlgorithm
 *--------------------------------------------------------------------
 * Description:  This is an implementation of the so called
 *               "deterministic Algorithm" from Moni Naor and Adi
@@ -47,6 +64,17 @@ void mallocSharesOfSourceSize(Image* source, Image* share, int numberOfShares);
 *               The basis matrices will be afterwards permutated in
 *               columns and each share will get a different row of
 *               every permutation per source pixel.
+********************************************************************/
+void __deterministicAlgorithm(deterministicData* data);
+
+/********************************************************************
+* Function:     deterministicAlgorithm
+*--------------------------------------------------------------------
+* Description:  This is a wrapper for the "deterministic Algorithm"
+*               from Moni Naor and Adi Shamir. It will allocate all 
+*               data that needs allocation and prepares the basis
+*               matrices which doesn't change for the same amount of
+*               share files.
 ********************************************************************/
 void deterministicAlgorithm(AlgorithmData* data);
 
