@@ -324,6 +324,8 @@ void randomGrid_kn_Threshold(AlgorithmData* data)
         .setOfN = setOfN,
         .randSortedSetOfN = randSortedSetOfN,
         .checkList = checkList,
+        .calculatedValues = NULL,
+        .sourceArray = NULL,
         .shares = shares,
         .storage = storage,
         .urandom = urandom,

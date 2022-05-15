@@ -42,6 +42,8 @@ typedef struct {
     Pixel* setOfN;
     Pixel* randSortedSetOfN;
     Pixel* checkList;
+    Pixel* calculatedValues;
+    Pixel* sourceArray;
     Image* shares;
     Image* storage;
     FILE* urandom;
@@ -139,6 +141,7 @@ void probabilisticAlgorithm(AlgorithmData* data);
 *               random grid algorithm from O. Kafri and E. Karen.
 ********************************************************************/
 void __randomGrid_nn_Threshold(Pixel* sourceArray, Image* shares, Pixel** storage, FILE* urandom, int arraySize, int numberOfShares);
+void __alternate_nn_ThresholdRGA(Pixel* sourceArray, Image* shares, Pixel* tmpSharePixel, FILE* urandom, int arraySize, int numberOfShares);
 
 /********************************************************************
 * Function:     randomGrid_nn_Threshold
@@ -163,6 +166,7 @@ void alternate_nn_ThresholdRGA(AlgorithmData* data);
 *               image becomes clearer.
 ********************************************************************/
 void __randomGrid_2n_Threshold(Pixel* sourceArray, Image* shares, FILE* urandom, int arraySize, int numberOfShares);
+void __alternate_2n_ThresholdRGA(Pixel* sourceArray, Image* shares, FILE* urandom, int arraySize, int numberOfShares);
 
 /********************************************************************
 * Function:     randomGrid_2n_Threshold
@@ -187,6 +191,7 @@ void alternate_2n_ThresholdRGA(AlgorithmData* data);
 *               decreases the image quality.
 ********************************************************************/
 void __randomGrid_kn_Threshold(kn_randomGridData* data);
+void __alternate_kn_ThresholdRGA(kn_randomGridData* data);
 
 /********************************************************************
 * Function:     randomGrid_kn_Threshold
