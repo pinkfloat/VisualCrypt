@@ -1,3 +1,4 @@
+#include "settings.h"
 #include "menu.h"
 #include "memoryManagement.h"
 #include "fileManagement.h"
@@ -61,7 +62,7 @@ void callAlgorithm(void (*algorithm)(AlgorithmData*), uint8_t algorithmNumber)
 		.source = &source,
 		.shares = shares,
 		.numberOfShares = numberOfShares,
-		.algorithmNumber = algorithmNumber,
+		.algorithmNumber = RG_VERSION ? algorithmNumber+3 : algorithmNumber,
 		.urandom = urandom
 	};
 	algorithm(&data);

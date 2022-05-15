@@ -32,4 +32,17 @@
 */
 #define THRESHOLD 127
 
+/*  RandomGridAlgorithms:
+    All callable RG-Algorithms exist in two versions
+    (for time measurement reasons), choose if the
+    normal or alternate versions should be called
+    (the resulting shares are the same).
+
+    0 = normal versions
+    1 = alternate versions
+
+    Note: This is only used in vcAlgorithms.c
+*/
+#define RG_VERSION 0
+
 #endif /* SETTINGS_H */  
