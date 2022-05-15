@@ -118,13 +118,22 @@ void __probabilisticAlgorithm(probabilisticData* data);
 void probabilisticAlgorithm(AlgorithmData* data);
 
 /********************************************************************
-* Function:     randomGrid_nn_Threshold
+* Function:     __randomGrid_nn_Threshold
 *--------------------------------------------------------------------
 * Description:  This is an implementation of a (n,n)-threshold random
 *               grid algorithm introduced by Tzung-Her Chen and
 *               Kai-Hsiang Tsao. It will calculate the pixel of the
 *               share images by calling recursively the (2,2)-threshold
 *               random grid algorithm from O. Kafri and E. Karen.
+********************************************************************/
+void __randomGrid_nn_Threshold(Pixel* sourceArray, Image* shares, Pixel** storage, FILE* urandom, int arraySize, int numberOfShares);
+
+/********************************************************************
+* Function:     randomGrid_nn_Threshold
+*--------------------------------------------------------------------
+* Description:  This is a wrapper for the (n,n)-threshold random
+*               grid algorithm introduced by Tzung-Her Chen and
+*               Kai-Hsiang Tsao.
 ********************************************************************/
 void randomGrid_nn_Threshold(AlgorithmData* data);
 void alternate_nn_ThresholdRGA(AlgorithmData* data);
