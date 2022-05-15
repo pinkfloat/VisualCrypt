@@ -38,6 +38,18 @@ typedef struct {
     int height;
 } probabilisticData;
 
+typedef struct {
+    Pixel* setOfN;
+    Pixel* randSortedSetOfN;
+    Pixel* checkList;
+    Image* shares;
+    Image* storage;
+    FILE* urandom;
+    int arraySize;
+    int n;
+    int k;
+} kn_randomGridData;
+
 /********************************************************************
 * Function:     callAlgorithm
 *--------------------------------------------------------------------
@@ -163,7 +175,7 @@ void randomGrid_2n_Threshold(AlgorithmData* data);
 void alternate_2n_ThresholdRGA(AlgorithmData* data);
 
 /********************************************************************
-* Function:     randomGrid_kn_Threshold
+* Function:     __randomGrid_kn_Threshold
 *--------------------------------------------------------------------
 * Description:  This is an implementation of a (k,n)-threshold random
 *               grid algorithm introduced by Tzung-Her Chen and
@@ -173,6 +185,15 @@ void alternate_2n_ThresholdRGA(AlgorithmData* data);
 *               independent from the amount of shares existing.
 *               If more than <k> shares are stacked, the noise
 *               decreases the image quality.
+********************************************************************/
+void __randomGrid_kn_Threshold(kn_randomGridData* data);
+
+/********************************************************************
+* Function:     randomGrid_kn_Threshold
+*--------------------------------------------------------------------
+* Description:  This is a wrapper for the (k,n)-threshold random
+*               grid algorithm introduced by Tzung-Her Chen and
+*               Kai-Hsiang Tsao.
 ********************************************************************/
 void randomGrid_kn_Threshold(AlgorithmData* data);
 void alternate_kn_ThresholdRGA(AlgorithmData* data);

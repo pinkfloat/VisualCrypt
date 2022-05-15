@@ -67,9 +67,15 @@ static void __randomGrid_22_Threshold(Pixel* source, Image* shares, FILE* urando
 ********************************************************************/
 static void randomGrid_22_Threshold(AlgorithmData* data)
 {
-    int arraySize = data->source->width * data->source->height;
-    Pixel* sourceArray = data->source->array;
+    Image* source = data->source;
     Image* shares = data->shares;
+    int numberOfShares = data->numberOfShares;
+
+    Pixel* sourceArray = source->array;
+    int arraySize = source->width * source->height;
+
+    /* allocate pixel-arrays for the shares */
+	mallocSharesOfSourceSize(source, shares, numberOfShares);
 
     /* open urandom, to get random numbers from it */
     FILE* urandom = xfopen("/dev/urandom", "r");
@@ -197,7 +203,7 @@ void randomGrid_2n_Threshold(AlgorithmData* data)
 }
 
 /********************************************************************
-* Function:     randomGrid_kn_Threshold
+* Function:     __randomGrid_kn_Threshold
 *--------------------------------------------------------------------
 * Description:  This is an implementation of a (k,n)-threshold random
 *               grid algorithm introduced by Tzung-Her Chen and
@@ -208,58 +214,17 @@ void randomGrid_2n_Threshold(AlgorithmData* data)
 *               If more than <k> shares are stacked, the noise
 *               decreases the image quality.
 ********************************************************************/
-void randomGrid_kn_Threshold(AlgorithmData* data)
+void __randomGrid_kn_Threshold(kn_randomGridData* data)
 {
-    Image* source = data->source;
+    Pixel* setOfN = data->setOfN;
+    Pixel* randSortedSetOfN = data->randSortedSetOfN;
+    Pixel* checkList = data->checkList;
     Image* shares = data->shares;
-    int arraySize = source->width * source->height;
-    int n = data->numberOfShares;
-
-    /* allocate pixel-arrays for the shares */
-	mallocSharesOfSourceSize(source, shares, n);
-
-    if(n == 2)
-    {
-        /* just call randomGrid_22_Threshold */
-        randomGrid_22_Threshold(data);
-        return;
-    }
-
-    /* get k from user */
-    int valid = 0, k;
-    char prompt[50];
-    memset(prompt, '\0', sizeof(prompt));
-    snprintf(prompt, sizeof(prompt), "Enter number for k:\n<min> = 2\n<max> = %d\n", n);
-    do
-    {
-        clear();
-        valid = getNumber(prompt, 2, n, &k);
-    } while (!valid);
-
-    /* create k storage shares */
-    Image* storage = xmalloc(k*sizeof(Image));
-
-    AlgorithmData randgrids = {
-        .numberOfShares = k,
-        .shares = storage,
-        .source = source
-    };
-
-    /* fill the temporary shares */
-    randomGrid_nn_Threshold(&randgrids);
-
-    /* create vector with values from 1 to n */
-    Pixel* setOfN = xmalloc(n * sizeof(Pixel));
-    for (int i = 0; i < n; i++)
-    {
-        setOfN[i] = i+1;
-    }
-
-    /* open urandom, to get random numbers from it */
-    FILE* urandom = xfopen("/dev/urandom", "r");
-
-    Pixel* randSortedSetOfN = xmalloc(n * sizeof(Pixel));
-    Pixel* checkList = xmalloc(n * sizeof(Pixel));
+    Image* storage = data->storage;
+    FILE* urandom = data->urandom;
+    int arraySize = data->arraySize;
+    int n = data->n;
+    int k = data->k;
 
     Copy copy = {
         .source = setOfN,
@@ -298,4 +263,79 @@ void randomGrid_kn_Threshold(AlgorithmData* data)
                 shares[idx].array[i] = getRandomNumber(urandom,0,2);
         }
     }
+}
+
+/********************************************************************
+* Function:     randomGrid_kn_Threshold
+*--------------------------------------------------------------------
+* Description:  This is a wrapper for the (k,n)-threshold random
+*               grid algorithm introduced by Tzung-Her Chen and
+*               Kai-Hsiang Tsao.
+********************************************************************/
+void randomGrid_kn_Threshold(AlgorithmData* data)
+{
+    int n = data->numberOfShares;
+
+    if(n == 2)
+    {
+        randomGrid_22_Threshold(data);
+        return;
+    }
+
+    Image* source = data->source;
+    Image* shares = data->shares;
+    int arraySize = source->width * source->height;
+
+    /* allocate pixel-arrays for the shares */
+    mallocSharesOfSourceSize(source, shares, n);
+
+    /* get k from user */
+    int valid = 0, k;
+    char prompt[50];
+    memset(prompt, '\0', sizeof(prompt));
+    snprintf(prompt, sizeof(prompt), "Enter number for k:\n<min> = 2\n<max> = %d\n", n);
+    do
+    {
+        clear();
+        valid = getNumber(prompt, 2, n, &k);
+    } while (!valid);
+
+    /* open urandom, to get random numbers from it */
+    FILE* urandom = xfopen("/dev/urandom", "r");
+
+    /* create vector with values from 1 to n */
+    Pixel* setOfN = xmalloc(n * sizeof(Pixel));
+    for (int i = 0; i < n; i++)
+        setOfN[i] = i+1;
+
+    Pixel* randSortedSetOfN = xmalloc(n * sizeof(Pixel));
+    Pixel* checkList = xmalloc(n * sizeof(Pixel));
+
+    /* create k storage shares */
+    Image* storage = xmalloc(k*sizeof(Image));
+
+    AlgorithmData randgrids = {
+        .numberOfShares = k,
+        .shares = storage,
+        .source = source
+    };
+
+    kn_randomGridData rgData = {
+        .setOfN = setOfN,
+        .randSortedSetOfN = randSortedSetOfN,
+        .checkList = checkList,
+        .shares = shares,
+        .storage = storage,
+        .urandom = urandom,
+        .arraySize = arraySize,
+        .n = n,
+        .k = k
+    };
+
+    /* fill the temporary shares */
+    randomGrid_nn_Threshold(&randgrids);
+
+    __randomGrid_kn_Threshold(&rgData);
+
+    xfclose(urandom);
 }
