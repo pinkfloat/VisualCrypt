@@ -2,7 +2,7 @@
 #include "fileManagement.h"
 #include "memoryManagement.h"
 #include "random.h"
-#include "vcAlgorithms.h"
+#include "vcAlg02_probabilistic.h"
 
 /********************************************************************
 * Function:     getRandomMatrixColumn

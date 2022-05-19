@@ -1,6 +1,9 @@
 #include "decrypt.h"
 #include "menu.h"
 #include "vcAlgorithms.h"
+#include "vcAlg01_deterministic.h"
+#include "vcAlg02_probabilistic.h"
+#include "vcAlg03_randomGrid.h"
 
 /********************************************************************
 * Function:     main

@@ -4,7 +4,7 @@
 #include "random.h"
 #include "fileManagement.h"
 #include "memoryManagement.h"
-#include "vcAlgorithms.h"
+#include "vcAlg01_deterministic.h"
 
 /********************************************************************
 * Function:     calcPixelExpansion
