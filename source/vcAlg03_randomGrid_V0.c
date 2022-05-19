@@ -193,22 +193,13 @@ void randomGrid_kn_Threshold(Image* source, Image* shares, Pixel** storage, FILE
 
     int k = getKfromUser(n);
 
-    /* create vector with values from 1 to n */
-    Pixel* setOfN = xmalloc(n * sizeof(Pixel));
-    for (int i = 0; i < n; i++)
-        setOfN[i] = i+1;
-
+    Pixel* setOfN = createSetOfN(n);
     Pixel* randSortedSetOfN = xmalloc(n * sizeof(Pixel));
     Pixel* checkList = xmalloc(n * sizeof(Pixel));
 
     /* create additional k shares */
     Image* additShares = xmalloc(k*sizeof(Image));
-    for(int i = 0; i < k; i++)
-    {
-        additShares[i].width = source->width;
-        additShares[i].height = source->height;
-        mallocPixelArray(&additShares[i]);
-    }
+    mallocSharesOfSourceSize(source, additShares, k);
 
     kn_randomGridData rgData = {
         .setOfN = setOfN,

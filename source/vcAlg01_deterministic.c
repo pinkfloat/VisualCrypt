@@ -21,7 +21,7 @@
 *               deterministicWidth = width of the pixel array
 *               encrypting a pixel.
 ********************************************************************/
-static void calcPixelExpansion (int* deterministicHeight, int* deterministicWidth, int n, int m)
+void calcPixelExpansion (int* deterministicHeight, int* deterministicWidth, int n, int m)
 {
     if (n % 2) /* odd */
     {
@@ -56,7 +56,7 @@ static void calcPixelExpansion (int* deterministicHeight, int* deterministicWidt
 * Output:       share->array will be correctly allocated for each
 *               share.
 ********************************************************************/
-static void mallocPixelExpandedShares(Image* source, Image* share, int n, int m)
+void mallocPixelExpandedShares(Image* source, Image* share, int n, int m)
 {
     int deterministicHeight, deterministicWidth;
     calcPixelExpansion(&deterministicHeight, &deterministicWidth, n, m);

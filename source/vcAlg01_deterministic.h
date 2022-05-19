@@ -21,6 +21,40 @@ typedef struct {
 } deterministicData;
 
 /********************************************************************
+* Function:     calcPixelExpansion
+*--------------------------------------------------------------------
+* Description:  The shares, that will be created from the source
+*               image, will have a greater amount of pixel as the
+*               original source file. This function calculates the
+*               pixel expansion i.e. the amount of pixel that encrypt
+*               a source pixel in width and height with:
+* Input:        n = number of shares,
+*               m = number of pixels in a share per pixel in source,
+* Output:       deterministicHeight = height of the pixel array
+*               encrypting a pixel.
+*               deterministicWidth = width of the pixel array
+*               encrypting a pixel.
+********************************************************************/
+void calcPixelExpansion (int* deterministicHeight, int* deterministicWidth, int n, int m);
+
+/********************************************************************
+* Function:     mallocPixelExpandedShares
+*--------------------------------------------------------------------
+* Description:  This function will allocate the buffer of the share
+*               pixel arrays, that are going to be printed to the
+*               BMPs later. Since the deterministic algorithm has
+*               pixel expansion, they will be larger than the
+*               source file.
+* Input:        source = containing width and height of the source
+*               image,
+*               n = number of shares,
+*               m = number of pixels in a share per pixel in source,
+* Output:       share->array will be correctly allocated for each
+*               share.
+********************************************************************/
+void mallocPixelExpandedShares(Image* source, Image* share, int n, int m);
+
+/********************************************************************
 * Function:     __deterministicAlgorithm
 *--------------------------------------------------------------------
 * Description:  This is an implementation of the so called

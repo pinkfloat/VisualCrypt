@@ -8,6 +8,19 @@
 #include "vcAlg03_randomGrid_V1.h"
 
 /********************************************************************
+* Function:     createSetOfN
+*--------------------------------------------------------------------
+* Description:  Create vector with values from 1 to n.
+********************************************************************/
+Pixel* createSetOfN(int n)
+{            
+    Pixel* setOfN = xmalloc(n * sizeof(Pixel));
+    for (int i = 0; i < n; i++)
+        setOfN[i] = i+1;
+    return setOfN;
+}
+
+/********************************************************************
 * Function:     randomSortVector
 *--------------------------------------------------------------------
 * Description:  This function will copy the contents of one vector

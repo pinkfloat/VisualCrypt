@@ -19,6 +19,13 @@ typedef struct {
 } kn_randomGridData;
 
 /********************************************************************
+* Function:     createSetOfN
+*--------------------------------------------------------------------
+* Description:  Create vector with values from 1 to n.
+********************************************************************/
+Pixel* createSetOfN(int n);
+
+/********************************************************************
 * Function:     randomSortVector
 *--------------------------------------------------------------------
 * Description:  This function will copy the contents of one vector

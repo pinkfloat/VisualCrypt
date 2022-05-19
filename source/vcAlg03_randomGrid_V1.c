@@ -153,11 +153,7 @@ void alternate_kn_ThresholdRGA(Image* source, Image* shares, FILE* urandom, int 
     if (n > 2)
         k = getKfromUser(n);
 
-    /* create vector with values from 1 to n */
-    Pixel* setOfN = xmalloc(n * sizeof(Pixel));
-    for (int i = 0; i < n; i++)
-        setOfN[i] = i+1;
-
+    Pixel* setOfN = createSetOfN(n);
     Pixel* randSortedSetOfN = xmalloc(n * sizeof(Pixel));
     Pixel* sharePixel = xmalloc(k * sizeof(Pixel));
     Pixel* checkList = xmalloc(n * sizeof(Pixel));
