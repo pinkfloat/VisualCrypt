@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <time.h>
 #include "memoryManagement.h"
 #include "fileManagement.h"
@@ -7,27 +8,35 @@
 #include "vcAlg03_randomGrid.h"
 #include "vcAlg03_randomGrid_V0.h"
 #include "vcAlg03_randomGrid_V1.h"
+#include "settings.h"
 #include "timeMeasurement.h"
-
-//debug
-#include <stdio.h> //printf
 
 /********************************************************************
 * Function:     printMeasuredTime
 *--------------------------------------------------------------------
-* Description:  Print the measured time ins milliseconds or seconds.
+* Description:  Print the average measured time ins milliseconds or
+*               seconds, and the total time over all loops in
+*               (h:m:s) format to the file "fp".
 ********************************************************************/
-static void printMeasuredTime(struct timespec *start, struct timespec *stop, char *name)
+static void printMeasuredTime(FILE* fp, struct timespec *start, struct timespec *stop, char *name)
 {
     long seconds = stop->tv_sec - start->tv_sec;
     long nanoseconds = stop->tv_nsec - start->tv_nsec;
     double milliseconds = seconds * 1e3 + nanoseconds / 1e6;
     double _seconds = (double)seconds + nanoseconds / 1e9;
 
-    if (_seconds < 1)
-        printf("%s\ntime (ms): %lf\n\n", name, milliseconds);
+    int hours = (_seconds/3600);
+	int remainingSeconds = _seconds - (hours*3600);
+	int minutes = remainingSeconds/60;
+	remainingSeconds = remainingSeconds - (minutes*60);
+
+    if (_seconds / TIME_LOOPS < 1)
+        fprintf(fp, "%s\naverage time (ms): %lf\n", name, milliseconds / TIME_LOOPS);
     else
-        printf("%s\ntime (s): %lf\n\n", name, _seconds);
+        fprintf(fp, "%s\naverage time (s): %lf\n", name, _seconds / TIME_LOOPS);
+    
+    fprintf(fp, "total time (h:m:s): %02d:%02d:%02d\n\n", hours, minutes, remainingSeconds);
+    fprintf(stdout, "measurement of %s algorithm done ...\n", name);
 }
 
 /********************************************************************
@@ -37,13 +46,11 @@ static void printMeasuredTime(struct timespec *start, struct timespec *stop, cha
 ********************************************************************/
 void timeMeasurement()
 {
-/*__________________________________________________________________________*/
 /*__ ALLOCATE MEMORY AND CREATE VALUES NEEDED IN THE DIFFERENT ALGORITHMS __*/
-/*__________________________________________________________________________*/
 
-    uint8_t n = 2; // number of shares
+    uint8_t n = TIME_N; // number of shares
     uint8_t m = 1 << (n-1);
-    uint8_t k = 2;
+    uint8_t k = TIME_K;
 
     /* open urandom, to get random numbers from it */
     FILE* urandom = xfopen("/dev/urandom", "r");
@@ -125,64 +132,84 @@ void timeMeasurement()
         .k = k
     };
 
-/*__________________________________________________________________________*/
 /*_________________________ START TIME MEASUREMENT _________________________*/
-/*__________________________________________________________________________*/
 
     struct timespec start, stop;
+    FILE* logFile = xfopen(TIME_LOG_PATH, "a");
+
+    fprintf(stdout, "Start time measurement ...\n");
+
+    fprintf(logFile, \
+    "Time Measurement:\n"
+    "algorithm loops: %d\n"
+    "number of shares (n) = %d\n"
+    "number of shares to stack (k) = %d\n\n", \
+    TIME_LOOPS, n, k);
 
     /* deterministic algorithm */
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
-    __deterministicAlgorithm(&dData);
+    for(int i = 0; i<TIME_LOOPS; i++)
+        __deterministicAlgorithm(&dData);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
-    printMeasuredTime(&start, &stop, "deterministic");
+    printMeasuredTime(logFile, &start, &stop, "deterministic");
 
     /* probabilistic algorithm */
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
-    __probabilisticAlgorithm(&pData);
+    for(int i = 0; i<TIME_LOOPS; i++)
+        __probabilisticAlgorithm(&pData);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
-    printMeasuredTime(&start, &stop, "probabilistic");
+    printMeasuredTime(logFile, &start, &stop, "probabilistic");
 
     /* (n,n) random grid */
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
-    randomGrid_nn_Threshold(source.array, shares, &storage, urandom, arraySize, n);
+    for(int i = 0; i<TIME_LOOPS; i++)
+        randomGrid_nn_Threshold(source.array, shares, &storage, urandom, arraySize, n);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
-    printMeasuredTime(&start, &stop, "(n,n) random grid");
+    printMeasuredTime(logFile, &start, &stop, "(n,n) random grid");
 
     /* alternate (n,n) random grid */
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
-    alternate_nn_ThresholdRGA(source.array, shares, randSortedSetOfN, urandom, arraySize, n);
+    for(int i = 0; i<TIME_LOOPS; i++)
+        alternate_nn_ThresholdRGA(source.array, shares, randSortedSetOfN, urandom, arraySize, n);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
-    printMeasuredTime(&start, &stop, "alternate (n,n) random grid");
+    printMeasuredTime(logFile, &start, &stop, "alternate (n,n) random grid");
 
     /* (2,n) random grid */
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
-    randomGrid_2n_Threshold(source.array, shares, urandom, arraySize, n);
+    for(int i = 0; i<TIME_LOOPS; i++)
+        randomGrid_2n_Threshold(source.array, shares, urandom, arraySize, n);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
-    printMeasuredTime(&start, &stop, "(2,n) random grid");
+    printMeasuredTime(logFile, &start, &stop, "(2,n) random grid");
 
     /* alternate (2,n) random grid */
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
-    alternate_2n_ThresholdRGA(source.array, shares, urandom, arraySize, n);
+    for(int i = 0; i<TIME_LOOPS; i++)
+        alternate_2n_ThresholdRGA(source.array, shares, urandom, arraySize, n);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
-    printMeasuredTime(&start, &stop, "alternate (2,n) random grid");
+    printMeasuredTime(logFile, &start, &stop, "alternate (2,n) random grid");
 
     /* (k,n) random grid */
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
-    //since the (k,n) needs the additional shares filled before, the time must be added:
-    randomGrid_nn_Threshold(source.array, additShares, &storage, urandom, arraySize, k);
-    __randomGrid_kn_Threshold(&rgData);
+    for(int i = 0; i<TIME_LOOPS; i++)
+    {
+        /* since the (k,n) needs the additional shares filled before, the time must be added */
+        randomGrid_nn_Threshold(source.array, additShares, &storage, urandom, arraySize, k);
+        __randomGrid_kn_Threshold(&rgData);
+    }
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
-    printMeasuredTime(&start, &stop, "(k,n) random grid");
+    printMeasuredTime(logFile, &start, &stop, "(k,n) random grid");
 
     /* alternate (k,n) random grid */
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
-    __alternate_kn_ThresholdRGA(&rgData);
+    for(int i = 0; i<TIME_LOOPS; i++)
+        __alternate_kn_ThresholdRGA(&rgData);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
-    printMeasuredTime(&start, &stop, "alternate (k,n) random grid");    
+    printMeasuredTime(logFile, &start, &stop, "alternate (k,n) random grid");
+
+    fprintf(logFile, "__________________________________________________\n\n");
 
 	/* cleanup */
 	xcloseAll();
 	xfreeAll();
-	fprintf(stdout, "Success!\n");
+	fprintf(stdout, "Success!\nResult was stored in %s\n", TIME_LOG_PATH);
 }

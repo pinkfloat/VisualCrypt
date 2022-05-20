@@ -1,6 +1,8 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
+/* PATHS */
+
 /*  SOURCE_PATH = the secret image
     SHARE_PATH = the directory where the shares
     and decryptions of the shares will be stored
@@ -16,7 +18,15 @@
 #define SHARE_PATH "../image"
 #define PATH_LENGTH 100
 
-/* Adjustments */
+/* Time measurement log path:
+    TIME_LOG_PATH = the log file of the
+    time measurement
+
+    Note: Used in timeMeasurement.c
+*/
+#define TIME_LOG_PATH "../timeMeasurement.log"
+
+/* ADJUSTMENTS */
 
 /*  Threshold:
     Color level to decide whether a pixel of the
@@ -44,5 +54,32 @@
     Note: This is only used in vcAlgorithms.c
 */
 #define RG_VERSION 0
+
+/* TIME MEASUREMENT OPTIONS */
+
+/* Number of shares in time measurement:
+    Define n and k for the time measurement.
+
+    n = number of shares
+    k = number of shares that must be stacked
+        in (k,n) algorithms to reveal information
+        about the source image
+
+    Note:   -   Used in timeMeasurement.c
+            -   The images won't be printet in
+                time measurement, but changing these
+                values will lead to different performance
+                results
+*/
+#define TIME_N 3
+#define TIME_K 2
+
+/* Time measurement loops:
+    Define the number of loops per algorithm,
+    over which will be measured and averaged.
+
+    Note: Used in timeMeasurement.c
+*/
+#define TIME_LOOPS 1000
 
 #endif /* SETTINGS_H */  
