@@ -51,4 +51,4 @@ void __randomGrid_kn_Threshold(kn_randomGridData* data);
 ********************************************************************/
 void randomGrid_kn_Threshold(Image* source, Image* shares, Pixel** storage, FILE* urandom, int arraySize, int n);
 
-#endif /* #ifndef RANDOM_GRID_ALGORITHMS_V0_H */
+#endif /* RANDOM_GRID_ALGORITHMS_V0_H */

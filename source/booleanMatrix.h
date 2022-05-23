@@ -28,13 +28,23 @@ typedef struct {
 BooleanMatrix createBooleanMatrix(int n, int m);
 
 /********************************************************************
+* Function:     deleteBooleanMatrix
+*--------------------------------------------------------------------
+* Description:  Free the allocated pixel array of a Booleanmatrix.
+********************************************************************/
+void deleteBooleanMatrix(BooleanMatrix* matrix);
+
+/********************************************************************
 * Function:     getPixel
 *--------------------------------------------------------------------
 * Description:  Return the value of the Pixel of a Booleanmatrix at
 *               row "i" and column "j". 
 * Return:       "1" is considered as black pixel and "0" as white.
 ********************************************************************/
-Pixel getPixel(BooleanMatrix* matrix, int i, int j);
+static inline Pixel getPixel(BooleanMatrix matrix, int i, int j)
+{
+    return matrix.array[i * matrix.m + j];
+}
 
 /********************************************************************
 * Function:     setPixel
@@ -42,14 +52,10 @@ Pixel getPixel(BooleanMatrix* matrix, int i, int j);
 * Description:  Set the Pixel of a BooleanMatrix on row "i" and
 *               columns "j" to the value "value".
 ********************************************************************/
-void setPixel(BooleanMatrix* matrix, int i, int j, uint8_t value);
-
-/********************************************************************
-* Function:     deleteBooleanMatrix
-*--------------------------------------------------------------------
-* Description:  Free the allocated pixel array of a Booleanmatrix.
-********************************************************************/
-void deleteBooleanMatrix(BooleanMatrix* matrix);
+static inline void setPixel(BooleanMatrix matrix, int i, int j, uint8_t value)
+{
+    matrix.array[i * matrix.m + j] = value;
+}
 
 /********************************************************************
 * Function:     fillBasisMatrix
@@ -59,7 +65,7 @@ void deleteBooleanMatrix(BooleanMatrix* matrix);
 *               be 1 (black) if the number behind "i" is part of the
 *               SubSet "set" and 0 (white) if not.
 ********************************************************************/
-void fillBasisMatrix(BooleanMatrix* B, SubSet* set, uint8_t i, uint8_t j);
+void fillBasisMatrix(BooleanMatrix* B, SubSet* set, int i, int j);
 
 /********************************************************************
 * Function:     printBooleanMatrix

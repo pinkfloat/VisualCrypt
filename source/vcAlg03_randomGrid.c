@@ -8,35 +8,6 @@
 #include "vcAlg03_randomGrid_V1.h"
 
 /********************************************************************
-* Function:     createSetOfN
-*--------------------------------------------------------------------
-* Description:  Create vector with values from 1 to n.
-********************************************************************/
-Pixel* createSetOfN(int n)
-{            
-    Pixel* setOfN = xmalloc(n * sizeof(Pixel));
-    for (int i = 0; i < n; i++)
-        setOfN[i] = i+1;
-    return setOfN;
-}
-
-/********************************************************************
-* Function:     randomSortVector
-*--------------------------------------------------------------------
-* Description:  This function will copy the contents of one vector
-*               random sorted to another.
-********************************************************************/
-void randomSortVector(Copy* copy, Pixel* checkList, FILE* urandom, int n)
-{            
-    for(int idx = 0; idx < n; idx++)
-    {
-        copy->destIdx = idx;
-        int randNum = getRandomNumber(urandom, 1, n-idx);
-        randomSort(randNum, checkList, copy, copyVectorElement);
-    }
-}
-
-/********************************************************************
 * Function:     writePixelToShares
 *--------------------------------------------------------------------
 * Description:  If the share number is part of the first k elements
@@ -46,7 +17,7 @@ void randomSortVector(Copy* copy, Pixel* checkList, FILE* urandom, int n)
 *               Shares with a number not contained in the first
 *               k elements will get randomly a 0/1.
 ********************************************************************/
-void writePixelToShares( Pixel* randSortedSetOfN,
+void writePixelToShares( int* randSortedSetOfN,
                                 void* source,
                                 Image* shares,
                                 FILE* urandom,
@@ -55,15 +26,14 @@ void writePixelToShares( Pixel* randSortedSetOfN,
                                 int i,
                                 Pixel (*getPixel)(void*, int, int))
 {
-    /* for each share */
+    // for each share
     for(int idx = 0; idx < n; idx++)
     {
         int found = -1;
-        /* if idx+1 is part of the first k elements of randSortedSetOfN */
         for (int idk = 0; idk < k; idk++)
         {
             if (randSortedSetOfN[idk] == idx+1)
-            {
+            {   // share idx is part of the first k elements
                 found = idk;
                 break;
             }
@@ -118,7 +88,7 @@ void callRandomGridAlgorithm(AlgorithmData* data)
     Pixel* sourceArray = source->array;
     int arraySize = source->width * source->height;
 
-    /* allocate pixel-arrays for the shares */
+    // allocate pixel-arrays for the shares
     mallocSharesOfSourceSize(source, shares, n);
     Pixel* storage = xmalloc(arraySize);
     Pixel* tmpSharePixel = xmalloc(n*sizeof(Pixel));

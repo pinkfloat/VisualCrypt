@@ -23,7 +23,7 @@
 ********************************************************************/
 void calcPixelExpansion (int* deterministicHeight, int* deterministicWidth, int n, int m)
 {
-    if (n % 2) /* odd */
+    if (n % 2) // odd
     {
         /*  the shares will have the same appearance as
             the source, and are just scaled a bit larger
@@ -31,7 +31,7 @@ void calcPixelExpansion (int* deterministicHeight, int* deterministicWidth, int 
         *deterministicHeight = (int)sqrt(m);
         *deterministicWidth = *deterministicHeight;
     }
-    else /* even */
+    else // even
     {
         /*  the shares will look a little
             "stretched" from left to right
@@ -61,7 +61,7 @@ void mallocPixelExpandedShares(Image* source, Image* share, int n, int m)
     int deterministicHeight, deterministicWidth;
     calcPixelExpansion(&deterministicHeight, &deterministicWidth, n, m);
 
-    /* for each share */
+    // for each share
     for(int i = 0; i < n; i++)
     {
         share[i].height = source->height * deterministicHeight;
@@ -90,50 +90,40 @@ static void permutateBasisMatrix(   BooleanMatrix* B0,
                                     BooleanMatrix* B1, 
                                     BooleanMatrix* permutation,
                                     Pixel sourcePixel,
-                                    Pixel* columnCheckList,
+                                    int* columnIndices,
                                     FILE* urandom)
 {
-    int m = B0->m;
-    int randNum;
-    Copy copy;
-
-    memset(columnCheckList, 0, m*sizeof(Pixel));
-    copy.dest = permutation;
-    for (int permColumn = 0; permColumn < m; permColumn++)
+    BooleanMatrix* basisMatrix;
+    if (sourcePixel) // source pixel is black
     {
-        randNum = getRandomNumber(urandom, 1, m-permColumn); /* number between 1 and m minus permColumn */
-        copy.destIdx = permColumn;
-
-        /* if the pixel is black */
-        if (sourcePixel)
-            /* permutate columns of basis matrix B1 */
-            copy.source = B1;
-
-        /* if the pixel is white */
-        else
-            /* permutate columns of basis matrix B0 */
-            copy.source = B0;
-
-        randomSort(randNum, columnCheckList, &copy, copyMatrixColumn);
+        basisMatrix = B1;
     }
+    else // source pixel is white
+    {
+        basisMatrix = B0;
+    }
+
+    shuffleColumns(permutation, basisMatrix, urandom, columnIndices);
 }
 
 /********************************************************************
-* Function:     copyEncryptedPixelToShare
+* Function:     copyMatrixRowToShares
 *--------------------------------------------------------------------
-* Description:  The function copyEncryptedPixelToShare copies the
-*               pixel array of encPixel to the pixel array of the
+* Description:  The function copyMatrixRowToShares copies the
+*               pixel array of matrixRow2D to the pixel array of a
 *               share, starting at row posY and column posX of the
 *               share.
 ********************************************************************/
-static void copyEncryptedPixelToShare(BooleanMatrix* encPixel, Image* share, int posY, int posX)
+static void copyMatrixRowToShares(BooleanMatrix matrixRow2D, Image* share, int posY, int posX)
 {
-    /* for each pixel of encPixel */
-    for(int i = 0; i < encPixel->n; i++)     /* rows */
+    int width = share->width;
+
+    // for each pixel of matrixRow2D
+    for(int i = 0; i < matrixRow2D.n; i++)     // rows
     {
-        for(int j = 0; j < encPixel->m; j++) /* columns */
+        for(int j = 0; j < matrixRow2D.m; j++) // columns
         {
-            share->array[(posY+i) * share->width + posX+j] = getPixel(encPixel, i, j);
+            share->array[(posY+i) * width + posX+j] = getPixel(matrixRow2D, i, j);
         }
     }
 }
@@ -141,54 +131,39 @@ static void copyEncryptedPixelToShare(BooleanMatrix* encPixel, Image* share, int
 /********************************************************************
 * Function:     fillPixelEncryptionToShares
 *--------------------------------------------------------------------
-* Description:  fill each permutation-array-row temporarily into the
-*               array "encryptedPixel", where the row will be
+* Description:  point with "matrixRow2D" temporarily to each
+*               permutation-array-row, where the row will be
 *               interpreted as 2D-array. Then fill the 2D-array
-*               "encryptedPixel" randomly in one of the shares,
+*               "matrixRow2D" randomly in one of the shares,
 *               so each share will finally get a different
 *               (2D-sorted) row of the permutation-array.
-* Input:        permutation = the columns permutation of a basis
-*               matrix
-*               i = the row-position of the the first pixel of an
-*               "encrypted pixel".
-*               j = the column-position of the the first pixel of an
-*               "encrypted pixel".
-*               -> encrypted pixel = a source pixel will be encrypted
-*               with an array of pixel per share.
-*               rowCheckList = containing zero's for unused basis
-*               matrix row and one's for allready used ones
-*               urandom = the opened file /dev/urandom, containing
-*               random numbers
-* Output:       encryptedPixel = temporary storage for an
-*               "encrypted pixel" before it is printed to one of the
-*               shares
-*               share = containing pixel arrays that need to be
-*               filled. If they are stacked together per OR-function,
-*               the secret image can be seen.
 ********************************************************************/
 static void fillPixelEncryptionToShares(    BooleanMatrix* permutation,
-                                            BooleanMatrix* encryptedPixel,
                                             Image* share,
                                             int i,
                                             int j,
-                                            Pixel* rowCheckList,
+                                            int deterministicWidth,
+                                            int deterministicHeight,
+                                            int* rowIndices,
                                             FILE* urandom)
 {
     int n = permutation->n;
+    int m = permutation->m;
     int randNum;
-    Copy copy;
-    memset(rowCheckList, 0, n*sizeof(Pixel));
 
-    copy.dest = encryptedPixel;
-    copy.source = permutation;
+    BooleanMatrix matrixRow2D;
+    matrixRow2D.m = deterministicWidth;
+    matrixRow2D.n = deterministicHeight;
+    shuffleVector(rowIndices, n, urandom);
+    
+    Pixel* shuffledBasisMatrix = permutation->array;
 
-    /* for each share */
+    // for each share
     for(int shareIdx = 0; shareIdx < n; shareIdx++)
     {
-        /* choose random which share will get which permutation-array row */
-        randNum = getRandomNumber(urandom, 1, n-shareIdx); /* number between 1 and "number-of-shares minus shareIdx" */
-        randomSort(randNum, rowCheckList, &copy, fillEncryptedPixel);
-        copyEncryptedPixelToShare(encryptedPixel, &share[shareIdx], i, j);
+        randNum = rowIndices[shareIdx];
+        matrixRow2D.array = &(shuffledBasisMatrix[randNum * m]); // first element of a random matrix row
+        copyMatrixRowToShares(matrixRow2D, &share[shareIdx], i*deterministicHeight, j*deterministicWidth);
     }
 }
 
@@ -209,10 +184,9 @@ void __deterministicAlgorithm(deterministicData* data)
     BooleanMatrix* B0 = data->B0;
     BooleanMatrix* B1 = data->B1;
     BooleanMatrix* permutation = data->permutation;
-    BooleanMatrix* encryptedPixel = data->encryptedPixel;
     Pixel* sourceArray = data->sourceArray;
-    Pixel* columnCheckList = data->columnCheckList;
-    Pixel* rowCheckList = data->rowCheckList;
+    int* columnIndices = data->columnIndices;
+    int* rowIndices = data->rowIndices;
     Image* share = data->share;
     FILE* urandom = data->urandom;
     int width = data->width;
@@ -220,15 +194,15 @@ void __deterministicAlgorithm(deterministicData* data)
     int deterministicWidth = data->deterministicWidth;
     int deterministicHeight = data->deterministicHeight;
 
-    /* for each pixel of the source */
-    for(int i = 0; i < height; i++)     /* rows */
+    // for each pixel of the source
+    for(int i = 0; i < height; i++)     // rows
     {
-        for(int j = 0; j < width; j++)  /* columns */
+        for(int j = 0; j < width; j++)  // columns
         {
             Pixel sourcePixel = sourceArray[i * width + j];
-            permutateBasisMatrix(B0, B1, permutation, sourcePixel, columnCheckList, urandom);
-            fillPixelEncryptionToShares(permutation, encryptedPixel, share, i*deterministicHeight,
-                                        j*deterministicWidth, rowCheckList, urandom);
+            permutateBasisMatrix(B0, B1, permutation, sourcePixel, columnIndices, urandom);
+            fillPixelEncryptionToShares(permutation, share, i,
+                                        j, deterministicWidth, deterministicHeight, rowIndices, urandom);
         }
     }
 }
@@ -245,12 +219,12 @@ void __deterministicAlgorithm(deterministicData* data)
 void deterministicAlgorithm(AlgorithmData* data)
 {
     uint8_t n = data->numberOfShares;
-    uint8_t m = 1 << (n-1);     /* number of pixels in a share per pixel in source file = 2^{n-1} */
+    uint8_t m = 1 << (n-1);     // number of pixels in a share per pixel in source file = 2^{n-1}
 
-    /* allocate pixel-arrays for the shares */
+    // allocate pixel-arrays for the shares
 	mallocPixelExpandedShares(data->source, data->shares, n, m);
 
-    /* create basis matrices */
+    // create basis matrices
     BooleanMatrix B0 = createBooleanMatrix(n,m);
     BooleanMatrix B1 = createBooleanMatrix(n,m);
     fillBasisMatrices(&B0, &B1);
@@ -263,28 +237,20 @@ void deterministicAlgorithm(AlgorithmData* data)
     */
     BooleanMatrix permutation = createBooleanMatrix(n, m);
 
-    /*  every pixel of the source will be encrypted in arrays of pixel,
-        printed to the shares. This matrix has the size of an array
-        of an encrypted pixel and will temporarily hold all of the
-        pixel-arrays printed to the shares.
-    */
-    BooleanMatrix encryptedPixel = createBooleanMatrix(deterministicHeight, deterministicWidth);
-
     /*  create checklist of size n (/m) to store which rows (/columns)
         of the basis matrix has been already used in the destination
         matrix: 0 = unused row (/column), 1 = used
     */
-    Pixel* rowCheckList = xmalloc(n * sizeof(Pixel));
-    Pixel* columnCheckList = xmalloc(m * sizeof(Pixel));
+    int* rowIndices = createSetOfN(n, 0);
+    int* columnIndices = createSetOfN(m, 0);
 
     deterministicData dData = {
         .B0 = &B0,
         .B1 = &B1,
         .permutation = &permutation,
-        .encryptedPixel = &encryptedPixel,
         .sourceArray = data->source->array,
-        .columnCheckList = columnCheckList,
-        .rowCheckList = rowCheckList,
+        .columnIndices = columnIndices,
+        .rowIndices = rowIndices,
         .share = data->shares,
         .urandom = data->urandom,
         .width = data->source->width,

@@ -21,29 +21,6 @@ BooleanMatrix createBooleanMatrix(int n, int m)
 }
 
 /********************************************************************
-* Function:     getPixel
-*--------------------------------------------------------------------
-* Description:  Return the value of the Pixel of a Booleanmatrix at
-*               row "i" and column "j". 
-* Return:       "1" is considered as black pixel and "0" as white.
-********************************************************************/
-Pixel getPixel(BooleanMatrix* matrix, int i, int j)
-{
-    return matrix->array[i * matrix->m + j];
-}
-
-/********************************************************************
-* Function:     setPixel
-*--------------------------------------------------------------------
-* Description:  Set the Pixel of a BooleanMatrix on row "i" and
-*               columns "j" to the value "value".
-********************************************************************/
-void setPixel(BooleanMatrix* matrix, int i, int j, uint8_t value)
-{
-    matrix->array[i * matrix->m + j] = value;
-}
-
-/********************************************************************
 * Function:     deleteBooleanMatrix
 *--------------------------------------------------------------------
 * Description:  Free the allocated pixel array of a Booleanmatrix.
@@ -61,26 +38,20 @@ void deleteBooleanMatrix(BooleanMatrix* matrix)
 *               be 1 (black) if the number behind "i" is part of the
 *               SubSet "set" and 0 (white) if not.
 ********************************************************************/
-void fillBasisMatrix(BooleanMatrix* B, SubSet* set, uint8_t i, uint8_t j)
+void fillBasisMatrix(BooleanMatrix* B, SubSet* set, int i, int j)
 {
-    uint8_t found = 0;
-    if (set[j].length) /* the subset is not NULL */
+    if (set[j].length) // the subset is not NULL
     {
-        for (int e = 0; e < set[j].length; e++) /* e = element of a subset */
+        for (int e = 0; e < set[j].length; e++) // e = element of a subset
         {
-            /* check if element i is part of the subset */
-            if (set[j].data[e] == i){
-                found = 1;
-                break;
+            if (set[j].data[e] == i) // i is part of the subset
+            {
+                setPixel(*B, i, j, 1);
+                return;
             }
         }
-        if(found)
-            setPixel(B, i, j, 1);
-        else
-            setPixel(B, i, j, 0);
     }
-    else /* the subset is NULL */
-        setPixel(B, i, j, 0);
+    setPixel(*B, i, j, 0);
 }
 
 /********************************************************************
@@ -96,11 +67,11 @@ void printBooleanMatrix(BooleanMatrix* B, char* name)
     int m = B->m;
 
     fprintf(stdout, "%2s:\n", name);
-    for(int i = 0; i < n; i++)     /* rows */
+    for(int i = 0; i < n; i++)     // rows
     {
-        for(int j = 0; j < m; j++) /* columns */
+        for(int j = 0; j < m; j++) // columns
         {
-            fprintf(stdout, "%d", getPixel(B, i, j));
+            fprintf(stdout, "%d", getPixel(*B, i, j));
         }
         fprintf(stdout, "\n");
     }
@@ -126,9 +97,9 @@ void fillBasisMatrices(BooleanMatrix* B0, BooleanMatrix* B1)
     Set set = createSet(n, m);
     printAllSubsets(&set);
 
-    for(uint8_t i = 0; i < n; i++)     /* rows */
+    for(uint8_t i = 0; i < n; i++) // rows
     {
-        for(uint8_t j = 0; j < m; j++) /* columns */
+        for(uint8_t j = 0; j < m; j++) // columns
         {
             fillBasisMatrix(B0, set.even, i, j);
             fillBasisMatrix(B1, set.odd, i, j);

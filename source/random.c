@@ -1,6 +1,5 @@
 #include "fileManagement.h"
 #include "memoryManagement.h"
-#include "booleanMatrix.h"
 #include "random.h"
 
 /********************************************************************
@@ -23,107 +22,97 @@ uint64_t getRandomNumber(FILE* urandom, uint64_t min, uint64_t max)
 }
 
 /********************************************************************
-* Function:     copyColumnElement
+* Function:     createSetOfN
 *--------------------------------------------------------------------
-* Description:  This is a sort-Function for randomSort().
-*               The function will copy a chosen column element of
-*               the source vector (n x 1 matrix = matrix column)
-*               to the destination which is in this case just a pixel.
+* Description:  Create vector with values from 1 to n
 ********************************************************************/
-void copyColumnElement(Copy* copy)
-{
-    BooleanMatrix* source = (BooleanMatrix*) copy->source;
-    Pixel* dest = (Pixel*) copy->dest;
-    *dest = getPixel(source, copy->sourceIdx, 0);
+int* createSetOfN(int n, int start)
+{            
+    int* setOfN = xmalloc(n * sizeof(int));
+    for(int i = 0; i < n; i++)
+        setOfN[i] = i+start;
+    return setOfN;
 }
 
 /********************************************************************
-* Function:     copyVectorElement
+* Function:     shuffleVector
 *--------------------------------------------------------------------
-* Description:  This is a sort-Function for randomSort().
-*               The function will copy an element of the source
-*               vector to the destination vector.
+* Description:  The function randomSortVector() shifts the vector
+*               element random to a different place.
+*               The Fisher-Yates shuffle is used for this purpose.
+* Input:        n = number of elements / size of the vector
+*               urandom = file with random numbers
+* In/Out:       vector = the vector which elements will be shifted
 ********************************************************************/
-void copyVectorElement(Copy* copy)
+void shuffleVector(int* vector, int n, FILE* urandom)
 {
-    Pixel* source = (Pixel*) copy->source;
-    Pixel* dest = (Pixel*) copy->dest;
-    dest[copy->destIdx] = source[copy->sourceIdx];
+    // Fisher–Yates shuffle
+    // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
+    // https://stackoverflow.com/questions/42321370/fisher-yates-shuffling-algorithm-in-c
+
+    int tmp, randNum;
+    for (int i = n-1; i>0; i--) {
+        randNum = getRandomNumber(urandom, 0, i+1);
+
+        // swap elements
+        tmp = vector[i];
+        vector[i] = vector[randNum];
+        vector[randNum] = tmp;
+    }
 }
 
 /********************************************************************
 * Function:     copyMatrixColumn
 *--------------------------------------------------------------------
-* Description:  This is a sort-Function for randomSort().
-*               The function will copy a chosen column of the source
-*               matrix (copy->sourceIdx) into a chosen column of the
-*               destination matrix (copy->destIdx).
+* Description:  Copy a matrix column of column number "srcIdx"
+*               from src to column "destIdx" of dest.
 ********************************************************************/
-void copyMatrixColumn(Copy* copy)
+static void copyMatrixColumn(BooleanMatrix* dest, BooleanMatrix* src, int destIdx, int srcIdx)
 {
-    BooleanMatrix* source = (BooleanMatrix*) copy->source;
-    BooleanMatrix* dest = (BooleanMatrix*) copy->dest;
-    for(int row = 0; row < source->n; row++)
-        setPixel(dest, row, copy->destIdx, getPixel(source, row, copy->sourceIdx));
+    int numRows = src->n;
+    for(int row = 0; row < numRows; row++)
+        setPixel(*dest, row, destIdx, getPixel(*src, row, srcIdx));
 }
 
 /********************************************************************
-* Function:     fillEncryptedPixel
+* Function:     shuffleColumns
 *--------------------------------------------------------------------
-* Description:  This is a sort-Function for randomSort().
-*               The function copies the values of a row of a
-*               "permutation matrix" (1D-array) into a "deterministic
-*               pixel" (2D-array). It is part of the encryption of a
-*               specific pixel.
+* Description:  Copy matrix from src to dest in a column-shuffled way
+*               by getting shuffled indices from parameter "indices".
 ********************************************************************/
-void fillEncryptedPixel(Copy* copy)
+void shuffleColumns(BooleanMatrix* dest, BooleanMatrix* src, FILE* urandom, int* indices)
 {
-    BooleanMatrix* source = (BooleanMatrix*) copy->source;
-    BooleanMatrix* dest = (BooleanMatrix*) copy->dest;
-    int row = copy->sourceIdx;
-    for(int column = 0; column < source->m; column++)
-        dest->array[column] = getPixel(source, row, column);
+    int numColumns = src->m;
+    shuffleVector(indices, numColumns, urandom);
+
+    for (int i = 0; i < numColumns; i++)
+        copyMatrixColumn(dest, src, i, indices[i]);
 }
 
 /********************************************************************
-* Function:     randomSort
+* Function:     copyMatrixRow
 *--------------------------------------------------------------------
-* Description:  The function randomSort() copies a row/column of a
-*               source matrix to a destination matrix, without using
-*               a row/column of the source twice. For doing this, a
-*               temporary vector "checkList" is used, that has the
-*               same size as the numbers of rows/columns, to store,
-*               which has already been taken. The "randNum"'th
-*               unused row/column of the source will be chosen and
-*               marked as "used" in the checkList.
-*               The code written in here is only to sort out which
-*               row/column of the source is to use. The copy process,
-*               from one matrix to another, is part of the sorting
-*               function, given as last parameter to randomSort.
+* Description:  Copy a matrix row of row number "srcIdx"
+*               from src to row "destIdx" of dest.
 ********************************************************************/
-void randomSort(int randNum, Pixel* checkList, Copy* copy, void (*sortFunc)(Copy*))
+static void copyMatrixRow(BooleanMatrix* dest, BooleanMatrix* src, int destIdx, int srcIdx)
 {
-    /* alternate version with lower complexity:
-        Fill the array with the numbers from 1 to n. 
-        Repeat for i = 0 to n - 1:
-        Generate a random number r such that 0 ≤ r < n - i.
-        Exchange array [i] and array [i + r]
-    */
-    
-    for(int checkIdx = 0, zeroCount = 0;; checkIdx++)
-    {
-        if(checkList[checkIdx] == 0)
-            zeroCount++;
+    int numColumns = src->m;
+    for(int column = 0; column < numColumns; column++)
+        setPixel(*dest, destIdx, column, getPixel(*src, srcIdx, column));
+}
 
-        if(zeroCount == randNum)
-        {
-            /*  copy the random chosen row/column of the source matrix
-                to the next empty row/column of the destination matrix
-            */
-            copy->sourceIdx = checkIdx;
-            sortFunc(copy);
-            checkList[checkIdx] = 1; /* mark row/column in checkList as used */
-            break;
-        }
-    }
-} 
+/********************************************************************
+* Function:     shuffleRows
+*--------------------------------------------------------------------
+* Description:  Copy matrix from src to dest in a row-shuffled way by
+*               getting shuffled indices from parameter "indices".
+********************************************************************/
+void shuffleRows(BooleanMatrix* dest, BooleanMatrix* src, FILE* urandom, int* indices)
+{
+    int numRows = src->n;
+    shuffleVector(indices, numRows, urandom);
+
+    for (int i = 0; i < numRows; i++)
+        copyMatrixRow(dest, src, i, indices[i]);
+}

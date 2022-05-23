@@ -17,10 +17,10 @@ static void createRandomGrid(Image* share, FILE* urandom)
     int arraySize = share->width * share->height;
     Pixel* shareArray = share->array;
 
-    /* for each pixel */
+    // for each pixel
     for(int i = 0; i < arraySize; i++)
     {
-        /* get random 0/1 */
+        // get random 0/1
         shareArray[i] = getRandomNumber(urandom,0,2);
     }
 }
@@ -39,21 +39,17 @@ static void randomGrid_22_Threshold(Pixel* source, Image* shares, FILE* urandom,
     Pixel* share1 = shares->array;
     Pixel* share2 = shares[1].array;
 
-    /* make the first share a random grid */
+    // make the first share a random grid
     createRandomGrid(shares, urandom);
 
-    /* fill the second share according to source and first share*/
+    // fill the second share according to source and first share
     for(int i = 0; i < arraySize; i++)
     {
-        /* if the source pixel is black */
-        if (source[i])
-            /* use the complementary value of share 1 */
-            share2[i] = share1[i] ? 0 : 1;
+        if (source[i]) // source pixel is black
+            share2[i] = share1[i] ? 0 : 1; // use complementary value of share 1
 
-        /* if the source pixel is white */
-        else
-            /* copy value of share 1 */
-            share2[i] = share1[i];
+        else // source pixel is white
+            share2[i] = share1[i]; // copy value of share 1
     }
 }
 
@@ -70,13 +66,16 @@ void randomGrid_nn_Threshold(Pixel* sourceArray, Image* shares, Pixel** storage,
 {
     Pixel* tmp;
     
-    /* fill the first two shares */
+    // fill the first two shares
     randomGrid_22_Threshold(sourceArray, shares, urandom, arraySize);
 
     if(numberOfShares > 2)
     {
         for(int idx = 2; idx < numberOfShares; idx++)
         {
+            /* use calculated share from last call as source and overwrite
+               source buffer from two calls before (content is not longer needed)
+            */
             tmp = *storage;
             *storage = shares[idx-1].array;
             shares[idx-1].array = tmp;
@@ -99,25 +98,21 @@ void randomGrid_nn_Threshold(Pixel* sourceArray, Image* shares, Pixel** storage,
 ********************************************************************/
 void randomGrid_2n_Threshold(Pixel* sourceArray, Image* shares, FILE* urandom, int arraySize, int numberOfShares)
 {
-    /* make the first share a random grid */
+    // make the first share a random grid
     createRandomGrid(shares, urandom);
 
-    /* for each share */
+    // for each share
     for(int idx = 1; idx < numberOfShares; idx++)
     {
-        /* for each pixel ... */
-        /* fill the other shares according to source and first share */
+        // for each pixel
+        // fill the other shares according to source and first share
         for(int i = 0; i < arraySize; i++)
         {
-            /* if the source pixel is black */
-            if (sourceArray[i])
-                /* get random 0/1 */
-                shares[idx].array[i] = getRandomNumber(urandom,0,2);
+            if (sourceArray[i]) //source pixel is black
+                shares[idx].array[i] = getRandomNumber(urandom,0,2); // get random 0/1
 
-            /* if the source pixel is white */
-            else
-                /* copy value of share 1 */
-                shares[idx].array[i] = shares->array[i];
+            else  //source pixel is white
+                shares[idx].array[i] = shares->array[i]; // copy value of share 1
         }
     }
 }
@@ -149,9 +144,7 @@ static inline Pixel getPixelFromShare(void* shares, int shareIdx, int matrixIdx)
 ********************************************************************/
 void __randomGrid_kn_Threshold(kn_randomGridData* data)
 {
-    Pixel* setOfN = data->setOfN;
-    Pixel* randSortedSetOfN = data->randSortedSetOfN;
-    Pixel* checkList = data->checkList;
+    int* setOfN = data->setOfN;
     Image* shares = data->shares;
     Image* additShares = data->additShares;
     FILE* urandom = data->urandom;
@@ -159,18 +152,11 @@ void __randomGrid_kn_Threshold(kn_randomGridData* data)
     int n = data->n;
     int k = data->k;
 
-    Copy copy = {
-        .source = setOfN,
-        .dest = randSortedSetOfN
-    };
-
-    /* for each pixel */
+    // for each pixel
     for(int i = 0; i < arraySize; i++)
     {
-        memset(checkList, 0, n*sizeof(Pixel));
-        randomSortVector(&copy, checkList, urandom, n);
-
-        writePixelToShares(randSortedSetOfN, additShares, shares, urandom, n, k, i, getPixelFromShare);
+        shuffleVector(setOfN, n, urandom);
+        writePixelToShares(setOfN, additShares, shares, urandom, n, k, i, getPixelFromShare);
     }
 }
 
@@ -193,20 +179,14 @@ void randomGrid_kn_Threshold(Image* source, Image* shares, Pixel** storage, FILE
 
     int k = getKfromUser(n);
 
-    Pixel* setOfN = createSetOfN(n);
-    Pixel* randSortedSetOfN = xmalloc(n * sizeof(Pixel));
-    Pixel* checkList = xmalloc(n * sizeof(Pixel));
+    int* setOfN = createSetOfN(n, 1);
 
-    /* create additional k shares */
+    // create additional k shares
     Image* additShares = xmalloc(k*sizeof(Image));
     mallocSharesOfSourceSize(source, additShares, k);
 
     kn_randomGridData rgData = {
         .setOfN = setOfN,
-        .randSortedSetOfN = randSortedSetOfN,
-        .checkList = checkList,
-        .sharePixel = NULL,
-        .sourceArray = NULL,
         .shares = shares,
         .additShares = additShares,
         .urandom = urandom,
@@ -215,8 +195,9 @@ void randomGrid_kn_Threshold(Image* source, Image* shares, Pixel** storage, FILE
         .k = k
     };
 
-    /* fill the temporary shares */
+    // fill temporary shares
     randomGrid_nn_Threshold(sourceArray, additShares, storage, urandom, arraySize, k);
 
+    // call algorithm
     __randomGrid_kn_Threshold(&rgData);
 }

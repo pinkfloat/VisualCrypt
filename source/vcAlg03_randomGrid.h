@@ -5,9 +5,7 @@
 #include "vcAlgorithms.h"
 
 typedef struct {
-    Pixel* setOfN;
-    Pixel* randSortedSetOfN;
-    Pixel* checkList;
+    int* setOfN;
     Pixel* sharePixel;
     Pixel* sourceArray;
     Image* shares;
@@ -19,21 +17,6 @@ typedef struct {
 } kn_randomGridData;
 
 /********************************************************************
-* Function:     createSetOfN
-*--------------------------------------------------------------------
-* Description:  Create vector with values from 1 to n.
-********************************************************************/
-Pixel* createSetOfN(int n);
-
-/********************************************************************
-* Function:     randomSortVector
-*--------------------------------------------------------------------
-* Description:  This function will copy the contents of one vector
-*               random sorted to another.
-********************************************************************/
-void randomSortVector(Copy* copy, Pixel* checkList, FILE* urandom, int n);
-
-/********************************************************************
 * Function:     writePixelToShares
 *--------------------------------------------------------------------
 * Description:  If the share number is part of the first k elements
@@ -43,7 +26,7 @@ void randomSortVector(Copy* copy, Pixel* checkList, FILE* urandom, int n);
 *               Shares with a number not contained in the first
 *               k elements will get randomly a 0/1.
 ********************************************************************/
-void writePixelToShares(Pixel* randSortedSetOfN, void* source, Image* shares, FILE* urandom, int n, int k, int i, Pixel (*getPixel)(void*, int, int));
+void writePixelToShares(int* randSortedSetOfN, void* source, Image* shares, FILE* urandom, int n, int k, int i, Pixel (*getPixel)(void*, int, int));
 
 /********************************************************************
 * Function:     getKfromUser
@@ -62,4 +45,4 @@ int getKfromUser(int n);
 ********************************************************************/
 void callRandomGridAlgorithm(AlgorithmData* data);
 
-#endif /* #ifndef RANDOM_GRID_ALGORITHMS_H */
+#endif /* RANDOM_GRID_ALGORITHMS_H */

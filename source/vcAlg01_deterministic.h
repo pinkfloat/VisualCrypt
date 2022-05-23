@@ -8,10 +8,9 @@ typedef struct {
     BooleanMatrix* B0;
     BooleanMatrix* B1;
     BooleanMatrix* permutation;
-    BooleanMatrix* encryptedPixel;
     Pixel* sourceArray;
-    Pixel* columnCheckList;
-    Pixel* rowCheckList;
+    int* columnIndices;
+    int* rowIndices;
     Image* share;
     FILE* urandom;
     int width;
@@ -79,4 +78,4 @@ void __deterministicAlgorithm(deterministicData* data);
 ********************************************************************/
 void deterministicAlgorithm(AlgorithmData* data);
 
-#endif /* #ifndef DETERMINISTIC_ALGORITHMS_H */
+#endif /* DETERMINISTIC_ALGORITHMS_H */

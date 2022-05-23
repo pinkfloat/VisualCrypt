@@ -20,21 +20,25 @@
 ********************************************************************/
 static void printMeasuredTime(FILE* fp, struct timespec *start, struct timespec *stop, char *name)
 {
+    // calculate time of total milliseconds or seconds
     long seconds = stop->tv_sec - start->tv_sec;
     long nanoseconds = stop->tv_nsec - start->tv_nsec;
     double milliseconds = seconds * 1e3 + nanoseconds / 1e6;
     double _seconds = (double)seconds + nanoseconds / 1e9;
 
+    // calculate time in hours : minutes : seconds
     int hours = (_seconds/3600);
 	int remainingSeconds = _seconds - (hours*3600);
 	int minutes = remainingSeconds/60;
 	remainingSeconds = remainingSeconds - (minutes*60);
 
+    // print average milliseconds or seconds
     if (_seconds / TIME_LOOPS < 1)
         fprintf(fp, "%s\naverage time (ms): %lf\n", name, milliseconds / TIME_LOOPS);
     else
         fprintf(fp, "%s\naverage time (s): %lf\n", name, _seconds / TIME_LOOPS);
     
+    // print total time
     fprintf(fp, "total time (h:m:s): %02d:%02d:%02d\n\n", hours, minutes, remainingSeconds);
     fprintf(stdout, "measurement of %s algorithm done ...\n", name);
 }
@@ -52,19 +56,19 @@ void timeMeasurement()
     uint8_t m = 1 << (n-1);
     uint8_t k = TIME_K;
 
-    /* open urandom, to get random numbers from it */
+    // open urandom, to get random numbers from it
     FILE* urandom = xfopen("/dev/urandom", "r");
 
-    /* read source image */
+    // read source image
     Image source;
     createSourceImage(&source);
 
-    /* create basis matrices */
+    // create basis matrices
     BooleanMatrix B0 = createBooleanMatrix(n,m);
     BooleanMatrix B1 = createBooleanMatrix(n,m);
     fillBasisMatrices(&B0, &B1);
 
-    /* allocate shares */
+    // allocate shares
     Image *shares = xmalloc(n*sizeof(Image));
     mallocSharesOfSourceSize(&source, shares, n);
 
@@ -74,22 +78,20 @@ void timeMeasurement()
     Image* additShares = xmalloc(k*sizeof(Image));
     mallocSharesOfSourceSize(&source, additShares, k);
 
-    Pixel* checkList = xmalloc(n * sizeof(Pixel));
+    int* rowIndices = createSetOfN(n, 0);
 
-    /* prepare deterministic algorithm */
+    // prepare deterministic algorithm
     int deterministicHeight, deterministicWidth;
     calcPixelExpansion(&deterministicHeight, &deterministicWidth, n, m);
     BooleanMatrix permutation = createBooleanMatrix(n, m);
-    BooleanMatrix encryptedPixel = createBooleanMatrix(deterministicHeight, deterministicWidth);
-    Pixel* columnCheckList = xmalloc(m * sizeof(Pixel));
+    int* columnIndices = createSetOfN(m, 0);
     deterministicData dData = {
         .B0 = &B0,
         .B1 = &B1,
         .permutation = &permutation,
-        .encryptedPixel = &encryptedPixel,
         .sourceArray = source.array,
-        .columnCheckList = columnCheckList,
-        .rowCheckList = checkList,
+        .columnIndices = columnIndices,
+        .rowIndices = rowIndices,
         .share = expShares,
         .urandom = urandom,
         .width = source.width,
@@ -98,30 +100,28 @@ void timeMeasurement()
         .deterministicHeight = deterministicHeight
     };
 
-    /* prepare probabilistic algorithm */
+    // prepare probabilistic algorithm
     BooleanMatrix columnVector = createBooleanMatrix(n, 1);
         probabilisticData pData = {
         .B0 = &B0,
         .B1 = &B1,
         .columnVector = &columnVector,
         .sourceArray = source.array,
-        .checkList = checkList,
+        .rowIndices = rowIndices,
         .share = shares,
         .urandom = urandom,
         .width = source.width,
         .height = source.height
     };
 
-    /* prepare random grid algorithms */
+    // prepare random grid algorithms
     int arraySize = source.width * source.height;
     Pixel* storage = xmalloc(arraySize);
     Pixel* sharePixel = xmalloc(k * sizeof(Pixel));
-    Pixel* setOfN = createSetOfN(n);
-    Pixel* randSortedSetOfN = xmalloc(n * sizeof(Pixel));
+    Pixel* tmpSharePixel = xmalloc(n * sizeof(Pixel));
+    int* setOfN = createSetOfN(n, 1);
     kn_randomGridData rgData = {
         .setOfN = setOfN,
-        .randSortedSetOfN = randSortedSetOfN,
-        .checkList = checkList,
         .sharePixel = sharePixel,
         .sourceArray = source.array,
         .shares = shares,
@@ -146,49 +146,49 @@ void timeMeasurement()
     "number of shares to stack (k) = %d\n\n", \
     TIME_LOOPS, n, k);
 
-    /* deterministic algorithm */
+    // deterministic algorithm
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
     for(int i = 0; i<TIME_LOOPS; i++)
         __deterministicAlgorithm(&dData);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
     printMeasuredTime(logFile, &start, &stop, "deterministic");
 
-    /* probabilistic algorithm */
+    // probabilistic algorithm
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
     for(int i = 0; i<TIME_LOOPS; i++)
         __probabilisticAlgorithm(&pData);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
     printMeasuredTime(logFile, &start, &stop, "probabilistic");
 
-    /* (n,n) random grid */
+    // (n,n) random grid
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
     for(int i = 0; i<TIME_LOOPS; i++)
         randomGrid_nn_Threshold(source.array, shares, &storage, urandom, arraySize, n);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
     printMeasuredTime(logFile, &start, &stop, "(n,n) random grid");
 
-    /* alternate (n,n) random grid */
+    // alternate (n,n) random grid
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
     for(int i = 0; i<TIME_LOOPS; i++)
-        alternate_nn_ThresholdRGA(source.array, shares, randSortedSetOfN, urandom, arraySize, n);
+        alternate_nn_ThresholdRGA(source.array, shares, tmpSharePixel, urandom, arraySize, n);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
     printMeasuredTime(logFile, &start, &stop, "alternate (n,n) random grid");
 
-    /* (2,n) random grid */
+    // (2,n) random grid
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
     for(int i = 0; i<TIME_LOOPS; i++)
         randomGrid_2n_Threshold(source.array, shares, urandom, arraySize, n);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
     printMeasuredTime(logFile, &start, &stop, "(2,n) random grid");
 
-    /* alternate (2,n) random grid */
+    // alternate (2,n) random grid
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
     for(int i = 0; i<TIME_LOOPS; i++)
         alternate_2n_ThresholdRGA(source.array, shares, urandom, arraySize, n);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
     printMeasuredTime(logFile, &start, &stop, "alternate (2,n) random grid");
 
-    /* (k,n) random grid */
+    // (k,n) random grid
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
     for(int i = 0; i<TIME_LOOPS; i++)
     {
@@ -199,7 +199,7 @@ void timeMeasurement()
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
     printMeasuredTime(logFile, &start, &stop, "(k,n) random grid");
 
-    /* alternate (k,n) random grid */
+    // alternate (k,n) random grid
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
     for(int i = 0; i<TIME_LOOPS; i++)
         __alternate_kn_ThresholdRGA(&rgData);
@@ -208,7 +208,7 @@ void timeMeasurement()
 
     fprintf(logFile, "__________________________________________________\n\n");
 
-	/* cleanup */
+	// cleanup
 	xcloseAll();
 	xfreeAll();
 	fprintf(stdout, "Success!\nResult was stored in %s\n", TIME_LOG_PATH);

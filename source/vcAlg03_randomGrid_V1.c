@@ -17,15 +17,11 @@ static void fillPixelRG(Pixel sourcePixel, Pixel* sharePixel, int numberOfShares
     for (int idx = 1; idx < numberOfShares; idx++)
     {
         sharePixel[idx-1] = getRandomNumber(urandom,0,2);
-        /* if the source pixel is black */
-        if (tmp)
-            /* use complementary value of previous share */
-            sharePixel[idx] = sharePixel[idx-1] ? 0 : 1;
+        if (tmp) // source pixel is black
+            sharePixel[idx] = sharePixel[idx-1] ? 0 : 1; // use complementary value of previous share
 
-        /* if the source pixel is white */
-        else
-            /* copy value of previous share */
-            sharePixel[idx] = sharePixel[idx-1];
+        else // source pixel is white
+            sharePixel[idx] = sharePixel[idx-1]; // copy value of previous share
         tmp = sharePixel[idx];
     }
 }
@@ -40,11 +36,11 @@ static void fillPixelRG(Pixel sourcePixel, Pixel* sharePixel, int numberOfShares
 ********************************************************************/
 void alternate_nn_ThresholdRGA(Pixel* sourceArray, Image* shares, Pixel* tmpSharePixel, FILE* urandom, int arraySize, int numberOfShares)
 {
-    /* for each pixel */
+    // for each pixel
     for(int i = 0; i < arraySize; i++)
     {
         fillPixelRG(sourceArray[i], tmpSharePixel, numberOfShares, urandom);
-        /* for each share */
+        // for each share
         for (int idx = 0; idx < numberOfShares; idx++)
             shares[idx].array[i] = tmpSharePixel[idx];
     }
@@ -62,25 +58,20 @@ void alternate_2n_ThresholdRGA(Pixel* sourceArray, Image* shares, FILE* urandom,
 {
     uint8_t* randomGrid = shares->array;
 
-    /* for each pixel ... */
-    /* fill the other shares according to source and first share */
+    // for each pixel
     for(int i = 0; i < arraySize; i++)
     {
-        /* fill share 1 random */
+        // fill pixel of share 1 random
         randomGrid[i] = getRandomNumber(urandom,0,2);
 
-        /* for each share */
+        // for share 2 to n
         for(int idx = 1; idx < numberOfShares; idx++)
         {
-            /* if the source pixel is black */
-            if (sourceArray[i])
-                /* get random 0/1 */
-                shares[idx].array[i] = getRandomNumber(urandom,0,2);
+            if (sourceArray[i]) // source pixel is black
+                shares[idx].array[i] = getRandomNumber(urandom,0,2); // get random 0/1
 
-            /* if the source pixel is white */
-            else
-                /* copy value of share 1 */
-                shares[idx].array[i] = shares->array[i];
+            else //source pixel is white
+                shares[idx].array[i] = shares->array[i]; // copy value of share 1
         }
     }
 }
@@ -108,34 +99,24 @@ static inline Pixel getSharePixel(void* sharePixel, int shareIdx, __attribute__(
 ********************************************************************/
 void __alternate_kn_ThresholdRGA(kn_randomGridData* data)
 {
-    Pixel* setOfN = data->setOfN;
-    Pixel* randSortedSetOfN = data->randSortedSetOfN;
+    int* setOfN = data->setOfN;
     Pixel* sharePixel = data->sharePixel;
     Pixel* sourceArray = data->sourceArray;
-    Pixel* checkList = data->checkList;
     Image* shares = data->shares;
     FILE* urandom = data->urandom;
     int arraySize = data->arraySize;
     int n = data->n;
     int k = data->k;
 
-    Copy copy = {
-        .source = setOfN,
-        .dest = randSortedSetOfN
-    };
-
-    /* for each pixel */
+    // for each pixel
     for(int i = 0; i < arraySize; i++)
     {
-        memset(checkList, 0, n*sizeof(Pixel));
-        randomSortVector(&copy, checkList, urandom, n);
-
         /*  create values of sharePixel according to traditional
             RG-based VSS to encode a pixel
         */
         fillPixelRG(sourceArray[i], sharePixel, k, urandom);
-
-        writePixelToShares(randSortedSetOfN, sharePixel, shares, urandom, n, k, i, getSharePixel);
+        shuffleVector(setOfN, n, urandom);
+        writePixelToShares(setOfN, sharePixel, shares, urandom, n, k, i, getSharePixel);
     }
 }
 
@@ -153,19 +134,14 @@ void alternate_kn_ThresholdRGA(Image* source, Image* shares, FILE* urandom, int 
     if (n > 2)
         k = getKfromUser(n);
 
-    Pixel* setOfN = createSetOfN(n);
-    Pixel* randSortedSetOfN = xmalloc(n * sizeof(Pixel));
+    int* setOfN = createSetOfN(n, 1);
     Pixel* sharePixel = xmalloc(k * sizeof(Pixel));
-    Pixel* checkList = xmalloc(n * sizeof(Pixel));
 
     kn_randomGridData rgData = {
         .setOfN = setOfN,
-        .randSortedSetOfN = randSortedSetOfN,
-        .checkList = checkList,
         .sharePixel = sharePixel,
         .sourceArray = source->array,
         .shares = shares,
-        .additShares = NULL,
         .urandom = urandom,
         .arraySize = arraySize,
         .n = n,

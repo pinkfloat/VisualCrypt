@@ -42,4 +42,4 @@ void __alternate_kn_ThresholdRGA(kn_randomGridData* data);
 ********************************************************************/
 void alternate_kn_ThresholdRGA(Image* source, Image* shares, FILE* urandom, int arraySize, int n);
 
-#endif /* #ifndef RANDOM_GRID_ALGORITHMS_V1_H */
+#endif /* RANDOM_GRID_ALGORITHMS_V1_H */

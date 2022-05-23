@@ -4,6 +4,13 @@
 #include "random.h"
 #include "vcAlg02_probabilistic.h"
 
+static inline void copyColumnOfBasisMatrix(BooleanMatrix* destVector, BooleanMatrix* srcMatrix, int column)
+{
+    int numberOfRows = srcMatrix->n;
+    for (int row = 0; row < numberOfRows; row++)
+        setPixel(*destVector, row, 0, getPixel(*srcMatrix, row, column));
+}
+
 /********************************************************************
 * Function:     getRandomMatrixColumn
 *--------------------------------------------------------------------
@@ -22,25 +29,20 @@ static void getRandomMatrixColumn(  BooleanMatrix* B0,
                                     Pixel sourcePixel,
                                     FILE* urandom)
 {
-    int n = B0->n; /* number of rows */
-    int m = B0->m; /* number of columns */
+    int m = B0->m; // number of columns
+    BooleanMatrix* basisMatrix;
+
+    if (sourcePixel) // source pixel is black
+    {
+        basisMatrix = B1;
+    }
+    else // source pixel is white
+    {
+        basisMatrix = B0;
+    }
 
     int randNum = getRandomNumber(urandom, 0, m);
-
-    /* if the source pixel is black */
-    if (sourcePixel)
-    {
-        /* get column of basis matrix B1 */
-        for(int idx = 0; idx < n; idx++)
-            setPixel(columnVector, idx, 0, getPixel(B1, idx, randNum));
-    }
-    /* if the source pixel is white */
-    else
-    {
-        /* get column of basis matrix B0 */
-        for(int idx = 0; idx < n; idx++)
-            setPixel(columnVector, idx, 0, getPixel(B0, idx, randNum));
-    }
+    copyColumnOfBasisMatrix(columnVector, basisMatrix, randNum);
 }
 
 /********************************************************************
@@ -64,24 +66,19 @@ static void getRandomMatrixColumn(  BooleanMatrix* B0,
 static void copyColumnElementsToShares( BooleanMatrix* columnVector,
                                         Image* share,
                                         int sharePixelPosition,
-                                        Pixel* checkList,
+                                        int* rowIndices,
                                         FILE* urandom)
 {
     int n = columnVector->n;
-    int randNum;
     Pixel randPixel;
-    Copy copy = {
-        .dest = &randPixel,
-        .source = columnVector
-    };
-    memset(checkList, 0, n*sizeof(Pixel));
+    shuffleVector(rowIndices, n, urandom);
+    Pixel* pxVector = columnVector->array;
 
-    /* for each share */
+    // for each share
     for(int shareIdx = 0; shareIdx < n; shareIdx++)
     {
-        /* choose random which share will get which column element */
-        randNum = getRandomNumber(urandom, 1, n-shareIdx);
-        randomSort(randNum, checkList, &copy, copyColumnElement);
+        // choose random which share will get which vector element
+        randPixel = pxVector[rowIndices[shareIdx]];
         share[shareIdx].array[sharePixelPosition] = randPixel;
     }
 }
@@ -106,21 +103,21 @@ void __probabilisticAlgorithm(probabilisticData* data)
     BooleanMatrix* B1 = data->B1;
     BooleanMatrix* columnVector = data->columnVector;
     Pixel* sourceArray = data->sourceArray;
-    Pixel* checkList = data->checkList;
+    int* rowIndices = data->rowIndices;
     Image* share = data->share;
     FILE* urandom = data->urandom;
     int width = data->width;
     int height = data->height;
 
-    /* for each pixel of the source */
-    for(int i = 0; i < height; i++)     /* rows */
+    // for each pixel of the source
+    for(int i = 0; i < height; i++)     // rows
     {
-        for(int j = 0; j < width; j++)  /* columns */
+        for(int j = 0; j < width; j++)  // columns
         {
             int sharePixelPosition = i * width + j;
             int sourcePixel = sourceArray[sharePixelPosition];
             getRandomMatrixColumn(B0, B1, columnVector, sourcePixel, urandom);
-            copyColumnElementsToShares(columnVector, share, sharePixelPosition, checkList, urandom);
+            copyColumnElementsToShares(columnVector, share, sharePixelPosition, rowIndices, urandom);
         }
     }
 }
@@ -139,10 +136,10 @@ void probabilisticAlgorithm(AlgorithmData* data)
     uint8_t n = data->numberOfShares;
     uint8_t m = 1 << (n-1);
 
-    /* allocate pixel-arrays for the shares */
+    // allocate pixel-arrays for the shares
 	mallocSharesOfSourceSize(data->source, data->shares, n);
 
-    /* create basis matrices */
+    // create basis matrices
     BooleanMatrix B0 = createBooleanMatrix(n,m);
     BooleanMatrix B1 = createBooleanMatrix(n,m);
     fillBasisMatrices(&B0, &B1);
@@ -157,14 +154,14 @@ void probabilisticAlgorithm(AlgorithmData* data)
         for a share file:
         0 = unused element, 1 = used
     */
-    Pixel* checkList = xmalloc(n * sizeof(Pixel));
+    int* rowIndices = createSetOfN(n, 0);
 
     probabilisticData pData = {
         .B0 = &B0,
         .B1 = &B1,
         .columnVector = &columnVector,
         .sourceArray = data->source->array,
-        .checkList = checkList,
+        .rowIndices = rowIndices,
         .share = data->shares,
         .urandom = data->urandom,
         .width = data->source->width,

@@ -9,7 +9,7 @@ typedef struct {
     BooleanMatrix* B1;
     BooleanMatrix* columnVector;
     Pixel* sourceArray;
-    Pixel* checkList;
+    int* rowIndices;
     Image* share;
     FILE* urandom;
     int width;
@@ -43,4 +43,4 @@ void __probabilisticAlgorithm(probabilisticData* data);
 ********************************************************************/
 void probabilisticAlgorithm(AlgorithmData* data);
 
-#endif /* #ifndef PROBABILISTIC_ALGORITHMS_H */
+#endif /* PROBABILISTIC_ALGORITHMS_H */
