@@ -10,12 +10,13 @@
 *               calculated from a value of /dev/urandom, containing
 *               cryptographically secure random numbers.
 ********************************************************************/
-uint8_t getRandomNumber(FILE* urandom, uint8_t min, uint8_t max)
+uint64_t getRandomNumber(FILE* urandom, uint64_t min, uint64_t max)
 {
-    uint8_t randNum;
+    uint64_t randNum;
     xfread(&randNum, sizeof(randNum), 1, urandom, "ERR: read /dev/urandom");
 
     // TODO: find a more secure way
+    // Note: using uint64_t slows the algorithm extremely
     // https://stackoverflow.com/questions/49878942/why-is-rand6-biased
     randNum = min + (randNum % max);
     return randNum;

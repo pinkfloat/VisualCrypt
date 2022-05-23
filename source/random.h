@@ -25,7 +25,7 @@ typedef struct {
 *               calculated from a value of /dev/urandom, containing
 *               cryptographically secure random numbers.
 ********************************************************************/
-uint8_t getRandomNumber(FILE* urandom, uint8_t min, uint8_t max);
+uint64_t getRandomNumber(FILE* urandom, uint64_t min, uint64_t max);
 
 /********************************************************************
 * Function:     copyColumnElement
