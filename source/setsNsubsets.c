@@ -145,13 +145,13 @@ static void fillSubSet(SubSet** set, uint8_t* tmpSet, uint8_t n, uint8_t len, ui
 {
     for(uint8_t idx = 0; idx < numSubsets; idx++)
     {
-        /* allocate subset of correct length */
+        // allocate subset of correct length
         **set = createSubSet(len);
 
-        /* save data from tmpSet in actual set */
+        // save data from tmpSet in actual set
         copyDataInSet(**set, tmpSet);
 
-        /* fill data for the next loop in tmpSet */
+        // fill data for the next loop in tmpSet
         incrementSubSet(n, len, tmpSet);
         (*set)++;
     }
@@ -178,10 +178,10 @@ static void createAllSubSets(Set* set)
         uint8_t* tmpSet = xmalloc(len);
         fillInitialSubSet(tmpSet, len);
 
-        if(len % 2){ /* odd */
+        if(len % 2){ // odd
             fillSubSet(&pOdd, tmpSet, n, len, numSubsets);
         }
-        else{ /* even */
+        else{ // even
             fillSubSet(&pEven, tmpSet, n, len, numSubsets);
         }
 
@@ -248,9 +248,9 @@ static void printSubsets(SubSet* set, uint8_t num_sets, char sign)
 ********************************************************************/
 void printAllSubsets(Set* set)
 {
-    /* print even subsets */
+    // print even subsets
     printSubsets(set->even, set->numSubsets, 'u');
 
-    /* print odd subsets */
+    // print odd subsets
     printSubsets(set->odd, set->numSubsets, 'v');
 }

@@ -1,6 +1,6 @@
 #include "memoryManagement.h"
 
-/* Global */
+// Global
 List *memList = NULL;
 
 /********************************************************************

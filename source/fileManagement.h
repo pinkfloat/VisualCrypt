@@ -33,7 +33,11 @@ FILE* xfopen(const char *filename, const char *mode);
 *               stream = pointer to an opened FILE input stream,
 *               errMessage = message printet on failure
 ********************************************************************/
-void xfread(void *ptr, size_t size, size_t nmemb, FILE *stream, const char *errMessage);
+static inline void xfread(void *ptr, size_t size, size_t nmemb, FILE *stream, const char *errMessage)
+{
+    if (fread(ptr, size, nmemb, stream) != nmemb)
+        customExitOnFailure(errMessage);
+}
 
 /********************************************************************
 * Function:     xfwrite
@@ -48,7 +52,11 @@ void xfread(void *ptr, size_t size, size_t nmemb, FILE *stream, const char *errM
 *               errMessage = message printet on failure
 * Output:       stream = pointer to an opened FILE output stream,
 ********************************************************************/
-void xfwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream, const char *errMessage);
+static inline void xfwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream, const char *errMessage)
+{
+    if (fwrite(ptr, size, nmemb, stream) != nmemb)
+        customExitOnFailure(errMessage);
+}
 
 /********************************************************************
 * Function:     xfclose

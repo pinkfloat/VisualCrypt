@@ -15,7 +15,7 @@ static void orTwoPixelArrays(Image* dest, Image* source)
     int height = dest->height;
     int width = dest->width;
 
-    /* for each pixel */
+    // for each pixel
     for(int i = 0; i < height*width; i++)
         dest->array[i] |= source->array[i];
 }
@@ -33,11 +33,9 @@ static void fillDecryptedImage(Image* decrypted, Image* share, int numberOfShare
 {
     decrypted->height = share->height;
     decrypted->width = share->width;
-
-    /* use the already allocated array of the first share */
     decrypted->array = share->array;
 
-    /* for each share */
+    // for each share
     for(uint8_t i = 1; i < numberOfShares; i++)
         orTwoPixelArrays(decrypted, share+i);
 }
@@ -54,7 +52,7 @@ void decryptShareFiles()
 {
     int valid = 0, first, last;
 
-	/* get number of first share from user*/
+	// get number of the first share from user
 	do
 	{
 		clear();
@@ -66,7 +64,7 @@ void decryptShareFiles()
 		valid = getNumber("Enter number of the FIRST share to decrypt: ", 1, 8, &first);
 	} while (!valid);
 
-    /* get number of last share from user*/
+    // get number of the last share from user
 	do
 	{
 		clear();
@@ -88,7 +86,7 @@ void decryptShareFiles()
     fillDecryptedImage(&result, shares, numberOfShares);
     createBMP(&result);
 
-    /* cleanup */
+    // cleanup
 	xcloseAll();
 	xfreeAll();
     fprintf(stdout, "Success!\n");

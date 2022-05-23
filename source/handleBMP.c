@@ -8,15 +8,15 @@
 
 typedef struct
 {
-    char padForAlignment[2]; 			    /* extend header size to multiple of 4 bytes */
+    char padForAlignment[2];    // extend header size to multiple of 4 bytes
 
-    /* 14 Byte BMP Fileheader */
+    // 14 Byte BMP Fileheader
     char bitmapSignatureBytes[2];
     uint32_t fileSize;
     uint32_t reserved;
     uint32_t pixelDataOffset;
 
-    /* 40 Byte BitMapInfoHeader */
+    // 40 Byte BitMapInfoHeader
     uint32_t infoHeaderSize;
     int32_t widthInPixel;
     int32_t heightInPixel;
@@ -48,14 +48,14 @@ static inline uint32_t roundToMultipleOf4(uint32_t x)
 ********************************************************************/
 static void writeBmpHeader(BmpHeader* bmpHeader, int32_t width, int32_t height)
 {
-   	/* 14 Byte BMP Fileheader */
+   	// 14 Byte BMP Fileheader
     bmpHeader->bitmapSignatureBytes[0] 	 = 'B';
     bmpHeader->bitmapSignatureBytes[1] 	 = 'M';
     bmpHeader->fileSize          		 = SIZE_BMP_HEADER + width * height * BYTES_PER_RGB_PIXEL;
     bmpHeader->reserved            		 = 0xdeadbeef;
     bmpHeader->pixelDataOffset 			 = SIZE_BMP_HEADER;
 
-    /* 40 Byte BitMapInfoHeader */
+    // 40 Byte BitMapInfoHeader
     bmpHeader->infoHeaderSize        	 = 40;
     bmpHeader->widthInPixel          	 = width;
     bmpHeader->heightInPixel          	 = height;
@@ -94,10 +94,10 @@ static void writeBmpBody(const Pixel* source, Pixel* destination, int32_t width,
     int32_t paddedWidth = roundToMultipleOf4(BYTES_PER_RGB_PIXEL*width);
     for (int32_t row = 0; row < height; row++) {
         for (int32_t column = 0; column < width; column++) {
-            p_source = source[row * width + column] ? 0 : 255;          /* black = 0, white = 255 */
-            destination[row * paddedWidth + column * 3]     = p_source; /* blue  */
-            destination[row * paddedWidth + column * 3 + 1] = p_source; /* green */
-            destination[row * paddedWidth + column * 3 + 2] = p_source; /* red   */
+            p_source = source[row * width + column] ? 0 : 255;          // black = 0, white = 255
+            destination[row * paddedWidth + column * 3]     = p_source; // blue 
+            destination[row * paddedWidth + column * 3 + 1] = p_source; // green
+            destination[row * paddedWidth + column * 3 + 2] = p_source; // red
         }
     }
 }
@@ -117,15 +117,13 @@ void createBMP(Image* image)
     int32_t height = image->height;
     uint32_t bmpSize = SIZE_BMP_HEADER + roundToMultipleOf4(BYTES_PER_RGB_PIXEL*width) * height;
 
-    /* create BMP file content */
+    // create BMP file content
     uint8_t* bmpBuffer = xmalloc(bmpSize + 2);
-
     writeBmpHeader((BmpHeader*)bmpBuffer, width, height);
     writeBmpBody(image->array, bmpBuffer + sizeof(BmpHeader), width, height);
 
-    /* write content to file */
+    // write content to file
     xfwrite(bmpBuffer + 2, 1, bmpSize, image->file,"ERR: create BMP");
-
     xfree(bmpBuffer);
 }
 
@@ -141,10 +139,9 @@ void createBMP(Image* image)
 *               positioning the file offset of "file" to the start
 *               of the pixel data.
 ********************************************************************/
-static void readBmpHeader(FILE* file, BmpHeader* headerInformation)
+static inline void readBmpHeader(FILE* file, BmpHeader* headerInformation)
 {
     size_t bufferSize = sizeof(BmpHeader);
-
     xfread( ((uint8_t*)headerInformation) + 2, 1, bufferSize - 2, file, "ERR: read BMP header information");
 }
 
@@ -168,23 +165,23 @@ static void readBmpBody(Image* image)
     uint32_t bmpSize = paddedWidth * height;
     uint8_t* bmpBuffer = xmalloc(bmpSize);
 
-    /* read remaining file to buffer after readBmpHeader */
+    // read remaining file stream to buffer after readBmpHeader
     xfread(bmpBuffer, 1, bmpSize, image->file, "ERR: invalid BMP body information");
 
-    /* calculate pixel Array */
+    // calculate pixel Array
     uint8_t* pBuffer = bmpBuffer;
     float red, green, blue;
 
     for (int32_t row = 0; row < height; row++) {
         for (int32_t column = 0; column < width; column++) {
 
-            /* weighted the color values of an rgb-image and determines whether
+            /* weight the color values of an rgb-image and determine whether
             a pixel of the result is supposed to be black or white */
             pBuffer = bmpBuffer + (row * paddedWidth + column * BYTES_PER_RGB_PIXEL);
             red = *pBuffer * 0.2616;
             green = pBuffer[1] * 0.7152;
             blue = pBuffer[2] * 0.0722;
-            image->array[row * width + column] = (blue + green + red) > THRESHOLD ? 0 : 1; /* white = 0, black = 1 */
+            image->array[row * width + column] = (blue + green + red) > THRESHOLD ? 0 : 1; // white = 0, black = 1
         }
     }
     xfree(bmpBuffer);
@@ -195,7 +192,7 @@ static void readBmpBody(Image* image)
 *--------------------------------------------------------------------
 * Description:  The function readBMP will read a colored bmp opened
 *               in image->file and get the information: width, height
-*               , and the pixel data from it, to store them into
+*               and the pixel data from it, to store them into
 *               the image structure "image".
 ********************************************************************/
 void readBMP(Image* image)

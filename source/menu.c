@@ -38,7 +38,7 @@ int getNumber(const char* prompt, int min, int max, int* result)
    clearBuffer();
    fprintf(stdout, "\n");
 
-   /* check if number is between boundaries */
+   // check if number is between boundaries
    if(valid)
    {
       *result = atoi(input);
@@ -57,16 +57,16 @@ int getNumber(const char* prompt, int min, int max, int* result)
 ********************************************************************/
 int getMenu(const char *title, char **menuItem, int numChoices, const char* prompt)
 {
-   int choice = 0; /* user input value */
+   int choice = 0; // user input value
    int valid;
 
    do
    {
-      /* print title */
+      // print title
       clear();
       fprintf(stdout, "%s\n\n", title);
 
-      /* print possible choices */
+      // print possible choices
       for (int i=0; i<numChoices; i++)
       {
          fprintf(stdout, "%i. ", i+1);
@@ -74,7 +74,7 @@ int getMenu(const char *title, char **menuItem, int numChoices, const char* prom
       }
       fprintf(stdout, "\n");
 
-      /* get user input */
+      // get user input
       valid = getNumber(prompt, 1, numChoices, &choice);
      
    } while (!valid);

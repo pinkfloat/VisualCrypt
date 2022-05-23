@@ -22,7 +22,11 @@ void customExitOnFailure(const char *message);
 *               and close all files opened so far, before exiting
 *               if ptr is NULL.
 ********************************************************************/
-void validatePointer(void* ptr, const char *message);
+static inline void validatePointer(void* ptr, const char *message)
+{
+    if (ptr == NULL)
+        customExitOnFailure(message);
+}
 
 /********************************************************************
 * Function:     appendOnList
@@ -30,12 +34,16 @@ void validatePointer(void* ptr, const char *message);
 * Description:  Append the List element "newElement" to the start of
 *               a list, the parameter "first" is pointing to.
 ********************************************************************/
-void appendOnList(List* newElement, List** first);
+static inline void appendOnList(List* newElement, List** first)
+{
+    newElement->next = *first;
+    *first = newElement;
+}
 
 /********************************************************************
 * Function:     removeFromList
 *--------------------------------------------------------------------
-* Description:  Removes the list-element, that has a data pointer,
+* Description:  Removes the list element, that has a data pointer,
 *               to the parameter "dataPtr", from the list "first"
 *               is pointing to, and returns the deleted list element.
 *               If nothing is removed from the list, the function

@@ -20,7 +20,7 @@
 ********************************************************************/
 void mallocSharesOfSourceSize(Image* source, Image* share, int numberOfShares)
 {
-    /* for each share */
+    // for each share
     for(int i = 0; i < numberOfShares; i++)
     {
         share[i].height = source->height;
@@ -41,7 +41,7 @@ void mallocSharesOfSourceSize(Image* source, Image* share, int numberOfShares)
 void callAlgorithm(void (*algorithm)(AlgorithmData*), uint8_t algorithmNumber)
 {
 	int valid = 0, numberOfShares;
-	/* get number of shares from user */
+	// get number of shares from user
 	do
 	{
 		clear();
@@ -54,10 +54,10 @@ void callAlgorithm(void (*algorithm)(AlgorithmData*), uint8_t algorithmNumber)
 	deleteShareFiles();
     createShareFiles(shares, numberOfShares);
 
-	/* open urandom, to get random numbers from it */
+	// open urandom, to get random numbers from it
     FILE* urandom = xfopen("/dev/urandom", "r");
 
-	/* call the algorithm */
+	// call the algorithm
 	AlgorithmData data = {
 		.source = &source,
 		.shares = shares,
@@ -69,7 +69,7 @@ void callAlgorithm(void (*algorithm)(AlgorithmData*), uint8_t algorithmNumber)
 
 	drawShareFiles(shares, numberOfShares);
 	
-	/* cleanup */
+	// cleanup
 	xcloseAll();
 	xfreeAll();
 	fprintf(stdout, "Success!\n");

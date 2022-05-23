@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "fileManagement.h"
 
-/* Global */
+// Global
 List *fileList = NULL;
 
 /********************************************************************
@@ -24,44 +24,6 @@ FILE* xfopen(const char *filename, const char *mode)
     validatePointer(newFile->data, "ERR: open file");
     appendOnList(newFile, &fileList);
     return newFile->data;
-}
-
-/********************************************************************
-* Function:     xfread
-*--------------------------------------------------------------------
-* Description:  Calls fread to read from a file, but exit the
-*               programm if the amount of characters that were read
-*               aren't correct.
-* Input:        ptr = block of memory with a minimum size of
-*                     size*nmemb bytes.
-*               size = size in bytes of each element to be read,
-*               nmemb = number of elements of "size"
-*               stream = pointer to an opened FILE input stream,
-*               errMessage = message printet on failure
-********************************************************************/
-void xfread(void *ptr, size_t size, size_t nmemb, FILE *stream, const char *errMessage)
-{
-    if (fread(ptr, size, nmemb, stream) != nmemb)
-        customExitOnFailure(errMessage);
-}
-
-/********************************************************************
-* Function:     xfwrite
-*--------------------------------------------------------------------
-* Description:  Calls fwrite to write to a file, but exit the
-*               programm if the amount of characters that were wrote
-*               aren't correct.
-* Input:        ptr = block of memory with a minimum size of
-*                     size*nmemb bytes.
-*               size = size in bytes of each element to write,
-*               nmemb = number of elements of "size"
-*               errMessage = message printet on failure
-* Output:       stream = pointer to an opened FILE output stream,
-********************************************************************/
-void xfwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream, const char *errMessage)
-{
-    if (fwrite(ptr, size, nmemb, stream) != nmemb)
-        customExitOnFailure(errMessage);
 }
 
 /********************************************************************

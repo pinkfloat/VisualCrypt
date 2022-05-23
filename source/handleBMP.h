@@ -19,7 +19,7 @@ void createBMP(Image* image);
 *--------------------------------------------------------------------
 * Description:  The function readBMP will read a colored bmp opened
 *               in image->file and get the information: width, height
-*               , and the pixel data from it, to store them into
+*               and the pixel data from it, to store them into
 *               the image structure "image".
 ********************************************************************/
 void readBMP(Image* image);

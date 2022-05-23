@@ -1,6 +1,5 @@
 #include <string.h>
 #include <unistd.h>
-#include "memoryManagement.h"
 #include "fileManagement.h"
 #include "image.h"
 #include "handleBMP.h"
@@ -12,7 +11,7 @@
 * Description:  Opens the binary file on the location "path" for read
 *               and stores it in image->file.
 ********************************************************************/
-static void openImageR(char* path, Image* image)
+static inline void openImageR(char* path, Image* image)
 {
     image->file = xfopen(path, "rb");
 }
@@ -23,20 +22,9 @@ static void openImageR(char* path, Image* image)
 * Description:  Opens the binary file on the location "path" for
 *               write and stores it in image->file.
 ********************************************************************/
-static void openImageW(char* path, Image* image)
+static inline void openImageW(char* path, Image* image)
 {
     image->file = xfopen(path, "wb");
-}
-
-/********************************************************************
-* Function:     mallocPixelArray
-*--------------------------------------------------------------------
-* Description:  Allocates a pixel array of the size image->width
-*               * image->height and stores it in image->array.
-********************************************************************/
-void mallocPixelArray(Image* image)
-{
-    image->array = xmalloc(image->width * image->height);
 }
 
 /********************************************************************
@@ -49,10 +37,7 @@ void mallocPixelArray(Image* image)
 ********************************************************************/
 void createSourceImage(Image* image)
 {
-    /* open existing image file for read */
 	openImageR(SOURCE_PATH, image);
-
-    /* read image file */
     readBMP(image);
 }
 
@@ -68,10 +53,10 @@ void createShareFiles(Image* share, int numberOfShares)
     char path[PATH_LENGTH];
     memset(path, '\0', sizeof(path));
 
-    /* for each share */
+    // for each share
     for(uint8_t i = 0; i < numberOfShares; i++)
     {
-            /* give every .bmp an unique number to save it */
+            // give every .bmp an unique number to save it
             snprintf(path, sizeof(path), "%s/share%02d.bmp", SHARE_PATH, i+1);
             openImageW(path, share+i);
     }
@@ -102,7 +87,7 @@ void deleteShareFiles()
 ********************************************************************/
 void drawShareFiles(Image* share, int numberOfShares)
 {
-    /* for each share */
+    // for each share
     for(uint8_t i = 0; i < numberOfShares; i++)
         createBMP(share+i);
 }
@@ -120,7 +105,7 @@ void readShareFiles(Image* share, int first, int last)
     char path[PATH_LENGTH];
     memset(path, '\0', sizeof(path));
 
-    /* for each used share */
+    // for each viewed share
     for(uint8_t i = 0; i <= last-first; i++)
     {
         snprintf(path, sizeof(path), "%s/share%02d.bmp", SHARE_PATH, i+first);
@@ -143,7 +128,7 @@ void createDecryptedImageFile(Image* image)
     char path[PATH_LENGTH];
     memset(path, '\0', sizeof(path));
 
-    /* don't overwrite already existing decrypted images if possible */
+    // don't overwrite already existing decrypted images if possible
     do
     {
         snprintf(path, sizeof(path), "%s/decrypted%02d.bmp", SHARE_PATH, i++);

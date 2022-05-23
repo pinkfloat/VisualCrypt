@@ -12,7 +12,7 @@ typedef struct {
     uint8_t numSetElements;
     SubSet* even;
     SubSet* odd;
-    uint8_t numSubsets; /* number of subsets behind "even" or "odd" */
+    uint8_t numSubsets; // number of subsets behind "even" or "odd"
 } Set;
 
 /********************************************************************

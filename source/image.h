@@ -3,13 +3,14 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include "memoryManagement.h"
 
 #ifndef TYPE_PIXEL
 #define TYPE_PIXEL
 
-typedef uint8_t Pixel; /* black / white */
+typedef uint8_t Pixel; // black / white
 
-#endif /* TYPE_PIXEL */
+#endif // TYPE_PIXEL
 
 typedef struct {
     FILE *file;
@@ -24,7 +25,10 @@ typedef struct {
 * Description:  Allocates a pixel array of the size image->width
 *               * image->height and stores it in image->array.
 ********************************************************************/
-void mallocPixelArray(Image* image);
+static inline void mallocPixelArray(Image* image)
+{
+    image->array = xmalloc(image->width * image->height);
+}
 
 /********************************************************************
 * Function:     createSourceImage

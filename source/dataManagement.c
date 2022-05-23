@@ -21,34 +21,9 @@ void customExitOnFailure(const char *message)
 }
 
 /********************************************************************
-* Function:     validatePointer
-*--------------------------------------------------------------------
-* Description:  Print error messages, free all allocated buffer,
-*               and close all files opened so far, before exiting
-*               if ptr is NULL.
-********************************************************************/
-void validatePointer(void* ptr, const char *message)
-{
-    if (ptr == NULL)
-        customExitOnFailure(message);
-}
-
-/********************************************************************
-* Function:     appendOnList
-*--------------------------------------------------------------------
-* Description:  Append the List element "newElement" to the start of
-*               a list, the parameter "first" is pointing to.
-********************************************************************/
-void appendOnList(List* newElement, List** first)
-{
-    newElement->next = *first;
-    *first = newElement;
-}
-
-/********************************************************************
 * Function:     removeFromList
 *--------------------------------------------------------------------
-* Description:  Removes the list-element, that has a data pointer,
+* Description:  Removes the list element, that has a data pointer,
 *               to the parameter "dataPtr", from the list "first"
 *               is pointing to, and returns the deleted list element.
 *               If nothing is removed from the list, the function
@@ -58,15 +33,15 @@ List* removeFromList(void* dataPtr, List** first)
 {
     List *prev, *tmp;
 
-    /* check if element exist */
+    // check if element exist
     if (dataPtr == NULL)
         return NULL;
 
-    /* case 1: list empty */
+    // case 1: list empty
     if (first == NULL)
         return NULL;
 
-    /* case 2: remove list start */
+    // case 2: remove list start
     if((*first)->data == dataPtr)
     {
         tmp = *first;
@@ -74,19 +49,19 @@ List* removeFromList(void* dataPtr, List** first)
         return tmp;
     }
 
-    /* case 3: search for the element to remove */
+    // case 3: search for the element to remove
     prev = *first;
     tmp = (*first)->next;
     while (tmp)
     {
-        /* found */
+        // found
         if(tmp->data == dataPtr)
         {
-            /* remove element from list */
+            // remove element from list
             prev->next = tmp->next;
             return tmp;
         }
-        /* not found */
+        // not found
         prev = tmp;
         tmp = tmp->next;
     }
