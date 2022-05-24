@@ -5,10 +5,17 @@ obj = $(src:.c=.o)
 
 CC=gcc
 
-LDLIBS += -lm -fsanitize=address
-CFLAGS += -Wall -Wextra -pedantic-errors -fsanitize=address
+LDLIBS += -lm
+CFLAGS += -Wall -Wextra -pedantic-errors
 
-all: $(PROGRAMM)
+release: CFLAGS += -O3
+release: $(PROGRAMM)
+
+debug: LDLIBS += -fsanitize=address
+debug: CFLAGS += -O0 -fsanitize=address
+debug: $(PROGRAMM)
+
+all: release
 
 run: all
 	./$(PROGRAMM)
