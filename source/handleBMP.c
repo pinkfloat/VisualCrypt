@@ -178,7 +178,7 @@ static void readBmpBody(Image* image)
             /* weight the color values of an rgb-image and determine whether
             a pixel of the result is supposed to be black or white */
             pBuffer = bmpBuffer + (row * paddedWidth + column * BYTES_PER_RGB_PIXEL);
-            red = *pBuffer * 0.2616;
+            red = *pBuffer * 0.2126;
             green = pBuffer[1] * 0.7152;
             blue = pBuffer[2] * 0.0722;
             image->array[row * width + column] = (blue + green + red) > THRESHOLD ? 0 : 1; // white = 0, black = 1
