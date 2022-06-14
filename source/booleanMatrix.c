@@ -40,15 +40,12 @@ void deleteBooleanMatrix(BooleanMatrix* matrix)
 ********************************************************************/
 void fillBasisMatrix(BooleanMatrix* B, SubSet* set, int i, int j)
 {
-    if (set[j].length) // the subset is not NULL
+    for (int e = 0; e < set[j].length; e++)
     {
-        for (int e = 0; e < set[j].length; e++) // e = element of a subset
+        if (set[j].data[e] == i)
         {
-            if (set[j].data[e] == i) // i is part of the subset
-            {
-                setPixel(*B, i, j, 1);
-                return;
-            }
+            setPixel(*B, i, j, 1);
+            return;
         }
     }
     setPixel(*B, i, j, 0);
