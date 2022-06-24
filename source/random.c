@@ -2,22 +2,25 @@
 #include "memoryManagement.h"
 #include "random.h"
 
+#define MAX_UINT -1
+
 /********************************************************************
 * Function:     getRandomNumber
 *--------------------------------------------------------------------
 * Description:  Return a random number between min and max, that was
 *               calculated from a file containing random numbers.
+*               To avoid bias, the "java algorithm" is used.
 ********************************************************************/
-uint64_t getRandomNumber(FILE* randomSrc, uint64_t min, uint64_t max)
+uint8_t getRandomNumber(FILE* randomSrc, uint8_t min, uint8_t max)
 {
-    uint64_t randNum;
-    xfread(&randNum, sizeof(randNum), 1, randomSrc, "ERR: read file with random numbers");
+    uint8_t randNum, inRangeNum, limit = MAX_UINT - max;
 
-    // TODO: find a more secure way
-    // Note: using uint64_t slows the algorithm extremely
-    // https://stackoverflow.com/questions/49878942/why-is-rand6-biased
-    randNum = min + (randNum % max);
-    return randNum;
+    do {
+        xfread(&randNum, sizeof(randNum), 1, randomSrc, "ERR: read file with random numbers");
+        inRangeNum = min + (randNum % max);
+    } while (randNum - inRangeNum > limit); // remove bias
+
+    return inRangeNum;
 }
 
 /********************************************************************
@@ -36,7 +39,7 @@ int* createSetOfN(int n, int start)
 /********************************************************************
 * Function:     shuffleVector
 *--------------------------------------------------------------------
-* Description:  The function randomSortVector() shifts the vector
+* Description:  The function shuffleVector() shifts the vector
 *               element random to a different place.
 *               The Fisher-Yates shuffle is used for this purpose.
 * Input:        n = number of elements / size of the vector
@@ -45,10 +48,6 @@ int* createSetOfN(int n, int start)
 ********************************************************************/
 void shuffleVector(int* vector, int n, FILE* randomSrc)
 {
-    // Fisher–Yates shuffle
-    // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
-    // https://stackoverflow.com/questions/42321370/fisher-yates-shuffling-algorithm-in-c
-
     int tmp, randNum;
     for (int i = n-1; i>0; i--) {
         randNum = getRandomNumber(randomSrc, 0, i+1);

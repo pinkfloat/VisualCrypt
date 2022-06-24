@@ -17,8 +17,9 @@ typedef uint8_t Pixel; // black / white
 *--------------------------------------------------------------------
 * Description:  Return a random number between min and max, that was
 *               calculated from a file containing random numbers.
+*               To avoid bias, the "java algorithm" is used.
 ********************************************************************/
-uint64_t getRandomNumber(FILE* randomSrc, uint64_t min, uint64_t max);
+uint8_t getRandomNumber(FILE* randomSrc, uint8_t min, uint8_t max);
 
 /********************************************************************
 * Function:     createSetOfN
@@ -30,7 +31,7 @@ int* createSetOfN(int n, int start);
 /********************************************************************
 * Function:     shuffleVector
 *--------------------------------------------------------------------
-* Description:  The function randomSortVector() shifts the vector
+* Description:  The function shuffleVector() shifts the vector
 *               element random to a different place.
 *               The Fisher-Yates shuffle is used for this purpose.
 * Input:        n = number of elements / size of the vector
