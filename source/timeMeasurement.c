@@ -141,9 +141,10 @@ void timeMeasurement()
     fprintf(logFile, \
     "Time Measurement:\n"
     "algorithm loops: %d\n"
-    "number of shares (n) = %d\n"
-    "number of shares to stack (k) = %d\n\n", \
-    TIME_LOOPS, n, k);
+    "number of shares (n): %d\n"
+    "number of shares to stack (k): %d\n"
+    "Image size in px: %d x %d\n\n", \
+    TIME_LOOPS, n, k, source.width, source.height);
 
     // deterministic algorithm
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
