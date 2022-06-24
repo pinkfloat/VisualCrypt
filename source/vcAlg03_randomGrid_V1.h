@@ -11,7 +11,7 @@
 *               calculates the contentes of all shares pixel by pixel,
 *               instead of filling the shares one after another.
 ********************************************************************/
-void alternate_nn_ThresholdRGA(Pixel* sourceArray, Image* shares, Pixel* tmpSharePixel, FILE* urandom, int arraySize, int numberOfShares);
+void alternate_nn_ThresholdRGA(Pixel* sourceArray, Image* shares, Pixel* tmpSharePixel, FILE* randomSrc, int arraySize, int numberOfShares);
 
 /********************************************************************
 * Function:     alternate_2n_ThresholdRGA
@@ -21,7 +21,7 @@ void alternate_nn_ThresholdRGA(Pixel* sourceArray, Image* shares, Pixel* tmpShar
 *               calculates the contentes of all shares pixel by pixel,
 *               instead of filling the shares one after another.
 ********************************************************************/
-void alternate_2n_ThresholdRGA(Pixel* sourceArray, Image* shares, FILE* urandom, int arraySize, int numberOfShares);
+void alternate_2n_ThresholdRGA(Pixel* sourceArray, Image* shares, FILE* randomSrc, int arraySize, int numberOfShares);
 
 /********************************************************************
 * Function:     __alternate_kn_ThresholdRGA
@@ -40,6 +40,6 @@ void __alternate_kn_ThresholdRGA(kn_randomGridData* data);
 *               random grid algorithm introduced by Tzung-Her Chen
 *               and Kai-Hsiang Tsao.
 ********************************************************************/
-void alternate_kn_ThresholdRGA(Image* source, Image* shares, FILE* urandom, int arraySize, int n);
+void alternate_kn_ThresholdRGA(Image* source, Image* shares, FILE* randomSrc, int arraySize, int n);
 
 #endif /* RANDOM_GRID_ALGORITHMS_V1_H */

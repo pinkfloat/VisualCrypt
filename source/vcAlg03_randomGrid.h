@@ -10,7 +10,7 @@ typedef struct {
     Pixel* sourceArray;
     Image* shares;
     Image* additShares;
-    FILE* urandom;
+    FILE* randomSrc;
     int arraySize;
     int n;
     int k;
@@ -26,7 +26,7 @@ typedef struct {
 *               Shares with a number not contained in the first
 *               k elements will get randomly a 0/1.
 ********************************************************************/
-void writePixelToShares(int* randSortedSetOfN, void* source, Image* shares, FILE* urandom, int n, int k, int i, Pixel (*getPixel)(void*, int, int));
+void writePixelToShares(int* randSortedSetOfN, void* source, Image* shares, FILE* randomSrc, int n, int k, int i, Pixel (*getPixel)(void*, int, int));
 
 /********************************************************************
 * Function:     getKfromUser

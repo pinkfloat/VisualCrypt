@@ -11,12 +11,12 @@
 *               source and the pixel of the share from before.
 *               It is used by the alternate RG algorithms.
 ********************************************************************/
-static void fillPixelRG(Pixel sourcePixel, Pixel* sharePixel, int numberOfShares, FILE* urandom)
+static void fillPixelRG(Pixel sourcePixel, Pixel* sharePixel, int numberOfShares, FILE* randomSrc)
 {
     Pixel tmp = sourcePixel;
     for (int idx = 1; idx < numberOfShares; idx++)
     {
-        sharePixel[idx-1] = getRandomNumber(urandom,0,2);
+        sharePixel[idx-1] = getRandomNumber(randomSrc,0,2);
         if (tmp) // source pixel is black
             sharePixel[idx] = sharePixel[idx-1] ? 0 : 1; // use complementary value of previous share
 
@@ -34,12 +34,12 @@ static void fillPixelRG(Pixel sourcePixel, Pixel* sharePixel, int numberOfShares
 *               calculates the contentes of all shares pixel by pixel,
 *               instead of filling the shares one after another.
 ********************************************************************/
-void alternate_nn_ThresholdRGA(Pixel* sourceArray, Image* shares, Pixel* tmpSharePixel, FILE* urandom, int arraySize, int numberOfShares)
+void alternate_nn_ThresholdRGA(Pixel* sourceArray, Image* shares, Pixel* tmpSharePixel, FILE* randomSrc, int arraySize, int numberOfShares)
 {
     // for each pixel
     for(int i = 0; i < arraySize; i++)
     {
-        fillPixelRG(sourceArray[i], tmpSharePixel, numberOfShares, urandom);
+        fillPixelRG(sourceArray[i], tmpSharePixel, numberOfShares, randomSrc);
         // for each share
         for (int idx = 0; idx < numberOfShares; idx++)
             shares[idx].array[i] = tmpSharePixel[idx];
@@ -54,7 +54,7 @@ void alternate_nn_ThresholdRGA(Pixel* sourceArray, Image* shares, Pixel* tmpShar
 *               calculates the contentes of all shares pixel by pixel,
 *               instead of filling the shares one after another.
 ********************************************************************/
-void alternate_2n_ThresholdRGA(Pixel* sourceArray, Image* shares, FILE* urandom, int arraySize, int numberOfShares)
+void alternate_2n_ThresholdRGA(Pixel* sourceArray, Image* shares, FILE* randomSrc, int arraySize, int numberOfShares)
 {
     Pixel* randomGrid = shares->array;
 
@@ -62,13 +62,13 @@ void alternate_2n_ThresholdRGA(Pixel* sourceArray, Image* shares, FILE* urandom,
     for(int i = 0; i < arraySize; i++)
     {
         // fill pixel of share 1 random
-        randomGrid[i] = getRandomNumber(urandom,0,2);
+        randomGrid[i] = getRandomNumber(randomSrc,0,2);
 
         // for share 2 to n
         for(int idx = 1; idx < numberOfShares; idx++)
         {
             if (sourceArray[i]) // source pixel is black
-                shares[idx].array[i] = getRandomNumber(urandom,0,2); // get random 0/1
+                shares[idx].array[i] = getRandomNumber(randomSrc,0,2); // get random 0/1
 
             else //source pixel is white
                 shares[idx].array[i] = shares->array[i]; // copy value of share 1
@@ -103,7 +103,7 @@ void __alternate_kn_ThresholdRGA(kn_randomGridData* data)
     Pixel* sharePixel = data->sharePixel;
     Pixel* sourceArray = data->sourceArray;
     Image* shares = data->shares;
-    FILE* urandom = data->urandom;
+    FILE* randomSrc = data->randomSrc;
     int arraySize = data->arraySize;
     int n = data->n;
     int k = data->k;
@@ -114,9 +114,9 @@ void __alternate_kn_ThresholdRGA(kn_randomGridData* data)
         /*  create values of sharePixel according to traditional
             RG-based VSS to encode a pixel
         */
-        fillPixelRG(sourceArray[i], sharePixel, k, urandom);
-        shuffleVector(setOfN, n, urandom);
-        writePixelToShares(setOfN, sharePixel, shares, urandom, n, k, i, getSharePixel);
+        fillPixelRG(sourceArray[i], sharePixel, k, randomSrc);
+        shuffleVector(setOfN, n, randomSrc);
+        writePixelToShares(setOfN, sharePixel, shares, randomSrc, n, k, i, getSharePixel);
     }
 }
 
@@ -127,7 +127,7 @@ void __alternate_kn_ThresholdRGA(kn_randomGridData* data)
 *               random grid algorithm introduced by Tzung-Her Chen
 *               and Kai-Hsiang Tsao.
 ********************************************************************/
-void alternate_kn_ThresholdRGA(Image* source, Image* shares, FILE* urandom, int arraySize, int n)
+void alternate_kn_ThresholdRGA(Image* source, Image* shares, FILE* randomSrc, int arraySize, int n)
 {
     int k = 2;
 
@@ -142,7 +142,7 @@ void alternate_kn_ThresholdRGA(Image* source, Image* shares, FILE* urandom, int 
         .sharePixel = sharePixel,
         .sourceArray = source->array,
         .shares = shares,
-        .urandom = urandom,
+        .randomSrc = randomSrc,
         .arraySize = arraySize,
         .n = n,
         .k = k

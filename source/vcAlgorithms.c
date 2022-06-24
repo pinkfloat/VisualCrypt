@@ -54,8 +54,7 @@ void callAlgorithm(void (*algorithm)(AlgorithmData*), int algorithmNumber)
 	deleteShareFiles();
     createShareFiles(shares, numberOfShares);
 
-	// open urandom, to get random numbers from it
-    FILE* urandom = xfopen("/dev/urandom", "r");
+    FILE* randomSrc = xfopen(RANDOM_FILE_PATH, "r");
 
 	// call the algorithm
 	AlgorithmData data = {
@@ -63,7 +62,7 @@ void callAlgorithm(void (*algorithm)(AlgorithmData*), int algorithmNumber)
 		.shares = shares,
 		.numberOfShares = numberOfShares,
 		.algorithmNumber = RG_VERSION ? algorithmNumber+3 : algorithmNumber,
-		.urandom = urandom
+		.randomSrc = randomSrc
 	};
 	algorithm(&data);
 

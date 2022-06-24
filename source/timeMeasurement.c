@@ -56,8 +56,7 @@ void timeMeasurement()
     int m = 1 << (n-1);
     int k = TIME_K;
 
-    // open urandom, to get random numbers from it
-    FILE* urandom = xfopen("/dev/urandom", "r");
+    FILE* randomSrc = xfopen(RANDOM_FILE_PATH, "r");
 
     // read source image
     Image source;
@@ -93,7 +92,7 @@ void timeMeasurement()
         .columnIndices = columnIndices,
         .rowIndices = rowIndices,
         .share = expShares,
-        .urandom = urandom,
+        .randomSrc = randomSrc,
         .width = source.width,
         .height = source.height,
         .deterministicWidth = deterministicWidth,
@@ -109,7 +108,7 @@ void timeMeasurement()
         .sourceArray = source.array,
         .rowIndices = rowIndices,
         .share = shares,
-        .urandom = urandom,
+        .randomSrc = randomSrc,
         .width = source.width,
         .height = source.height
     };
@@ -126,7 +125,7 @@ void timeMeasurement()
         .sourceArray = source.array,
         .shares = shares,
         .additShares = additShares,
-        .urandom = urandom,
+        .randomSrc = randomSrc,
         .arraySize = arraySize,
         .n = n,
         .k = k
@@ -163,28 +162,28 @@ void timeMeasurement()
     // (n,n) random grid
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
     for(int i = 0; i<TIME_LOOPS; i++)
-        randomGrid_nn_Threshold(source.array, shares, &storage, urandom, arraySize, n);
+        randomGrid_nn_Threshold(source.array, shares, &storage, randomSrc, arraySize, n);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
     printMeasuredTime(logFile, &start, &stop, "(n,n) random grid");
 
     // alternate (n,n) random grid
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
     for(int i = 0; i<TIME_LOOPS; i++)
-        alternate_nn_ThresholdRGA(source.array, shares, tmpSharePixel, urandom, arraySize, n);
+        alternate_nn_ThresholdRGA(source.array, shares, tmpSharePixel, randomSrc, arraySize, n);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
     printMeasuredTime(logFile, &start, &stop, "alternate (n,n) random grid");
 
     // (2,n) random grid
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
     for(int i = 0; i<TIME_LOOPS; i++)
-        randomGrid_2n_Threshold(source.array, shares, urandom, arraySize, n);
+        randomGrid_2n_Threshold(source.array, shares, randomSrc, arraySize, n);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
     printMeasuredTime(logFile, &start, &stop, "(2,n) random grid");
 
     // alternate (2,n) random grid
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
     for(int i = 0; i<TIME_LOOPS; i++)
-        alternate_2n_ThresholdRGA(source.array, shares, urandom, arraySize, n);
+        alternate_2n_ThresholdRGA(source.array, shares, randomSrc, arraySize, n);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
     printMeasuredTime(logFile, &start, &stop, "alternate (2,n) random grid");
 
@@ -193,7 +192,7 @@ void timeMeasurement()
     for(int i = 0; i<TIME_LOOPS; i++)
     {
         /* since the (k,n) needs the additional shares filled before, the time must be added */
-        randomGrid_nn_Threshold(source.array, additShares, &storage, urandom, arraySize, k);
+        randomGrid_nn_Threshold(source.array, additShares, &storage, randomSrc, arraySize, k);
         __randomGrid_kn_Threshold(&rgData);
     }
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);

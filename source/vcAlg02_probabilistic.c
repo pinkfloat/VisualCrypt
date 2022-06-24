@@ -19,15 +19,14 @@ static inline void copyColumnOfBasisMatrix(BooleanMatrix* destVector, BooleanMat
 * Input:        B0 = Basis matrix for white share-pixels
 *               B1 = Basis matrix for black share-pixels
 *               sourcePixel = pixel of the secret image (0/1)
-*               urandom = the opened file /dev/urandom, containing
-*               random numbers
+*               randomSrc = file containing random numbers
 * Output:       columnVector = stores the randomly chosen column
 ********************************************************************/
 static void getRandomMatrixColumn(  BooleanMatrix* B0,
                                     BooleanMatrix* B1, 
                                     BooleanMatrix* columnVector,
                                     Pixel sourcePixel,
-                                    FILE* urandom)
+                                    FILE* randomSrc)
 {
     int m = B0->m; // number of columns
     BooleanMatrix* basisMatrix;
@@ -41,7 +40,7 @@ static void getRandomMatrixColumn(  BooleanMatrix* B0,
         basisMatrix = B0;
     }
 
-    int randNum = getRandomNumber(urandom, 0, m);
+    int randNum = getRandomNumber(randomSrc, 0, m);
     copyColumnOfBasisMatrix(columnVector, basisMatrix, randNum);
 }
 
@@ -57,8 +56,7 @@ static void getRandomMatrixColumn(  BooleanMatrix* B0,
 *               be copied to
 *               checkList = containing zero's for unused elements
 *               one's for allready used ones
-*               urandom = the opened file /dev/urandom, containing
-*               random numbers
+*               randomSrc = file containing random numbers
 * Output:       share = containing pixel arrays that need to be
 *               filled. If they are stacked together per OR-function,
 *               the secret image can be seen.
@@ -67,11 +65,11 @@ static void copyColumnElementsToShares( BooleanMatrix* columnVector,
                                         Image* share,
                                         int sharePixelPosition,
                                         int* rowIndices,
-                                        FILE* urandom)
+                                        FILE* randomSrc)
 {
     int n = columnVector->n;
     Pixel randPixel;
-    shuffleVector(rowIndices, n, urandom);
+    shuffleVector(rowIndices, n, randomSrc);
     Pixel* pxVector = columnVector->array;
 
     // for each share
@@ -105,7 +103,7 @@ void __probabilisticAlgorithm(probabilisticData* data)
     Pixel* sourceArray = data->sourceArray;
     int* rowIndices = data->rowIndices;
     Image* share = data->share;
-    FILE* urandom = data->urandom;
+    FILE* randomSrc = data->randomSrc;
     int width = data->width;
     int height = data->height;
 
@@ -116,8 +114,8 @@ void __probabilisticAlgorithm(probabilisticData* data)
         {
             int sharePixelPosition = i * width + j;
             int sourcePixel = sourceArray[sharePixelPosition];
-            getRandomMatrixColumn(B0, B1, columnVector, sourcePixel, urandom);
-            copyColumnElementsToShares(columnVector, share, sharePixelPosition, rowIndices, urandom);
+            getRandomMatrixColumn(B0, B1, columnVector, sourcePixel, randomSrc);
+            copyColumnElementsToShares(columnVector, share, sharePixelPosition, rowIndices, randomSrc);
         }
     }
 }
@@ -163,7 +161,7 @@ void probabilisticAlgorithm(AlgorithmData* data)
         .sourceArray = data->source->array,
         .rowIndices = rowIndices,
         .share = data->shares,
-        .urandom = data->urandom,
+        .randomSrc = data->randomSrc,
         .width = data->source->width,
         .height = data->source->height
     };

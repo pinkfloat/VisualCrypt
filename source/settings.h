@@ -18,8 +18,19 @@
 #define SHARE_PATH "../image"
 #define PATH_LENGTH 100
 
-/* Time measurement log path:
-    TIME_LOG_PATH = the log file of the
+/*  RANDOM_FILE_PATH = the file used as source
+    to get random numbers
+
+    /dev/urandom is faster to get numbers from,
+    but only /dev/random is considered cryptographically
+    secure and should be used to generate "true shares"
+
+    Note: Used in vcAlgorithms.c and
+    timeMeasurement.c
+*/
+#define RANDOM_FILE_PATH "/dev/urandom"
+
+/*  TIME_LOG_PATH = the log file of the
     time measurement
 
     Note: Used in timeMeasurement.c

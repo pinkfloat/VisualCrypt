@@ -81,8 +81,7 @@ void mallocPixelExpandedShares(Image* source, Image* share, int n, int m)
 *               columnCheckList = containing zero's for unused
 *               basis matrix columns and one's for allready used
 *               ones
-*               urandom = the opened file /dev/urandom, containing
-*               random numbers
+*               randomSrc = file containing random numbers
 * Output:       permutation = either the column-permutation of
 *               B0 or B1
 ********************************************************************/
@@ -91,7 +90,7 @@ static void permutateBasisMatrix(   BooleanMatrix* B0,
                                     BooleanMatrix* permutation,
                                     Pixel sourcePixel,
                                     int* columnIndices,
-                                    FILE* urandom)
+                                    FILE* randomSrc)
 {
     BooleanMatrix* basisMatrix;
     if (sourcePixel) // source pixel is black
@@ -103,7 +102,7 @@ static void permutateBasisMatrix(   BooleanMatrix* B0,
         basisMatrix = B0;
     }
 
-    shuffleColumns(permutation, basisMatrix, urandom, columnIndices);
+    shuffleColumns(permutation, basisMatrix, randomSrc, columnIndices);
 }
 
 /********************************************************************
@@ -145,7 +144,7 @@ static void fillPixelEncryptionToShares(    BooleanMatrix* permutation,
                                             int deterministicWidth,
                                             int deterministicHeight,
                                             int* rowIndices,
-                                            FILE* urandom)
+                                            FILE* randomSrc)
 {
     int n = permutation->n;
     int m = permutation->m;
@@ -154,7 +153,7 @@ static void fillPixelEncryptionToShares(    BooleanMatrix* permutation,
     BooleanMatrix matrixRow2D;
     matrixRow2D.m = deterministicWidth;
     matrixRow2D.n = deterministicHeight;
-    shuffleVector(rowIndices, n, urandom);
+    shuffleVector(rowIndices, n, randomSrc);
     
     Pixel* shuffledBasisMatrix = permutation->array;
 
@@ -188,7 +187,7 @@ void __deterministicAlgorithm(deterministicData* data)
     int* columnIndices = data->columnIndices;
     int* rowIndices = data->rowIndices;
     Image* share = data->share;
-    FILE* urandom = data->urandom;
+    FILE* randomSrc = data->randomSrc;
     int width = data->width;
     int height = data->height;
     int deterministicWidth = data->deterministicWidth;
@@ -200,9 +199,9 @@ void __deterministicAlgorithm(deterministicData* data)
         for(int j = 0; j < width; j++)  // columns
         {
             Pixel sourcePixel = sourceArray[i * width + j];
-            permutateBasisMatrix(B0, B1, permutation, sourcePixel, columnIndices, urandom);
+            permutateBasisMatrix(B0, B1, permutation, sourcePixel, columnIndices, randomSrc);
             fillPixelEncryptionToShares(permutation, share, i,
-                                        j, deterministicWidth, deterministicHeight, rowIndices, urandom);
+                                        j, deterministicWidth, deterministicHeight, rowIndices, randomSrc);
         }
     }
 }
@@ -252,7 +251,7 @@ void deterministicAlgorithm(AlgorithmData* data)
         .columnIndices = columnIndices,
         .rowIndices = rowIndices,
         .share = data->shares,
-        .urandom = data->urandom,
+        .randomSrc = data->randomSrc,
         .width = data->source->width,
         .height = data->source->height,
         .deterministicWidth = deterministicWidth,

@@ -16,10 +16,9 @@ typedef uint8_t Pixel; // black / white
 * Function:     getRandomNumber
 *--------------------------------------------------------------------
 * Description:  Return a random number between min and max, that was
-*               calculated from a value of /dev/urandom, containing
-*               cryptographically secure random numbers.
+*               calculated from a file containing random numbers.
 ********************************************************************/
-uint64_t getRandomNumber(FILE* urandom, uint64_t min, uint64_t max);
+uint64_t getRandomNumber(FILE* randomSrc, uint64_t min, uint64_t max);
 
 /********************************************************************
 * Function:     createSetOfN
@@ -35,10 +34,10 @@ int* createSetOfN(int n, int start);
 *               element random to a different place.
 *               The Fisher-Yates shuffle is used for this purpose.
 * Input:        n = number of elements / size of the vector
-*               urandom = file with random numbers
+*               randomSrc = file with random numbers
 * In/Out:       vector = the vector which elements will be shifted
 ********************************************************************/
-void shuffleVector(int* vector, int n, FILE* urandom);
+void shuffleVector(int* vector, int n, FILE* randomSrc);
 
 /********************************************************************
 * Function:     shuffleColumns
@@ -46,7 +45,7 @@ void shuffleVector(int* vector, int n, FILE* urandom);
 * Description:  Copy matrix from src to dest in a column-shuffled way
 *               by getting shuffled indices from parameter "indices".
 ********************************************************************/
-void shuffleColumns(BooleanMatrix* dest, BooleanMatrix* src, FILE* urandom, int* indices);
+void shuffleColumns(BooleanMatrix* dest, BooleanMatrix* src, FILE* randomSrc, int* indices);
 
 /********************************************************************
 * Function:     shuffleRows
@@ -54,6 +53,6 @@ void shuffleColumns(BooleanMatrix* dest, BooleanMatrix* src, FILE* urandom, int*
 * Description:  Copy matrix from src to dest in a row-shuffled way by
 *               getting shuffled indices from parameter "indices".
 ********************************************************************/
-// void shuffleRows(BooleanMatrix* dest, BooleanMatrix* src, FILE* urandom, int* indices);
+// void shuffleRows(BooleanMatrix* dest, BooleanMatrix* src, FILE* randomSrc, int* indices);
 
 #endif /* RANDOM_H */

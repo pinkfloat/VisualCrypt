@@ -12,7 +12,7 @@
 *               share images by calling recursively the (2,2)-threshold
 *               random grid algorithm from O. Kafri and E. Karen.
 ********************************************************************/
-void randomGrid_nn_Threshold(Pixel* sourceArray, Image* shares, Pixel** storage, FILE* urandom, int arraySize, int numberOfShares);
+void randomGrid_nn_Threshold(Pixel* sourceArray, Image* shares, Pixel** storage, FILE* randomSrc, int arraySize, int numberOfShares);
 
 /********************************************************************
 * Function:     randomGrid_2n_Threshold
@@ -26,7 +26,7 @@ void randomGrid_nn_Threshold(Pixel* sourceArray, Image* shares, Pixel** storage,
 *               If more than two shares are stacked, the revealed
 *               image becomes darker.
 ********************************************************************/
-void randomGrid_2n_Threshold(Pixel* sourceArray, Image* shares, FILE* urandom, int arraySize, int numberOfShares);
+void randomGrid_2n_Threshold(Pixel* sourceArray, Image* shares, FILE* randomSrc, int arraySize, int numberOfShares);
 
 /********************************************************************
 * Function:     __randomGrid_kn_Threshold
@@ -49,6 +49,6 @@ void __randomGrid_kn_Threshold(kn_randomGridData* data);
 *               grid algorithm introduced by Tzung-Her Chen and
 *               Kai-Hsiang Tsao.
 ********************************************************************/
-void randomGrid_kn_Threshold(Image* source, Image* shares, Pixel** storage, FILE* urandom, int arraySize, int n);
+void randomGrid_kn_Threshold(Image* source, Image* shares, Pixel** storage, FILE* randomSrc, int arraySize, int n);
 
 #endif /* RANDOM_GRID_ALGORITHMS_V0_H */

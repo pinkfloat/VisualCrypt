@@ -11,7 +11,7 @@ typedef struct {
     Pixel* sourceArray;
     int* rowIndices;
     Image* share;
-    FILE* urandom;
+    FILE* randomSrc;
     int width;
     int height;
 } probabilisticData;

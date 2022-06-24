@@ -20,7 +20,7 @@
 void writePixelToShares( int* randSortedSetOfN,
                                 void* source,
                                 Image* shares,
-                                FILE* urandom,
+                                FILE* randomSrc,
                                 int n,
                                 int k,
                                 int i,
@@ -44,7 +44,7 @@ void writePixelToShares( int* randSortedSetOfN,
         }
         else
         {
-            shares[idx].array[i] = getRandomNumber(urandom,0,2);
+            shares[idx].array[i] = getRandomNumber(randomSrc,0,2);
         }
     }
 }
@@ -83,7 +83,7 @@ void callRandomGridAlgorithm(AlgorithmData* data)
     Image* shares = data->shares;
     int n = data->numberOfShares;
     int algorithmNumber = data->algorithmNumber;
-    FILE* urandom = data->urandom;
+    FILE* randomSrc = data->randomSrc;
 
     Pixel* sourceArray = source->array;
     int arraySize = source->width * source->height;
@@ -95,13 +95,13 @@ void callRandomGridAlgorithm(AlgorithmData* data)
 
     switch(algorithmNumber)
 	{
-		case 1: randomGrid_nn_Threshold(sourceArray, shares, &storage, urandom, arraySize, n);              break;
-		case 2: randomGrid_2n_Threshold(sourceArray, shares, urandom, arraySize, n);                        break;
-		case 3:	randomGrid_kn_Threshold(source, shares, &storage, urandom, arraySize, n);                   break;
+		case 1: randomGrid_nn_Threshold(sourceArray, shares, &storage, randomSrc, arraySize, n);              break;
+		case 2: randomGrid_2n_Threshold(sourceArray, shares, randomSrc, arraySize, n);                        break;
+		case 3:	randomGrid_kn_Threshold(source, shares, &storage, randomSrc, arraySize, n);                   break;
 
-        case 4: alternate_nn_ThresholdRGA(source->array, shares, tmpSharePixel, urandom, arraySize, n);     break;
-        case 5: alternate_2n_ThresholdRGA(source->array, shares, urandom, arraySize, n);                    break;
-        case 6: alternate_kn_ThresholdRGA(source, shares, urandom, arraySize, n);                           break;
+        case 4: alternate_nn_ThresholdRGA(source->array, shares, tmpSharePixel, randomSrc, arraySize, n);     break;
+        case 5: alternate_2n_ThresholdRGA(source->array, shares, randomSrc, arraySize, n);                    break;
+        case 6: alternate_kn_ThresholdRGA(source, shares, randomSrc, arraySize, n);                           break;
 		default: break;
 	}
 }

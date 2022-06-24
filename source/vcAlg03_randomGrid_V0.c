@@ -12,7 +12,7 @@
 *               random with black and white pixel.
 *               It is used by the non-alternate RG algorithms.
 ********************************************************************/
-static void createRandomGrid(Image* share, FILE* urandom)
+static void createRandomGrid(Image* share, FILE* randomSrc)
 {
     int arraySize = share->width * share->height;
     Pixel* shareArray = share->array;
@@ -21,7 +21,7 @@ static void createRandomGrid(Image* share, FILE* urandom)
     for(int i = 0; i < arraySize; i++)
     {
         // get random 0/1
-        shareArray[i] = getRandomNumber(urandom,0,2);
+        shareArray[i] = getRandomNumber(randomSrc,0,2);
     }
 }
 
@@ -34,13 +34,13 @@ static void createRandomGrid(Image* share, FILE* urandom)
 *               a completely random filled image and calculates
 *               share2 by using share1 and the source.
 ********************************************************************/
-static void randomGrid_22_Threshold(Pixel* source, Image* shares, FILE* urandom, int arraySize)
+static void randomGrid_22_Threshold(Pixel* source, Image* shares, FILE* randomSrc, int arraySize)
 {
     Pixel* share1 = shares->array;
     Pixel* share2 = shares[1].array;
 
     // make the first share a random grid
-    createRandomGrid(shares, urandom);
+    createRandomGrid(shares, randomSrc);
 
     // fill the second share according to source and first share
     for(int i = 0; i < arraySize; i++)
@@ -62,12 +62,12 @@ static void randomGrid_22_Threshold(Pixel* source, Image* shares, FILE* urandom,
 *               share images by calling recursively the (2,2)-threshold
 *               random grid algorithm from O. Kafri and E. Karen.
 ********************************************************************/
-void randomGrid_nn_Threshold(Pixel* sourceArray, Image* shares, Pixel** storage, FILE* urandom, int arraySize, int numberOfShares)
+void randomGrid_nn_Threshold(Pixel* sourceArray, Image* shares, Pixel** storage, FILE* randomSrc, int arraySize, int numberOfShares)
 {
     Pixel* tmp;
     
     // fill the first two shares
-    randomGrid_22_Threshold(sourceArray, shares, urandom, arraySize);
+    randomGrid_22_Threshold(sourceArray, shares, randomSrc, arraySize);
 
     if(numberOfShares > 2)
     {
@@ -79,7 +79,7 @@ void randomGrid_nn_Threshold(Pixel* sourceArray, Image* shares, Pixel** storage,
             tmp = *storage;
             *storage = shares[idx-1].array;
             shares[idx-1].array = tmp;
-            randomGrid_22_Threshold(*storage, &shares[idx-1], urandom, arraySize);
+            randomGrid_22_Threshold(*storage, &shares[idx-1], randomSrc, arraySize);
         }
     }
 }
@@ -96,10 +96,10 @@ void randomGrid_nn_Threshold(Pixel* sourceArray, Image* shares, Pixel** storage,
 *               If more than two shares are stacked, the revealed
 *               image becomes darker.
 ********************************************************************/
-void randomGrid_2n_Threshold(Pixel* sourceArray, Image* shares, FILE* urandom, int arraySize, int numberOfShares)
+void randomGrid_2n_Threshold(Pixel* sourceArray, Image* shares, FILE* randomSrc, int arraySize, int numberOfShares)
 {
     // make the first share a random grid
-    createRandomGrid(shares, urandom);
+    createRandomGrid(shares, randomSrc);
 
     // for each share
     for(int idx = 1; idx < numberOfShares; idx++)
@@ -109,7 +109,7 @@ void randomGrid_2n_Threshold(Pixel* sourceArray, Image* shares, FILE* urandom, i
         for(int i = 0; i < arraySize; i++)
         {
             if (sourceArray[i]) //source pixel is black
-                shares[idx].array[i] = getRandomNumber(urandom,0,2); // get random 0/1
+                shares[idx].array[i] = getRandomNumber(randomSrc,0,2); // get random 0/1
 
             else  //source pixel is white
                 shares[idx].array[i] = shares->array[i]; // copy value of share 1
@@ -147,7 +147,7 @@ void __randomGrid_kn_Threshold(kn_randomGridData* data)
     int* setOfN = data->setOfN;
     Image* shares = data->shares;
     Image* additShares = data->additShares;
-    FILE* urandom = data->urandom;
+    FILE* randomSrc = data->randomSrc;
     int arraySize = data->arraySize;
     int n = data->n;
     int k = data->k;
@@ -155,8 +155,8 @@ void __randomGrid_kn_Threshold(kn_randomGridData* data)
     // for each pixel
     for(int i = 0; i < arraySize; i++)
     {
-        shuffleVector(setOfN, n, urandom);
-        writePixelToShares(setOfN, additShares, shares, urandom, n, k, i, getPixelFromShare);
+        shuffleVector(setOfN, n, randomSrc);
+        writePixelToShares(setOfN, additShares, shares, randomSrc, n, k, i, getPixelFromShare);
     }
 }
 
@@ -167,13 +167,13 @@ void __randomGrid_kn_Threshold(kn_randomGridData* data)
 *               grid algorithm introduced by Tzung-Her Chen and
 *               Kai-Hsiang Tsao.
 ********************************************************************/
-void randomGrid_kn_Threshold(Image* source, Image* shares, Pixel** storage, FILE* urandom, int arraySize, int n)
+void randomGrid_kn_Threshold(Image* source, Image* shares, Pixel** storage, FILE* randomSrc, int arraySize, int n)
 {
     Pixel* sourceArray = source->array;
 
     if(n == 2)
     {
-        randomGrid_22_Threshold(sourceArray, shares, urandom, arraySize);
+        randomGrid_22_Threshold(sourceArray, shares, randomSrc, arraySize);
         return;
     }
 
@@ -189,14 +189,14 @@ void randomGrid_kn_Threshold(Image* source, Image* shares, Pixel** storage, FILE
         .setOfN = setOfN,
         .shares = shares,
         .additShares = additShares,
-        .urandom = urandom,
+        .randomSrc = randomSrc,
         .arraySize = arraySize,
         .n = n,
         .k = k
     };
 
     // fill temporary shares
-    randomGrid_nn_Threshold(sourceArray, additShares, storage, urandom, arraySize, k);
+    randomGrid_nn_Threshold(sourceArray, additShares, storage, randomSrc, arraySize, k);
 
     // call algorithm
     __randomGrid_kn_Threshold(&rgData);

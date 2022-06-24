@@ -12,7 +12,7 @@ typedef struct {
     int* columnIndices;
     int* rowIndices;
     Image* share;
-    FILE* urandom;
+    FILE* randomSrc;
     int width;
     int height;
     int deterministicWidth;

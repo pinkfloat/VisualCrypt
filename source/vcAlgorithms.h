@@ -8,7 +8,7 @@ typedef struct {
     Image* shares;
     int numberOfShares;
     int algorithmNumber;
-    FILE* urandom;
+    FILE* randomSrc;
 } AlgorithmData;
 
 /********************************************************************
