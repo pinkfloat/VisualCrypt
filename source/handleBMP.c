@@ -146,6 +146,28 @@ static inline void readBmpHeader(FILE* file, BmpHeader* headerInformation)
 }
 
 /********************************************************************
+* Function:     verifyBmpHeaderInformation
+*--------------------------------------------------------------------
+* Description:  The programm can only read BMP files structured
+*               in a specific (yet common) way. If the input file
+*               got data structured differently, the programm wont
+*               be able to read them and will abort.
+********************************************************************/
+static inline void verifyBmpHeaderInformation(const BmpHeader* headerInformation)
+{
+    if (headerInformation->bitmapSignatureBytes[0] != 'B' ||
+        headerInformation->bitmapSignatureBytes[1] != 'M' ||
+        headerInformation->pixelDataOffset != SIZE_BMP_HEADER ||
+        headerInformation->infoHeaderSize != 40 ||
+        headerInformation->bitsPerPixel != BYTES_PER_RGB_PIXEL * 8 ||
+        headerInformation->compressionMethod != 0
+    )
+    {
+        customExitOnFailure("ERR: found invalid BMP file");
+    }
+}
+
+/********************************************************************
 * Function:     readBmpBody
 *--------------------------------------------------------------------
 * Description:  This function has to be called after readBmpHeader().
@@ -200,6 +222,7 @@ void readBMP(Image* image)
     BmpHeader headerInformation;
 
     readBmpHeader(image->file, &headerInformation);
+    verifyBmpHeaderInformation(&headerInformation);
 
     image->width = headerInformation.widthInPixel;
 	image->height = headerInformation.heightInPixel;
