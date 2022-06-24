@@ -53,7 +53,17 @@
 */
 #define THRESHOLD 127
 
-/*  RandomGridAlgorithms:
+/*  Print Sets and Basis Matrices:
+    If this Option is non-zero, the programm
+    will print the calculated sets, subsets and
+    basis matrices, if either the deterministic or
+    probabilistic algorithm is called
+
+    Note: Used in booleanMatrix.c
+*/
+#define PRINT_SETS_AND_BASIS_MATRICES 0
+
+/*  Random Grid Algorithms:
     All callable RG-Algorithms exist in two versions
     (for time measurement reasons), choose if the
     normal or alternate versions should be called

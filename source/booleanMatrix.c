@@ -2,6 +2,7 @@
 #include <time.h>
 #include "memoryManagement.h"
 #include "booleanMatrix.h"
+#include "settings.h"
 
 /********************************************************************
 * Function:     createBooleanMatrix
@@ -92,7 +93,6 @@ void fillBasisMatrices(BooleanMatrix* B0, BooleanMatrix* B1)
         with even and odd cardinalities of it
     */
     Set set = createSet(n, m);
-    printAllSubsets(&set);
 
     for(int i = 0; i < n; i++) // rows
     {
@@ -103,6 +103,10 @@ void fillBasisMatrices(BooleanMatrix* B0, BooleanMatrix* B1)
         }
     }
 
-    printBooleanMatrix(B0, "B0");
-    printBooleanMatrix(B1, "B1");
+    if(PRINT_SETS_AND_BASIS_MATRICES)
+    {
+        printAllSubsets(&set);
+        printBooleanMatrix(B0, "B0");
+        printBooleanMatrix(B1, "B1");
+    }
 }
