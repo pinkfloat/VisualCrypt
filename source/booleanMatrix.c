@@ -7,17 +7,17 @@
 /********************************************************************
 * Function:     createBooleanMatrix
 *--------------------------------------------------------------------
-* Description:  Saves the size of a BooleanMatrix (n = height, m = 
-*               width) and allocates a 2D pixel array of the size,
-*               that is stored in the BooleanMatrix struct as array.
+* Description:  Saves the size of a BooleanMatrix and allocates a 2D
+*               pixel array of the size, that is stored in the
+*               BooleanMatrix struct as array.
 * Return:       The created BooleanMatrix.
 ********************************************************************/
-BooleanMatrix createBooleanMatrix(int n, int m)
+BooleanMatrix createBooleanMatrix(int height, int width)
 {
     BooleanMatrix result;
-    result.n = n;
-    result.m = m;
-    result.array = xmalloc(sizeof(Pixel)*n*m);
+    result.height = height;
+    result.width = width;
+    result.array = xmalloc(sizeof(Pixel)*height*width);
     return result;
 }
 
@@ -61,8 +61,8 @@ void fillBasisMatrix(BooleanMatrix* B, SubSet* set, int i, int j)
 ********************************************************************/
 void printBooleanMatrix(BooleanMatrix* B, char* name)
 {
-    int n = B->n;
-    int m = B->m;
+    int n = B->height;
+    int m = B->width;
 
     fprintf(stdout, "%2s:\n", name);
     for(int i = 0; i < n; i++)     // rows
@@ -86,8 +86,8 @@ void printBooleanMatrix(BooleanMatrix* B, char* name)
 ********************************************************************/
 void fillBasisMatrices(BooleanMatrix* B0, BooleanMatrix* B1)
 {
-    int n = B0->n;
-    int m = B0->m;
+    int n = B0->height;
+    int m = B0->width;
     
     /*  create set with n elements, holding subsets
         with even and odd cardinalities of it

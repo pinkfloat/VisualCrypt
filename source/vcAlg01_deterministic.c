@@ -118,9 +118,9 @@ static void copyMatrixRowToShares(BooleanMatrix matrixRow2D, Image* share, int p
     int width = share->width;
 
     // for each pixel of matrixRow2D
-    for(int i = 0; i < matrixRow2D.n; i++)     // rows
+    for(int i = 0; i < matrixRow2D.height; i++) // rows
     {
-        for(int j = 0; j < matrixRow2D.m; j++) // columns
+        for(int j = 0; j < matrixRow2D.width; j++) // columns
         {
             share->array[(posY+i) * width + posX+j] = getPixel(matrixRow2D, i, j);
         }
@@ -146,13 +146,13 @@ static void fillPixelEncryptionToShares(    BooleanMatrix* permutation,
                                             int* rowIndices,
                                             FILE* randomSrc)
 {
-    int n = permutation->n;
-    int m = permutation->m;
+    int n = permutation->height;
+    int m = permutation->width;
     int randNum;
 
     BooleanMatrix matrixRow2D;
-    matrixRow2D.m = deterministicWidth;
-    matrixRow2D.n = deterministicHeight;
+    matrixRow2D.width = deterministicWidth;
+    matrixRow2D.height = deterministicHeight;
     shuffleVector(rowIndices, n, randomSrc);
     
     Pixel* shuffledBasisMatrix = permutation->array;

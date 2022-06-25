@@ -6,7 +6,7 @@
 
 static inline void copyColumnOfBasisMatrix(BooleanMatrix* destVector, BooleanMatrix* srcMatrix, int column)
 {
-    int numberOfRows = srcMatrix->n;
+    int numberOfRows = srcMatrix->height;
     for (int row = 0; row < numberOfRows; row++)
         setPixel(*destVector, row, 0, getPixel(*srcMatrix, row, column));
 }
@@ -28,7 +28,7 @@ static void getRandomMatrixColumn(  BooleanMatrix* B0,
                                     Pixel sourcePixel,
                                     FILE* randomSrc)
 {
-    int m = B0->m; // number of columns
+    int m = B0->width; // number of columns
     BooleanMatrix* basisMatrix;
 
     if (sourcePixel) // source pixel is black
@@ -67,7 +67,7 @@ static void copyColumnElementsToShares( BooleanMatrix* columnVector,
                                         int* rowIndices,
                                         FILE* randomSrc)
 {
-    int n = columnVector->n;
+    int n = columnVector->height;
     Pixel randPixel;
     shuffleVector(rowIndices, n, randomSrc);
     Pixel* pxVector = columnVector->array;

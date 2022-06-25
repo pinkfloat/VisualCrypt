@@ -67,7 +67,7 @@ void shuffleVector(int* vector, int n, FILE* randomSrc)
 ********************************************************************/
 static void copyMatrixColumn(BooleanMatrix* dest, BooleanMatrix* src, int destIdx, int srcIdx)
 {
-    int numRows = src->n;
+    int numRows = src->height;
     for(int row = 0; row < numRows; row++)
         setPixel(*dest, row, destIdx, getPixel(*src, row, srcIdx));
 }
@@ -80,7 +80,7 @@ static void copyMatrixColumn(BooleanMatrix* dest, BooleanMatrix* src, int destId
 ********************************************************************/
 void shuffleColumns(BooleanMatrix* dest, BooleanMatrix* src, FILE* randomSrc, int* indices)
 {
-    int numColumns = src->m;
+    int numColumns = src->width;
     shuffleVector(indices, numColumns, randomSrc);
 
     for (int i = 0; i < numColumns; i++)
@@ -95,7 +95,7 @@ void shuffleColumns(BooleanMatrix* dest, BooleanMatrix* src, FILE* randomSrc, in
 ********************************************************************/
 static void copyMatrixRow(BooleanMatrix* dest, BooleanMatrix* src, int destIdx, int srcIdx)
 {
-    int numColumns = src->m;
+    int numColumns = src->width;
     for(int column = 0; column < numColumns; column++)
         setPixel(*dest, destIdx, column, getPixel(*src, srcIdx, column));
 }
@@ -108,7 +108,7 @@ static void copyMatrixRow(BooleanMatrix* dest, BooleanMatrix* src, int destIdx, 
 ********************************************************************/
 void shuffleRows(BooleanMatrix* dest, BooleanMatrix* src, FILE* randomSrc, int* indices)
 {
-    int numRows = src->n;
+    int numRows = src->height;
     shuffleVector(indices, numRows, randomSrc);
 
     for (int i = 0; i < numRows; i++)

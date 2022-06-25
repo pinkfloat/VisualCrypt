@@ -12,20 +12,20 @@ typedef uint8_t Pixel; /* black / white */
 #endif /* TYPE_PIXEL */
 
 typedef struct {
-    int n;
-    int m;
+    int height;
+    int width;
     Pixel* array;
 } BooleanMatrix;
 
 /********************************************************************
 * Function:     createBooleanMatrix
 *--------------------------------------------------------------------
-* Description:  Saves the size of a BooleanMatrix (n = height, m = 
-*               width) and allocates a 2D pixel array of the size,
-*               that is stored in the BooleanMatrix struct as array.
+* Description:  Saves the size of a BooleanMatrix and allocates a 2D
+*               pixel array of the size, that is stored in the
+*               BooleanMatrix struct as array.
 * Return:       The created BooleanMatrix.
 ********************************************************************/
-BooleanMatrix createBooleanMatrix(int n, int m);
+BooleanMatrix createBooleanMatrix(int height, int width);
 
 /********************************************************************
 * Function:     deleteBooleanMatrix
@@ -43,7 +43,7 @@ void deleteBooleanMatrix(BooleanMatrix* matrix);
 ********************************************************************/
 static inline Pixel getPixel(BooleanMatrix matrix, int i, int j)
 {
-    return matrix.array[i * matrix.m + j];
+    return matrix.array[i * matrix.width + j];
 }
 
 /********************************************************************
@@ -54,7 +54,7 @@ static inline Pixel getPixel(BooleanMatrix matrix, int i, int j)
 ********************************************************************/
 static inline void setPixel(BooleanMatrix matrix, int i, int j, Pixel value)
 {
-    matrix.array[i * matrix.m + j] = value;
+    matrix.array[i * matrix.width + j] = value;
 }
 
 /********************************************************************
