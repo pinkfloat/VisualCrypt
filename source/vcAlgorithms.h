@@ -6,8 +6,8 @@
 typedef struct {
     Image* source;
     Image* shares;
-    uint8_t numberOfShares;
-    uint8_t algorithmNumber;
+    int numberOfShares;
+    int algorithmNumber;
     FILE* urandom;
 } AlgorithmData;
 
@@ -20,7 +20,7 @@ typedef struct {
 *               the algorithm is finished. It will use the settings
 *               stored in "settings.h".
 ********************************************************************/
-void callAlgorithm(void (*algorithm)(AlgorithmData*), uint8_t algorithmNumber);
+void callAlgorithm(void (*algorithm)(AlgorithmData*), int algorithmNumber);
 
 /********************************************************************
 * Function:     mallocSharesOfSourceSize

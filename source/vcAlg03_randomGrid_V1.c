@@ -56,7 +56,7 @@ void alternate_nn_ThresholdRGA(Pixel* sourceArray, Image* shares, Pixel* tmpShar
 ********************************************************************/
 void alternate_2n_ThresholdRGA(Pixel* sourceArray, Image* shares, FILE* urandom, int arraySize, int numberOfShares)
 {
-    uint8_t* randomGrid = shares->array;
+    Pixel* randomGrid = shares->array;
 
     // for each pixel
     for(int i = 0; i < arraySize; i++)

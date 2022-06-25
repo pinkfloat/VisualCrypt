@@ -54,7 +54,7 @@ void createShareFiles(Image* share, int numberOfShares)
     memset(path, '\0', sizeof(path));
 
     // for each share
-    for(uint8_t i = 0; i < numberOfShares; i++)
+    for(int i = 0; i < numberOfShares; i++)
     {
             // give every .bmp an unique number to save it
             snprintf(path, sizeof(path), "%s/share%02d.bmp", SHARE_PATH, i+1);
@@ -69,7 +69,7 @@ void createShareFiles(Image* share, int numberOfShares)
 ********************************************************************/
 void deleteShareFiles()
 {
-    uint8_t i = 1;
+    int i = 1;
     char path[PATH_LENGTH];
     memset(path, '\0', sizeof(path));
     do
@@ -88,7 +88,7 @@ void deleteShareFiles()
 void drawShareFiles(Image* share, int numberOfShares)
 {
     // for each share
-    for(uint8_t i = 0; i < numberOfShares; i++)
+    for(int i = 0; i < numberOfShares; i++)
         createBMP(share+i);
 }
 
@@ -106,7 +106,7 @@ void readShareFiles(Image* share, int first, int last)
     memset(path, '\0', sizeof(path));
 
     // for each viewed share
-    for(uint8_t i = 0; i <= last-first; i++)
+    for(int i = 0; i <= last-first; i++)
     {
         snprintf(path, sizeof(path), "%s/share%02d.bmp", SHARE_PATH, i+first);
         openImageR(path, share+i);

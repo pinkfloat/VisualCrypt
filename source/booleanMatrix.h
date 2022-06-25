@@ -52,7 +52,7 @@ static inline Pixel getPixel(BooleanMatrix matrix, int i, int j)
 * Description:  Set the Pixel of a BooleanMatrix on row "i" and
 *               columns "j" to the value "value".
 ********************************************************************/
-static inline void setPixel(BooleanMatrix matrix, int i, int j, uint8_t value)
+static inline void setPixel(BooleanMatrix matrix, int i, int j, Pixel value)
 {
     matrix.array[i * matrix.m + j] = value;
 }

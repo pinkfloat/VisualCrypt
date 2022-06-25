@@ -88,8 +88,8 @@ void printBooleanMatrix(BooleanMatrix* B, char* name)
 ********************************************************************/
 void fillBasisMatrices(BooleanMatrix* B0, BooleanMatrix* B1)
 {
-    uint8_t n = B0->n;
-    uint8_t m = B0->m;
+    int n = B0->n;
+    int m = B0->m;
     
     /*  create set with n elements, holding subsets
         with even and odd cardinalities of it
@@ -97,9 +97,9 @@ void fillBasisMatrices(BooleanMatrix* B0, BooleanMatrix* B1)
     Set set = createSet(n, m);
     printAllSubsets(&set);
 
-    for(uint8_t i = 0; i < n; i++) // rows
+    for(int i = 0; i < n; i++) // rows
     {
-        for(uint8_t j = 0; j < m; j++) // columns
+        for(int j = 0; j < m; j++) // columns
         {
             fillBasisMatrix(B0, set.even, i, j);
             fillBasisMatrix(B1, set.odd, i, j);

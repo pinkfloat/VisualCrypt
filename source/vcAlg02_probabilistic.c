@@ -133,8 +133,8 @@ void __probabilisticAlgorithm(probabilisticData* data)
 ********************************************************************/
 void probabilisticAlgorithm(AlgorithmData* data)
 {
-    uint8_t n = data->numberOfShares;
-    uint8_t m = 1 << (n-1);
+    int n = data->numberOfShares;
+    int m = 1 << (n-1);
 
     // allocate pixel-arrays for the shares
 	mallocSharesOfSourceSize(data->source, data->shares, n);

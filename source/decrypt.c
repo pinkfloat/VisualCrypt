@@ -36,7 +36,7 @@ static void fillDecryptedImage(Image* decrypted, Image* share, int numberOfShare
     decrypted->array = share->array;
 
     // for each share
-    for(uint8_t i = 1; i < numberOfShares; i++)
+    for(int i = 1; i < numberOfShares; i++)
         orTwoPixelArrays(decrypted, share+i);
 }
 

@@ -52,9 +52,9 @@ void timeMeasurement()
 {
 /*__ ALLOCATE MEMORY AND CREATE VALUES NEEDED IN THE DIFFERENT ALGORITHMS __*/
 
-    uint8_t n = TIME_N; // number of shares
-    uint8_t m = 1 << (n-1);
-    uint8_t k = TIME_K;
+    int n = TIME_N; // number of shares
+    int m = 1 << (n-1);
+    int k = TIME_K;
 
     // open urandom, to get random numbers from it
     FILE* urandom = xfopen("/dev/urandom", "r");

@@ -158,8 +158,8 @@ static inline void readBmpHeader(FILE* file, BmpHeader* headerInformation)
 ********************************************************************/
 static void readBmpBody(Image* image)
 {
-    int32_t width = image->width;
-    int32_t height = image->height;
+    uint32_t width = image->width;
+    uint32_t height = image->height;
 
     uint32_t paddedWidth = roundToMultipleOf4(width * BYTES_PER_RGB_PIXEL) ;
     uint32_t bmpSize = paddedWidth * height;
@@ -169,11 +169,11 @@ static void readBmpBody(Image* image)
     xfread(bmpBuffer, 1, bmpSize, image->file, "ERR: invalid BMP body information");
 
     // calculate pixel Array
-    uint8_t* pBuffer = bmpBuffer;
+    uint8_t* pBuffer = NULL;
     float red, green, blue;
 
-    for (int32_t row = 0; row < height; row++) {
-        for (int32_t column = 0; column < width; column++) {
+    for (uint32_t row = 0; row < height; row++) {
+        for (uint32_t column = 0; column < width; column++) {
 
             /* weight the color values of an rgb-image and determine whether
             a pixel of the result is supposed to be black or white */

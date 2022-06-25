@@ -81,8 +81,8 @@ void callRandomGridAlgorithm(AlgorithmData* data)
 {
     Image* source = data->source;
     Image* shares = data->shares;
-    uint8_t n = data->numberOfShares;
-    uint8_t algorithmNumber = data->algorithmNumber;
+    int n = data->numberOfShares;
+    int algorithmNumber = data->algorithmNumber;
     FILE* urandom = data->urandom;
 
     Pixel* sourceArray = source->array;

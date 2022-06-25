@@ -218,8 +218,8 @@ void __deterministicAlgorithm(deterministicData* data)
 ********************************************************************/
 void deterministicAlgorithm(AlgorithmData* data)
 {
-    uint8_t n = data->numberOfShares;
-    uint8_t m = 1 << (n-1);     // number of pixels in a share per pixel in source file = 2^{n-1}
+    int n = data->numberOfShares;
+    int m = 1 << (n-1);     // number of pixels in a share per pixel in source file = 2^{n-1}
 
     // allocate pixel-arrays for the shares
 	mallocPixelExpandedShares(data->source, data->shares, n, m);

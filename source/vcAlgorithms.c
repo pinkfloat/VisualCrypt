@@ -38,7 +38,7 @@ void mallocSharesOfSourceSize(Image* source, Image* share, int numberOfShares)
 *               the algorithm is finished. It will use the settings
 *               stored in "settings.h".
 ********************************************************************/
-void callAlgorithm(void (*algorithm)(AlgorithmData*), uint8_t algorithmNumber)
+void callAlgorithm(void (*algorithm)(AlgorithmData*), int algorithmNumber)
 {
 	int valid = 0, numberOfShares;
 	// get number of shares from user
