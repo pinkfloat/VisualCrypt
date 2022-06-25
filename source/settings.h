@@ -78,23 +78,6 @@
 
 /* TIME MEASUREMENT OPTIONS */
 
-/* Number of shares in time measurement:
-    Define n and k for the time measurement.
-
-    n = number of shares
-    k = number of shares that must be stacked
-        in (k,n) algorithms to reveal information
-        about the source image
-
-    Note:   -   Used in timeMeasurement.c
-            -   The images won't be printet in
-                time measurement, but changing these
-                values will lead to different performance
-                results
-*/
-#define TIME_N 3
-#define TIME_K 2
-
 /* Time measurement loops:
     Define the number of loops per algorithm,
     over which will be measured and averaged.

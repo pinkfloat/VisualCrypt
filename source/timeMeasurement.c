@@ -2,6 +2,7 @@
 #include <time.h>
 #include "memoryManagement.h"
 #include "fileManagement.h"
+#include "menu.h"
 #include "vcAlgorithms.h"
 #include "vcAlg01_deterministic.h"
 #include "vcAlg02_probabilistic.h"
@@ -52,9 +53,16 @@ void timeMeasurement()
 {
 /*__ ALLOCATE MEMORY AND CREATE VALUES NEEDED IN THE DIFFERENT ALGORITHMS __*/
 
-    int n = TIME_N; // number of shares
+	int valid = 0, n;
+	// get number of shares from user
+	do
+	{
+		clear();
+		valid = getNumber("Enter number of shares:\n<min> = 2\n<max> = 8\n", 2, 8, &n);
+	} while (!valid);
+
     int m = 1 << (n-1);
-    int k = TIME_K;
+    int k = getKfromUser(n);
 
     FILE* randomSrc = xfopen(RANDOM_FILE_PATH, "r");
 
