@@ -2,6 +2,7 @@
 #include "image.h"
 #include "fileManagement.h"
 #include "memoryManagement.h"
+#include "menu.h"
 #include "vcAlg03_randomGrid_V0.h"
 
 /********************************************************************

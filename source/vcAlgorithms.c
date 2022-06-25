@@ -40,13 +40,7 @@ void mallocSharesOfSourceSize(Image* source, Image* share, int numberOfShares)
 ********************************************************************/
 void callAlgorithm(void (*algorithm)(AlgorithmData*), int algorithmNumber)
 {
-	int valid = 0, numberOfShares;
-	// get number of shares from user
-	do
-	{
-		clear();
-		valid = getNumber("Enter number of shares:\n<min> = 2\n<max> = 8\n", 2, 8, &numberOfShares);
-	} while (!valid);
+	int numberOfShares = getNfromUser();
 
 	Image source, *shares = xmalloc(numberOfShares*sizeof(Image));
 

@@ -29,14 +29,6 @@ typedef struct {
 void writePixelToShares(int* randSortedSetOfN, void* source, Image* shares, FILE* randomSrc, int n, int k, int i, Pixel (*getPixel)(void*, int, int));
 
 /********************************************************************
-* Function:     getKfromUser
-*--------------------------------------------------------------------
-* Description:  Ask the user the number of the k shares in a
-*               (k,n) RG-Algorithm.
-********************************************************************/
-int getKfromUser(int n);
-
-/********************************************************************
 * Function:     callRandomGridAlgorithm
 *--------------------------------------------------------------------
 * Description:  Prepares data which is needed by all or at least

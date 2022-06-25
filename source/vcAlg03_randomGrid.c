@@ -50,27 +50,6 @@ void writePixelToShares( int* randSortedSetOfN,
 }
 
 /********************************************************************
-* Function:     getKfromUser
-*--------------------------------------------------------------------
-* Description:  Ask the user the number of the k shares in a
-*               (k,n) RG-Algorithm.
-********************************************************************/
-int getKfromUser(int n)
-{
-    int valid = 0, k;
-    char prompt[50];
-    memset(prompt, '\0', sizeof(prompt));
-    snprintf(prompt, sizeof(prompt), "Enter number for k:\n<min> = 2\n<max> = %d\n", n);
-    do
-    {
-        clear();
-        valid = getNumber(prompt, 2, n, &k);
-    } while (!valid);
-    
-    return k;
-}
-
-/********************************************************************
 * Function:     callRandomGridAlgorithm(
 *--------------------------------------------------------------------
 * Description:  Prepares data which is needed by all or at least

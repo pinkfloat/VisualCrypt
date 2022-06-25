@@ -20,6 +20,22 @@
 int getNumber(const char* prompt, int min, int max, int* result);
 
 /********************************************************************
+* Function:     getNfromUser
+*--------------------------------------------------------------------
+* Description:  Ask the user the number of shares that should be
+*               generated.
+********************************************************************/
+int getNfromUser();
+
+/********************************************************************
+* Function:     getKfromUser
+*--------------------------------------------------------------------
+* Description:  Ask the user the number of the k shares in a
+*               (k,n) RG-Algorithm.
+********************************************************************/
+int getKfromUser(int n);
+
+/********************************************************************
 * Function:     getMenu
 *--------------------------------------------------------------------
 * Description:  Print menu title and a list of menu items, from which
