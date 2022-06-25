@@ -167,55 +167,14 @@ static void fillPixelEncryptionToShares(    BooleanMatrix* permutation,
 }
 
 /********************************************************************
-* Function:     __deterministicAlgorithm
+* Function:     prepareDeterministicAlgorithm
 *--------------------------------------------------------------------
-* Description:  This is an implementation of the so called
-*               "deterministic Algorithm" from Moni Naor and Adi
-*               Shamir. It will calculate the pixel of the share
-*               images from the pixel in the source file, by creating
-*               basis matrices out of the number of the share files.
-*               The basis matrices will be afterwards permutated in
-*               columns and each share will get a different row of
-*               every permutation per source pixel.
+* Description:  This function will allocate all data that needs
+*               allocation for the deterministic algorithm and
+*               prepares the basis matrices which doesn't change for
+*               the same amount of share files.
 ********************************************************************/
-void __deterministicAlgorithm(deterministicData* data)
-{
-    BooleanMatrix* B0 = data->B0;
-    BooleanMatrix* B1 = data->B1;
-    BooleanMatrix* permutation = data->permutation;
-    Pixel* sourceArray = data->sourceArray;
-    int* columnIndices = data->columnIndices;
-    int* rowIndices = data->rowIndices;
-    Image* share = data->share;
-    FILE* randomSrc = data->randomSrc;
-    int width = data->width;
-    int height = data->height;
-    int deterministicWidth = data->deterministicWidth;
-    int deterministicHeight = data->deterministicHeight;
-
-    // for each pixel of the source
-    for(int i = 0; i < height; i++)     // rows
-    {
-        for(int j = 0; j < width; j++)  // columns
-        {
-            Pixel sourcePixel = sourceArray[i * width + j];
-            permutateBasisMatrix(B0, B1, permutation, sourcePixel, columnIndices, randomSrc);
-            fillPixelEncryptionToShares(permutation, share, i,
-                                        j, deterministicWidth, deterministicHeight, rowIndices, randomSrc);
-        }
-    }
-}
-
-/********************************************************************
-* Function:     deterministicAlgorithm
-*--------------------------------------------------------------------
-* Description:  This is a wrapper for the "deterministic Algorithm"
-*               from Moni Naor and Adi Shamir. It will allocate all 
-*               data that needs allocation and prepares the basis
-*               matrices which doesn't change for the same amount of
-*               share files.
-********************************************************************/
-void deterministicAlgorithm(AlgorithmData* data)
+deterministicData* prepareDeterministicAlgorithm(AlgorithmData* data)
 {
     int n = data->numberOfShares;
     int m = 1 << (n-1);     // number of pixels in a share per pixel in source file = 2^{n-1}
@@ -232,31 +191,83 @@ void deterministicAlgorithm(AlgorithmData* data)
     calcPixelExpansion(&deterministicHeight, &deterministicWidth, n, m);
 
     /*  create matrix of equal size as the basis matrices 
-        to store the permutations of them.
+        to store the permutations of them
     */
     BooleanMatrix permutation = createBooleanMatrix(n, m);
 
-    /*  create checklist of size n (/m) to store which rows (/columns)
-        of the basis matrix has been already used in the destination
-        matrix: 0 = unused row (/column), 1 = used
+    /*  create checklist of size n (/m) to shuffle the rows (/columns)
+        of the basis matrices
     */
     int* rowIndices = createSetOfN(n, 0);
     int* columnIndices = createSetOfN(m, 0);
 
-    deterministicData dData = {
-        .B0 = &B0,
-        .B1 = &B1,
-        .permutation = &permutation,
-        .sourceArray = data->source->array,
-        .columnIndices = columnIndices,
-        .rowIndices = rowIndices,
-        .share = data->shares,
-        .randomSrc = data->randomSrc,
-        .width = data->source->width,
-        .height = data->source->height,
-        .deterministicWidth = deterministicWidth,
-        .deterministicHeight = deterministicHeight
-    };
+    deterministicData* dData = xmalloc(sizeof(deterministicData));
+    dData->B0 = B0;
+    dData->B1 = B1;
+    dData->permutation = permutation;
+    dData->sourceArray = data->source->array;
+    dData->columnIndices = columnIndices;
+    dData->rowIndices = rowIndices;
+    dData->share = data->shares;
+    dData->randomSrc = data->randomSrc;
+    dData->width = data->source->width;
+    dData->height = data->source->height;
+    dData->deterministicWidth = deterministicWidth;
+    dData->deterministicHeight = deterministicHeight;
 
-    __deterministicAlgorithm(&dData);
+    return dData;
+}
+
+/********************************************************************
+* Function:     __deterministicAlgorithm
+*--------------------------------------------------------------------
+* Description:  This is an implementation of the so called
+*               "deterministic Algorithm" from Moni Naor and Adi
+*               Shamir. It will calculate the pixel of the share
+*               images from the pixel in the source file, by creating
+*               basis matrices out of the number of the share files.
+*               The basis matrices will be afterwards permutated in
+*               columns and each share will get a different row of
+*               every permutation per source pixel.
+********************************************************************/
+void __deterministicAlgorithm(deterministicData* data)
+{
+    BooleanMatrix* B0 = &data->B0;
+    BooleanMatrix* B1 = &data->B1;
+    BooleanMatrix* permutation = &data->permutation;
+    Pixel* sourceArray = data->sourceArray;
+    int* columnIndices = data->columnIndices;
+    int* rowIndices = data->rowIndices;
+    Image* share = data->share;
+    FILE* randomSrc = data->randomSrc;
+    int width = data->width;
+    int height = data->height;
+    int deterministicWidth = data->deterministicWidth;
+    int deterministicHeight = data->deterministicHeight;
+
+    // for each pixel of the source
+    for(int i = 0; i < height; i++)
+    {
+        for(int j = 0; j < width; j++)
+        {
+            Pixel sourcePixel = sourceArray[i * width + j];
+            permutateBasisMatrix(B0, B1, permutation, sourcePixel, columnIndices, randomSrc);
+            fillPixelEncryptionToShares(permutation, share, i,
+                                        j, deterministicWidth, deterministicHeight, rowIndices, randomSrc);
+        }
+    }
+}
+
+/********************************************************************
+* Function:     deterministicAlgorithm
+*--------------------------------------------------------------------
+* Description:  This is a wrapper for the "deterministic Algorithm"
+*               from Moni Naor and Adi Shamir. It will prepare the
+*               resources needed by the algorithm and call it
+*               afterwards.
+********************************************************************/
+void deterministicAlgorithm(AlgorithmData* data)
+{
+    deterministicData* dData = prepareDeterministicAlgorithm(data);
+    __deterministicAlgorithm(dData);
 }

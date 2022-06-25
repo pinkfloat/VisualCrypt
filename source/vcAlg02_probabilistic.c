@@ -82,6 +82,53 @@ static void copyColumnElementsToShares( BooleanMatrix* columnVector,
 }
 
 /********************************************************************
+* Function:     prepareProbabilisticAlgorithm
+*--------------------------------------------------------------------
+* Description:  This function will allocate all data that needs
+*               allocation for the probabilistic algorithm and
+*               prepares the basis matrices which doesn't change for
+*               the same amount of share files.
+********************************************************************/
+probabilisticData* prepareProbabilisticAlgorithm(AlgorithmData* data)
+{
+    int n = data->numberOfShares;
+    int m = 1 << (n-1);
+
+    // allocate pixel-arrays for the shares
+	mallocSharesOfSourceSize(data->source, data->shares, n);
+
+    // create basis matrices
+    BooleanMatrix B0 = createBooleanMatrix(n,m);
+    BooleanMatrix B1 = createBooleanMatrix(n,m);
+    fillBasisMatrices(&B0, &B1);
+
+    /*  create vector with the length of a matrix column
+        to store a random column later on in it
+    */
+    BooleanMatrix columnVector = createBooleanMatrix(n, 1);
+
+    /*  create checklist of size n to store which column elements
+        of the random basis matrix column has been already used
+        for a share file:
+        0 = unused element, 1 = used
+    */
+    int* rowIndices = createSetOfN(n, 0);
+
+    probabilisticData* pData = xmalloc(sizeof(probabilisticData));
+    pData->B0 = B0;
+    pData->B1 = B1;
+    pData->columnVector = columnVector;
+    pData->sourceArray = data->source->array;
+    pData->rowIndices = rowIndices;
+    pData->share = data->shares;
+    pData->randomSrc = data->randomSrc;
+    pData->width = data->source->width;
+    pData->height = data->source->height;
+
+    return pData;
+}
+
+/********************************************************************
 * Function:     __probabilisticAlgorithm
 *--------------------------------------------------------------------
 * Description:  This is an implementation of the so called
@@ -97,9 +144,9 @@ static void copyColumnElementsToShares( BooleanMatrix* columnVector,
 ********************************************************************/
 void __probabilisticAlgorithm(probabilisticData* data)
 {
-    BooleanMatrix* B0 = data->B0;
-    BooleanMatrix* B1 = data->B1;
-    BooleanMatrix* columnVector = data->columnVector;
+    BooleanMatrix* B0 = &data->B0;
+    BooleanMatrix* B1 = &data->B1;
+    BooleanMatrix* columnVector = &data->columnVector;
     Pixel* sourceArray = data->sourceArray;
     int* rowIndices = data->rowIndices;
     Image* share = data->share;
@@ -125,46 +172,11 @@ void __probabilisticAlgorithm(probabilisticData* data)
 *--------------------------------------------------------------------
 * Description:  This is a wrapper for the "probabilistic Algorithm"
 *               from Ryo Ito, Hidenori Kuwakado and Hatsukazu Tanaka.
-*               It will allocate all data that needs allocation and
-*               prepares the basis matrices which doesn't change for
-*               the same amount of share files.
+*               It will prepare the resources needed by the algorithm
+*               and call it afterwards.
 ********************************************************************/
 void probabilisticAlgorithm(AlgorithmData* data)
 {
-    int n = data->numberOfShares;
-    int m = 1 << (n-1);
-
-    // allocate pixel-arrays for the shares
-	mallocSharesOfSourceSize(data->source, data->shares, n);
-
-    // create basis matrices
-    BooleanMatrix B0 = createBooleanMatrix(n,m);
-    BooleanMatrix B1 = createBooleanMatrix(n,m);
-    fillBasisMatrices(&B0, &B1);
-
-    /*  create vector with the length of a matrix column
-        to store a random column later on in it
-    */
-    BooleanMatrix columnVector = createBooleanMatrix(n, 1);
-
-    /*  create checklist of size n to store which column elements
-        of the random basis matrix column has been already used
-        for a share file:
-        0 = unused element, 1 = used
-    */
-    int* rowIndices = createSetOfN(n, 0);
-
-    probabilisticData pData = {
-        .B0 = &B0,
-        .B1 = &B1,
-        .columnVector = &columnVector,
-        .sourceArray = data->source->array,
-        .rowIndices = rowIndices,
-        .share = data->shares,
-        .randomSrc = data->randomSrc,
-        .width = data->source->width,
-        .height = data->source->height
-    };
-
-    __probabilisticAlgorithm(&pData);
+    probabilisticData* pData = prepareProbabilisticAlgorithm(data);
+    __probabilisticAlgorithm(pData);
 }

@@ -143,22 +143,28 @@ static inline Pixel getPixelFromShare(void* shares, int shareIdx, int matrixIdx)
 *               If more than <k> shares are stacked, the noise
 *               decreases the image quality.
 ********************************************************************/
-void __randomGrid_kn_Threshold(kn_randomGridData* data)
+void __randomGrid_kn_Threshold(int* setOfN, Image* shares, Image* tmpShares, FILE* randomSrc, int arraySize, int n, int k)
 {
-    int* setOfN = data->setOfN;
-    Image* shares = data->shares;
-    Image* additShares = data->additShares;
-    FILE* randomSrc = data->randomSrc;
-    int arraySize = data->arraySize;
-    int n = data->n;
-    int k = data->k;
-
     // for each pixel
     for(int i = 0; i < arraySize; i++)
     {
         shuffleVector(setOfN, n, randomSrc);
-        writePixelToShares(setOfN, additShares, shares, randomSrc, n, k, i, getPixelFromShare);
+        writePixelToShares(setOfN, tmpShares, shares, randomSrc, n, k, i, getPixelFromShare);
     }
+}
+
+/********************************************************************
+* Function:     createTemporaryShares
+*--------------------------------------------------------------------
+* Description:  Allocates additional shares and returns them.
+********************************************************************/
+static inline Image* createTemporaryShares(Image* source, Pixel** storage, FILE* randomSrc, int arraySize, int numberOfShares)
+{
+    Image* tmpShares = xmalloc(numberOfShares*sizeof(Image));
+    mallocSharesOfSourceSize(source, tmpShares, numberOfShares);
+    randomGrid_nn_Threshold(source->array, tmpShares, storage, randomSrc, arraySize, numberOfShares);
+
+    return tmpShares;
 }
 
 /********************************************************************
@@ -182,23 +188,6 @@ void randomGrid_kn_Threshold(Image* source, Image* shares, Pixel** storage, FILE
 
     int* setOfN = createSetOfN(n, 1);
 
-    // create additional k shares
-    Image* additShares = xmalloc(k*sizeof(Image));
-    mallocSharesOfSourceSize(source, additShares, k);
-
-    kn_randomGridData rgData = {
-        .setOfN = setOfN,
-        .shares = shares,
-        .additShares = additShares,
-        .randomSrc = randomSrc,
-        .arraySize = arraySize,
-        .n = n,
-        .k = k
-    };
-
-    // fill temporary shares
-    randomGrid_nn_Threshold(sourceArray, additShares, storage, randomSrc, arraySize, k);
-
-    // call algorithm
-    __randomGrid_kn_Threshold(&rgData);
+    Image* tmpShares = createTemporaryShares(source, storage, randomSrc, arraySize, k);
+    __randomGrid_kn_Threshold(setOfN, shares, tmpShares, randomSrc, arraySize, n, k);
 }

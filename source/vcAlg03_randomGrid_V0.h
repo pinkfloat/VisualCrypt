@@ -40,7 +40,7 @@ void randomGrid_2n_Threshold(Pixel* sourceArray, Image* shares, FILE* randomSrc,
 *               If more than <k> shares are stacked, the noise
 *               decreases the image quality.
 ********************************************************************/
-void __randomGrid_kn_Threshold(kn_randomGridData* data);
+void __randomGrid_kn_Threshold(int* setOfN, Image* shares, Image* tmpShares, FILE* randomSrc, int arraySize, int n, int k);
 
 /********************************************************************
 * Function:     randomGrid_kn_Threshold

@@ -58,24 +58,22 @@ void writePixelToShares( int* randSortedSetOfN,
 ********************************************************************/
 void callRandomGridAlgorithm(AlgorithmData* data)
 {
+    int algorithmNumber = data->algorithmNumber;
+
     Image* source = data->source;
     Image* shares = data->shares;
-    int n = data->numberOfShares;
-    int algorithmNumber = data->algorithmNumber;
     FILE* randomSrc = data->randomSrc;
-
-    Pixel* sourceArray = source->array;
     int arraySize = source->width * source->height;
+    int n = data->numberOfShares;
 
-    // allocate pixel-arrays for the shares
     mallocSharesOfSourceSize(source, shares, n);
     Pixel* storage = xmalloc(arraySize);
     Pixel* tmpSharePixel = xmalloc(n*sizeof(Pixel));
 
     switch(algorithmNumber)
 	{
-		case 1: randomGrid_nn_Threshold(sourceArray, shares, &storage, randomSrc, arraySize, n);              break;
-		case 2: randomGrid_2n_Threshold(sourceArray, shares, randomSrc, arraySize, n);                        break;
+		case 1: randomGrid_nn_Threshold(source->array, shares, &storage, randomSrc, arraySize, n);            break;
+		case 2: randomGrid_2n_Threshold(source->array, shares, randomSrc, arraySize, n);                      break;
 		case 3:	randomGrid_kn_Threshold(source, shares, &storage, randomSrc, arraySize, n);                   break;
 
         case 4: alternate_nn_ThresholdRGA(source->array, shares, tmpSharePixel, randomSrc, arraySize, n);     break;

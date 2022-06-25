@@ -51,86 +51,40 @@ static void printMeasuredTime(FILE* fp, struct timespec *start, struct timespec 
 ********************************************************************/
 void timeMeasurement()
 {
-/*__ ALLOCATE MEMORY AND CREATE VALUES NEEDED IN THE DIFFERENT ALGORITHMS __*/
-
     int n = getNfromUser();
-    int m = 1 << (n-1);
     int k = getKfromUser(n);
 
     FILE* randomSrc = xfopen(RANDOM_FILE_PATH, "r");
 
-    // read source image
     Image source;
     createSourceImage(&source);
 
-    // create basis matrices
-    BooleanMatrix B0 = createBooleanMatrix(n,m);
-    BooleanMatrix B1 = createBooleanMatrix(n,m);
-    fillBasisMatrices(&B0, &B1);
-
-    // allocate shares
-    Image *shares = xmalloc(n*sizeof(Image));
-    mallocSharesOfSourceSize(&source, shares, n);
-
     Image *expShares = xmalloc(n*sizeof(Image));
-    mallocPixelExpandedShares(&source, expShares, n, m);
+    AlgorithmData _dData = {
+		.source = &source,
+		.shares = expShares,
+		.numberOfShares = n,
+		.randomSrc = randomSrc
+	};
+    deterministicData* dData = prepareDeterministicAlgorithm(&_dData);
 
-    Image* additShares = xmalloc(k*sizeof(Image));
-    mallocSharesOfSourceSize(&source, additShares, k);
-
-    int* rowIndices = createSetOfN(n, 0);
-
-    // prepare deterministic algorithm
-    int deterministicHeight, deterministicWidth;
-    calcPixelExpansion(&deterministicHeight, &deterministicWidth, n, m);
-    BooleanMatrix permutation = createBooleanMatrix(n, m);
-    int* columnIndices = createSetOfN(m, 0);
-    deterministicData dData = {
-        .B0 = &B0,
-        .B1 = &B1,
-        .permutation = &permutation,
-        .sourceArray = source.array,
-        .columnIndices = columnIndices,
-        .rowIndices = rowIndices,
-        .share = expShares,
-        .randomSrc = randomSrc,
-        .width = source.width,
-        .height = source.height,
-        .deterministicWidth = deterministicWidth,
-        .deterministicHeight = deterministicHeight
-    };
-
-    // prepare probabilistic algorithm
-    BooleanMatrix columnVector = createBooleanMatrix(n, 1);
-        probabilisticData pData = {
-        .B0 = &B0,
-        .B1 = &B1,
-        .columnVector = &columnVector,
-        .sourceArray = source.array,
-        .rowIndices = rowIndices,
-        .share = shares,
-        .randomSrc = randomSrc,
-        .width = source.width,
-        .height = source.height
-    };
-
+    Image *shares = xmalloc(n*sizeof(Image));
+    AlgorithmData _pData = {
+		.source = &source,
+		.shares = shares,
+		.numberOfShares = n,
+		.randomSrc = randomSrc
+	};
+    probabilisticData* pData = prepareProbabilisticAlgorithm(&_pData);
+    
     // prepare random grid algorithms
     int arraySize = source.width * source.height;
     Pixel* storage = xmalloc(arraySize);
     Pixel* sharePixel = xmalloc(k * sizeof(Pixel));
     Pixel* tmpSharePixel = xmalloc(n * sizeof(Pixel));
+    Image* tmpShares = xmalloc(k*sizeof(Image));
+    mallocSharesOfSourceSize(&source, tmpShares, k);
     int* setOfN = createSetOfN(n, 1);
-    kn_randomGridData rgData = {
-        .setOfN = setOfN,
-        .sharePixel = sharePixel,
-        .sourceArray = source.array,
-        .shares = shares,
-        .additShares = additShares,
-        .randomSrc = randomSrc,
-        .arraySize = arraySize,
-        .n = n,
-        .k = k
-    };
 
 /*_________________________ START TIME MEASUREMENT _________________________*/
 
@@ -150,60 +104,60 @@ void timeMeasurement()
     // deterministic algorithm
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
     for(int i = 0; i<TIME_LOOPS; i++)
-        __deterministicAlgorithm(&dData);
+        __deterministicAlgorithm(dData);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
     printMeasuredTime(logFile, &start, &stop, "deterministic");
 
     // probabilistic algorithm
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
     for(int i = 0; i<TIME_LOOPS; i++)
-        __probabilisticAlgorithm(&pData);
+        __probabilisticAlgorithm(pData);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
     printMeasuredTime(logFile, &start, &stop, "probabilistic");
 
-    // (n,n) random grid
+    // (n,n) random grid algorithm
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
     for(int i = 0; i<TIME_LOOPS; i++)
         randomGrid_nn_Threshold(source.array, shares, &storage, randomSrc, arraySize, n);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
     printMeasuredTime(logFile, &start, &stop, "(n,n) random grid");
 
-    // alternate (n,n) random grid
+    // alternate (n,n) random grid algorithm
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
     for(int i = 0; i<TIME_LOOPS; i++)
         alternate_nn_ThresholdRGA(source.array, shares, tmpSharePixel, randomSrc, arraySize, n);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
     printMeasuredTime(logFile, &start, &stop, "alternate (n,n) random grid");
 
-    // (2,n) random grid
+    // (2,n) random grid algorithm
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
     for(int i = 0; i<TIME_LOOPS; i++)
         randomGrid_2n_Threshold(source.array, shares, randomSrc, arraySize, n);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
     printMeasuredTime(logFile, &start, &stop, "(2,n) random grid");
 
-    // alternate (2,n) random grid
+    // alternate (2,n) random grid algorithm
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
     for(int i = 0; i<TIME_LOOPS; i++)
         alternate_2n_ThresholdRGA(source.array, shares, randomSrc, arraySize, n);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
     printMeasuredTime(logFile, &start, &stop, "alternate (2,n) random grid");
 
-    // (k,n) random grid
+    // (k,n) random grid algorithm
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
     for(int i = 0; i<TIME_LOOPS; i++)
     {
-        /* since the (k,n) needs the additional shares filled before, the time must be added */
-        randomGrid_nn_Threshold(source.array, additShares, &storage, randomSrc, arraySize, k);
-        __randomGrid_kn_Threshold(&rgData);
+        // since the (k,n) needs the additional shares filled before, the time must be added
+        randomGrid_nn_Threshold(source.array, tmpShares, &storage, randomSrc, arraySize, k);
+        __randomGrid_kn_Threshold(setOfN, shares, tmpShares, randomSrc, arraySize, n, k);
     }
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
     printMeasuredTime(logFile, &start, &stop, "(k,n) random grid");
 
-    // alternate (k,n) random grid
+    // alternate (k,n) random grid algorithm
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
     for(int i = 0; i<TIME_LOOPS; i++)
-        __alternate_kn_ThresholdRGA(&rgData);
+        __alternate_kn_ThresholdRGA(setOfN, source.array, sharePixel, shares, randomSrc, arraySize, n, k);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
     printMeasuredTime(logFile, &start, &stop, "alternate (k,n) random grid");
 

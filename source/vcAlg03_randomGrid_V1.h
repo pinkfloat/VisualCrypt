@@ -31,7 +31,7 @@ void alternate_2n_ThresholdRGA(Pixel* sourceArray, Image* shares, FILE* randomSr
 *               calculates the contentes of all shares pixel by pixel,
 *               instead of filling the shares one after another.
 ********************************************************************/
-void __alternate_kn_ThresholdRGA(kn_randomGridData* data);
+void __alternate_kn_ThresholdRGA(int* setOfN, Pixel* sourceArray, Pixel* sharePixel, Image* shares, FILE* randomSrc, int arraySize, int n, int k);
 
 /********************************************************************
 * Function:     alternate_kn_ThresholdRGA

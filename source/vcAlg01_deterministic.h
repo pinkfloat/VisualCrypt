@@ -5,9 +5,9 @@
 #include "vcAlgorithms.h"
 
 typedef struct {
-    BooleanMatrix* B0;
-    BooleanMatrix* B1;
-    BooleanMatrix* permutation;
+    BooleanMatrix B0;
+    BooleanMatrix B1;
+    BooleanMatrix permutation;
     Pixel* sourceArray;
     int* columnIndices;
     int* rowIndices;
@@ -54,6 +54,16 @@ void calcPixelExpansion (int* deterministicHeight, int* deterministicWidth, int 
 void mallocPixelExpandedShares(Image* source, Image* share, int n, int m);
 
 /********************************************************************
+* Function:     prepareDeterministicAlgorithm
+*--------------------------------------------------------------------
+* Description:  This function will allocate all data that needs
+*               allocation for the deterministic algorithm and
+*               prepares the basis matrices which doesn't change for
+*               the same amount of share files.
+********************************************************************/
+deterministicData* prepareDeterministicAlgorithm(AlgorithmData* data);
+
+/********************************************************************
 * Function:     __deterministicAlgorithm
 *--------------------------------------------------------------------
 * Description:  This is an implementation of the so called
@@ -71,10 +81,9 @@ void __deterministicAlgorithm(deterministicData* data);
 * Function:     deterministicAlgorithm
 *--------------------------------------------------------------------
 * Description:  This is a wrapper for the "deterministic Algorithm"
-*               from Moni Naor and Adi Shamir. It will allocate all 
-*               data that needs allocation and prepares the basis
-*               matrices which doesn't change for the same amount of
-*               share files.
+*               from Moni Naor and Adi Shamir. It will prepare the
+*               resources needed by the algorithm and call it
+*               afterwards.
 ********************************************************************/
 void deterministicAlgorithm(AlgorithmData* data);
 

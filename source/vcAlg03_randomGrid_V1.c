@@ -98,17 +98,8 @@ static inline Pixel getSharePixel(void* sharePixel, int shareIdx, __attribute__(
 *               calculates the contentes of all shares pixel by pixel,
 *               instead of filling the shares one after another.
 ********************************************************************/
-void __alternate_kn_ThresholdRGA(kn_randomGridData* data)
+void __alternate_kn_ThresholdRGA(int* setOfN, Pixel* sourceArray, Pixel* sharePixel, Image* shares, FILE* randomSrc, int arraySize, int n, int k)
 {
-    int* setOfN = data->setOfN;
-    Pixel* sharePixel = data->sharePixel;
-    Pixel* sourceArray = data->sourceArray;
-    Image* shares = data->shares;
-    FILE* randomSrc = data->randomSrc;
-    int arraySize = data->arraySize;
-    int n = data->n;
-    int k = data->k;
-
     // for each pixel
     for(int i = 0; i < arraySize; i++)
     {
@@ -138,16 +129,5 @@ void alternate_kn_ThresholdRGA(Image* source, Image* shares, FILE* randomSrc, in
     int* setOfN = createSetOfN(n, 1);
     Pixel* sharePixel = xmalloc(k * sizeof(Pixel));
 
-    kn_randomGridData rgData = {
-        .setOfN = setOfN,
-        .sharePixel = sharePixel,
-        .sourceArray = source->array,
-        .shares = shares,
-        .randomSrc = randomSrc,
-        .arraySize = arraySize,
-        .n = n,
-        .k = k
-    };
-
-    __alternate_kn_ThresholdRGA(&rgData);
+    __alternate_kn_ThresholdRGA(setOfN, source->array, sharePixel, shares, randomSrc, arraySize, n, k);
 }

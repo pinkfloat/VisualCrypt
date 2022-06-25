@@ -4,18 +4,6 @@
 #include "random.h"
 #include "vcAlgorithms.h"
 
-typedef struct {
-    int* setOfN;
-    Pixel* sharePixel;
-    Pixel* sourceArray;
-    Image* shares;
-    Image* additShares;
-    FILE* randomSrc;
-    int arraySize;
-    int n;
-    int k;
-} kn_randomGridData;
-
 /********************************************************************
 * Function:     writePixelToShares
 *--------------------------------------------------------------------

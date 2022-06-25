@@ -5,9 +5,9 @@
 #include "vcAlgorithms.h"
 
 typedef struct {
-    BooleanMatrix* B0;
-    BooleanMatrix* B1;
-    BooleanMatrix* columnVector;
+    BooleanMatrix B0;
+    BooleanMatrix B1;
+    BooleanMatrix columnVector;
     Pixel* sourceArray;
     int* rowIndices;
     Image* share;
@@ -15,6 +15,16 @@ typedef struct {
     int width;
     int height;
 } probabilisticData;
+
+/********************************************************************
+* Function:     prepareProbabilisticAlgorithm
+*--------------------------------------------------------------------
+* Description:  This function will allocate all data that needs
+*               allocation for the probabilistic algorithm and
+*               prepares the basis matrices which doesn't change for
+*               the same amount of share files.
+********************************************************************/
+probabilisticData* prepareProbabilisticAlgorithm(AlgorithmData* data);
 
 /********************************************************************
 * Function:     __probabilisticAlgorithm
@@ -37,9 +47,8 @@ void __probabilisticAlgorithm(probabilisticData* data);
 *--------------------------------------------------------------------
 * Description:  This is a wrapper for the "probabilistic Algorithm"
 *               from Ryo Ito, Hidenori Kuwakado and Hatsukazu Tanaka.
-*               It will allocate all data that needs allocation and
-*               prepares the basis matrices which doesn't change for
-*               the same amount of share files.
+*               It will prepare the resources needed by the algorithm
+*               and call it afterwards.
 ********************************************************************/
 void probabilisticAlgorithm(AlgorithmData* data);
 
