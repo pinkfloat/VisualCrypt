@@ -10,10 +10,13 @@
 ********************************************************************/
 static void clearBuffer()
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
    char tmp;
    do {
      scanf("%c", &tmp);
    } while(tmp != '\n');
+#pragma GCC diagnostic pop
 }
 
 /********************************************************************
