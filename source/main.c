@@ -1,21 +1,85 @@
+#include <stdlib.h>
+#include <unistd.h>
 #include "menu.h"
 #include "vcAlgorithms.h"
 #include "vcAlg01_deterministic.h"
 #include "vcAlg02_probabilistic.h"
 #include "vcAlg03_randomGrid.h"
 #include "decrypt.h"
+#include "settings.h"
 #include "timeMeasurement.h"
+
+#define EXIT_ON_HELP 2
+
+// Global
+char* sourcePath = SOURCE_PATH;
+char* sharePath = SHARE_PATH;
+
+/********************************************************************
+* Function:     usage
+*--------------------------------------------------------------------
+* Description:  Print program usage.
+********************************************************************/
+static inline void usage()
+{
+	fprintf(stdout,\
+	"Usage:\n"
+	"visualCrypt [options] <parameters>\n\n"
+	"Options:\n"
+	" -h                            display this help\n"
+	" -s <source path>              set path to a secret .bmp\n"
+	" -d <destination path>         set path to a result storing directory\n\n"
+	);
+}
+
+/********************************************************************
+* Function:     getPathsFromProgramParameter
+*--------------------------------------------------------------------
+* Description:  Check the program parameters and set the global paths
+*				according to them.
+* Return:       0 on success, 1 on failure, 2 for help option.
+********************************************************************/
+static int getPathsFromProgramParameter(int argc, char* argv[])
+{
+	int c = '?';
+	while ((c = getopt(argc, argv, "hs:d:")) != -1)
+	{
+		switch(c) {
+			case 'h':
+					usage();
+					return EXIT_ON_HELP;
+			case 's':
+					sourcePath = optarg;
+					break;
+			case 'd':
+					sharePath = optarg;
+					break;
+			case ':':
+					fprintf(stderr, "ERR: option -%c requires an operand\n", optopt);
+					return EXIT_FAILURE;
+			case '?':
+					fprintf(stderr, "ERR: unrecognized option: '-%c'\n", optopt);
+					return EXIT_FAILURE;
+		}
+	}
+	return EXIT_SUCCESS;
+}
 
 /********************************************************************
 * Function:     main
 *--------------------------------------------------------------------
 * Description:  Ask the user which algorithm shall run and call the
 *               chosen one.
-* Return:       0 on success, -1 on failure.
+* Return:       0 on success, 1 on failure.
 ********************************************************************/
 int main(int argc, char* argv[])
 {
 	int choice;
+
+	int exitStatus = getPathsFromProgramParameter(argc, argv);
+	if (exitStatus)
+		return exitStatus;
+	
 	char *menu [] = {
 						"(n,n) deterministic algorithm",
 						"(n,n) probabilistic algorithm",
@@ -37,8 +101,8 @@ int main(int argc, char* argv[])
 		case 5:		callAlgorithm(callRandomGridAlgorithm, 3); 	break;
 		case 6:		decryptShareFiles();						break;
 		case 7: 	timeMeasurement();							break;
-		case 8:		return 0;
+		case 8:		return EXIT_SUCCESS;
 		default: 	break;
 	}
-	return 0;
+	return EXIT_SUCCESS;
 }

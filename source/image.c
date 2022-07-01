@@ -5,6 +5,8 @@
 #include "handleBMP.h"
 #include "settings.h"
 
+//Note: sourcePath and sharePath are globals from main.c
+
 /********************************************************************
 * Function:     openImageR
 *--------------------------------------------------------------------
@@ -30,14 +32,14 @@ static inline void openImageW(char* path, Image* image)
 /********************************************************************
 * Function:     createSourceImage
 *--------------------------------------------------------------------
-* Description:  Opens the bmp file located at SOURCE_PATH and stores
+* Description:  Opens the bmp file located at sourcePath and stores
 *               the opened file path, width, height and
 *               black-and-white interpreted pixel array in the
 *               structure "image".
 ********************************************************************/
 void createSourceImage(Image* image)
 {
-	openImageR(SOURCE_PATH, image);
+	openImageR(sourcePath, image);
     readBMP(image);
 }
 
@@ -50,16 +52,18 @@ void createSourceImage(Image* image)
 ********************************************************************/
 void createShareFiles(Image* share, int numberOfShares)
 {
-    char path[PATH_LENGTH];
-    memset(path, '\0', sizeof(path));
+    size_t pathLen = strlen(sharePath)+13;
+    char *path = xcalloc(pathLen, 1);
 
     // for each share
     for(int i = 0; i < numberOfShares; i++)
     {
             // give every .bmp an unique number to save it
-            snprintf(path, sizeof(path), "%s/share%02d.bmp", SHARE_PATH, i+1);
+            snprintf(path, pathLen, "%s/share%02d.bmp", sharePath, i+1);
             openImageW(path, share+i);
     }
+
+    xfree(path);
 }
 
 /********************************************************************
@@ -70,12 +74,14 @@ void createShareFiles(Image* share, int numberOfShares)
 void deleteShareFiles()
 {
     int i = 1;
-    char path[PATH_LENGTH];
-    memset(path, '\0', sizeof(path));
+    size_t pathLen = strlen(sharePath)+13;
+    char *path = xcalloc(pathLen, 1);
     do
     {
-        snprintf(path, sizeof(path), "%s/share%02d.bmp", SHARE_PATH, i++);
+        snprintf(path, pathLen, "%s/share%02d.bmp", sharePath, i++);
     } while(remove(path) == 0);
+
+    xfree(path);
 }
 
 /********************************************************************
@@ -102,16 +108,18 @@ void drawShareFiles(Image* share, int numberOfShares)
 ********************************************************************/
 void readShareFiles(Image* share, int first, int last)
 {
-    char path[PATH_LENGTH];
-    memset(path, '\0', sizeof(path));
+    size_t pathLen = strlen(sharePath)+13;
+    char *path = xcalloc(pathLen, 1);
 
     // for each viewed share
     for(int i = 0; i <= last-first; i++)
     {
-        snprintf(path, sizeof(path), "%s/share%02d.bmp", SHARE_PATH, i+first);
+        snprintf(path, pathLen, "%s/share%02d.bmp", sharePath, i+first);
         openImageR(path, share+i);
         readBMP(share+i);
     }
+
+    xfree(path);
 }
 
 /********************************************************************
@@ -125,16 +133,16 @@ void readShareFiles(Image* share, int first, int last)
 void createDecryptedImageFile(Image* image)
 {
     int i = 1;
-    char path[PATH_LENGTH];
-    memset(path, '\0', sizeof(path));
+    size_t pathLen = strlen(sharePath)+17;
+    char *path = xcalloc(pathLen, 1);
 
     // don't overwrite already existing decrypted images if possible
     do
     {
-        snprintf(path, sizeof(path), "%s/decrypted%02d.bmp", SHARE_PATH, i++);
+        snprintf(path, pathLen, "%s/decrypted%02d.bmp", sharePath, i++);
         if (i > 99)
         {
-            snprintf(path, sizeof(path), "%s/decrypted01.bmp", SHARE_PATH);
+            snprintf(path, pathLen, "%s/decrypted01.bmp", sharePath);
             remove(path);
             fprintf(stdout, "replaced %s\n", path);
             break;
@@ -142,4 +150,6 @@ void createDecryptedImageFile(Image* image)
     } while( access(path, F_OK) != -1);
 
 	openImageW(path, image);
+
+    xfree(path);
 }

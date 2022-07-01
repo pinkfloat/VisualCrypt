@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "memoryManagement.h"
 #include "fileManagement.h"
 
@@ -17,7 +18,7 @@ void customExitOnFailure(const char *message)
     fprintf(stderr, "Free all buffer...\n");
     xfreeAll();
     fprintf(stderr, "Exit programm...\n");
-    exit(-1);
+    exit(EXIT_FAILURE);
 }
 
 /********************************************************************

@@ -4,19 +4,18 @@
 /* PATHS */
 
 /*  SOURCE_PATH = the secret image
-    SHARE_PATH = the directory where the shares
-    and decryptions of the shares will be stored
+    SHARE_PATH = directory where the shares and
+    decryptions of the shares will be stored.
 
-    If changed to something much longer
-    please adjust PATH_LENGTH too to something
-    that is at least 20 characters larger than
-    the paths.
+    These are the standard values for source image
+    and result directory, if they are not changed
+    via command line options when the program is
+    called.
 
-    Note: Used in image.c
+    Note: Used in main.c
 */
 #define SOURCE_PATH "../image/cameraman.bmp"
 #define SHARE_PATH "../image"
-#define PATH_LENGTH 100
 
 /*  RANDOM_FILE_PATH = the file used as source
     to get random numbers

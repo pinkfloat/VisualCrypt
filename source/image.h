@@ -19,6 +19,9 @@ typedef struct {
     int32_t height;
 } Image;
 
+extern char* sourcePath;
+extern char* sharePath;
+
 /********************************************************************
 * Function:     mallocPixelArray
 *--------------------------------------------------------------------
@@ -33,7 +36,7 @@ static inline void mallocPixelArray(Image* image)
 /********************************************************************
 * Function:     createSourceImage
 *--------------------------------------------------------------------
-* Description:  Opens the bmp file located at SOURCE_PATH and stores
+* Description:  Opens the bmp file located at sourcePath and stores
 *               the opened file path, width, height and
 *               black-and-white interpreted pixel array in the
 *               structure "image".
