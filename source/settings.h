@@ -12,7 +12,7 @@
     via command line options when the program is
     called.
 
-    Note: Used in main.c
+    Note: Used in visualCrypt.c
 */
 #define SOURCE_PATH "../image/cameraman.bmp"
 #define SHARE_PATH "../image"

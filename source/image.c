@@ -5,7 +5,7 @@
 #include "handleBMP.h"
 #include "settings.h"
 
-//Note: sourcePath and sharePath are globals from main.c
+//note: sourcePath and sharePath are globals from visualCrypt.c
 
 /********************************************************************
 * Function:     openImageR

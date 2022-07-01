@@ -1,4 +1,4 @@
-PROGRAMM = main
+PROGRAM = visualCrypt
 
 src = $(wildcard *.c)
 obj = $(src:.c=.o)
@@ -9,19 +9,17 @@ LDLIBS += -lm
 CFLAGS += -Wall -Wextra -pedantic-errors
 
 release: CFLAGS += -O3
-release: $(PROGRAMM)
+release: $(PROGRAM)
 
 debug: LDLIBS += -fsanitize=address
 debug: CFLAGS += -O0 -fsanitize=address
-debug: $(PROGRAMM)
+debug: $(PROGRAM)
 
-all: release
+$(PROGRAM): $(obj)
 
-run: all
-	./$(PROGRAMM)
-
-$(PROGRAMM): $(obj)
+run:
+	./$(PROGRAM)
 
 .PHONY: clean
 clean:
-	rm -f $(obj) $(PROGRAMM)
+	rm -f $(obj) $(PROGRAM)
