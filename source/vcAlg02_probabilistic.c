@@ -151,19 +151,14 @@ void __probabilisticAlgorithm(probabilisticData* data)
     int* rowIndices = data->rowIndices;
     Image* share = data->share;
     FILE* randomSrc = data->randomSrc;
-    int width = data->width;
-    int height = data->height;
+    int imageSize = data->width * data->height;
 
-    // for each pixel of the source
-    for(int i = 0; i < height; i++)     // rows
+    // for each pixel of the secret image
+    for(int i = 0; i < imageSize; i++)
     {
-        for(int j = 0; j < width; j++)  // columns
-        {
-            int sharePixelPosition = i * width + j;
-            int sourcePixel = sourceArray[sharePixelPosition];
+            int sourcePixel = sourceArray[i];
             getRandomMatrixColumn(B0, B1, columnVector, sourcePixel, randomSrc);
-            copyColumnElementsToShares(columnVector, share, sharePixelPosition, rowIndices, randomSrc);
-        }
+            copyColumnElementsToShares(columnVector, share, i, rowIndices, randomSrc);
     }
 }
 
