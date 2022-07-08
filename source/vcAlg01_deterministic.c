@@ -138,11 +138,10 @@ static void copyMatrixRowToShares(BooleanMatrix matrixRow2D, Image* share, int p
 *               (2D-sorted) row of the permutation-array.
 ********************************************************************/
 static void fillPixelEncryptionToShares(    BooleanMatrix* permutation,
+                                            BooleanMatrix matrixRow2D,
                                             Image* share,
-                                            int i,
-                                            int j,
-                                            int deterministicWidth,
-                                            int deterministicHeight,
+                                            int posY,
+                                            int posX,
                                             int* rowIndices,
                                             FILE* randomSrc)
 {
@@ -150,9 +149,6 @@ static void fillPixelEncryptionToShares(    BooleanMatrix* permutation,
     int m = permutation->width;
     int randNum;
 
-    BooleanMatrix matrixRow2D;
-    matrixRow2D.width = deterministicWidth;
-    matrixRow2D.height = deterministicHeight;
     shuffleVector(rowIndices, n, randomSrc);
     
     Pixel* shuffledBasisMatrix = permutation->array;
@@ -162,7 +158,7 @@ static void fillPixelEncryptionToShares(    BooleanMatrix* permutation,
     {
         randNum = rowIndices[shareIdx];
         matrixRow2D.array = &(shuffledBasisMatrix[randNum * m]); // first element of a random matrix row
-        copyMatrixRowToShares(matrixRow2D, &share[shareIdx], i*deterministicHeight, j*deterministicWidth);
+        copyMatrixRowToShares(matrixRow2D, &share[shareIdx], posY, posX);
     }
 }
 
@@ -244,16 +240,19 @@ void __deterministicAlgorithm(deterministicData* data)
     int height = data->height;
     int deterministicWidth = data->deterministicWidth;
     int deterministicHeight = data->deterministicHeight;
+    BooleanMatrix matrixRow2D;
+    matrixRow2D.width = deterministicWidth;
+    matrixRow2D.height = deterministicHeight;
 
-    // for each pixel of the source
+    // for each pixel of the secret image
     for(int i = 0; i < height; i++)
     {
         for(int j = 0; j < width; j++)
         {
             Pixel sourcePixel = sourceArray[i * width + j];
             permutateBasisMatrix(B0, B1, permutation, sourcePixel, columnIndices, randomSrc);
-            fillPixelEncryptionToShares(permutation, share, i,
-                                        j, deterministicWidth, deterministicHeight, rowIndices, randomSrc);
+            fillPixelEncryptionToShares(permutation, matrixRow2D, share, i*deterministicHeight, 
+                                        j*deterministicWidth, rowIndices, randomSrc);
         }
     }
 }
