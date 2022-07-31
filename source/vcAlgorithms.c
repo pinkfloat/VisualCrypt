@@ -1,28 +1,27 @@
-#include "settings.h"
-#include "menu.h"
-#include "memoryManagement.h"
-#include "fileManagement.h"
 #include "vcAlgorithms.h"
 
+#include "fileManagement.h"
+#include "memoryManagement.h"
+#include "menu.h"
+#include "settings.h"
+
 /********************************************************************
-* Function:     mallocSharesOfSourceSize
-*--------------------------------------------------------------------
-* Description:  This function will allocate the buffer of the share
-*               pixel arrays, that are going to be printed to the
-*               BMPs later. The size will be the same as for the
-*				source file.
-* Input:        source = containing width and height of the source
-*               image,
-*               numberOfShares = amount of shares that will be
-*               created,
-* Output:       share->array will be correctly allocated for each
-*               share.
-********************************************************************/
-void mallocSharesOfSourceSize(Image* source, Image* share, int numberOfShares)
-{
+ * Function:     mallocSharesOfSourceSize
+ *--------------------------------------------------------------------
+ * Description:  This function will allocate the buffer of the share
+ *               pixel arrays, that are going to be printed to the
+ *               BMPs later. The size will be the same as for the
+ *				source file.
+ * Input:        source = containing width and height of the source
+ *               image,
+ *               numberOfShares = amount of shares that will be
+ *               created,
+ * Output:       share->array will be correctly allocated for each
+ *               share.
+ ********************************************************************/
+void mallocSharesOfSourceSize(Image *source, Image *share, int numberOfShares) {
     // for each share
-    for(int i = 0; i < numberOfShares; i++)
-    {
+    for (int i = 0; i < numberOfShares; i++) {
         share[i].height = source->height;
         share[i].width = source->width;
         mallocPixelArray(&share[i]);
@@ -30,40 +29,37 @@ void mallocSharesOfSourceSize(Image* source, Image* share, int numberOfShares)
 }
 
 /********************************************************************
-* Function:     callAlgorithm
-*--------------------------------------------------------------------
-* Description:  The function callAlgorithm will extract the data of
-*               the source bmp, call the algorithm given to it as
-*               parameter and draw all of the share bmps, after
-*               the algorithm is finished. It will use the settings
-*               stored in "settings.h".
-********************************************************************/
-void callAlgorithm(void (*algorithm)(AlgorithmData*), int algorithmNumber)
-{
-	int numberOfShares = getNfromUser();
+ * Function:     callAlgorithm
+ *--------------------------------------------------------------------
+ * Description:  The function callAlgorithm will extract the data of
+ *               the source bmp, call the algorithm given to it as
+ *               parameter and draw all of the share bmps, after
+ *               the algorithm is finished. It will use the settings
+ *               stored in "settings.h".
+ ********************************************************************/
+void callAlgorithm(void (*algorithm)(AlgorithmData *), int algorithmNumber) {
+    int numberOfShares = getNfromUser();
 
-	Image source, *shares = xmalloc(numberOfShares*sizeof(Image));
+    Image source, *shares = xmalloc(numberOfShares * sizeof(Image));
 
-	createSourceImage(&source);
-	deleteShareFiles();
+    createSourceImage(&source);
+    deleteShareFiles();
     createShareFiles(shares, numberOfShares);
 
-    FILE* randomSrc = xfopen(RANDOM_FILE_PATH, "r");
+    FILE *randomSrc = xfopen(RANDOM_FILE_PATH, "r");
 
-	// call the algorithm
-	AlgorithmData data = {
-		.source = &source,
-		.shares = shares,
-		.numberOfShares = numberOfShares,
-		.algorithmNumber = RG_VERSION ? algorithmNumber+3 : algorithmNumber,
-		.randomSrc = randomSrc
-	};
-	algorithm(&data);
+    // call the algorithm
+    AlgorithmData data = {.source = &source,
+                          .shares = shares,
+                          .numberOfShares = numberOfShares,
+                          .algorithmNumber = RG_VERSION ? algorithmNumber + 3 : algorithmNumber,
+                          .randomSrc = randomSrc};
+    algorithm(&data);
 
-	drawShareFiles(shares, numberOfShares);
-	
-	// cleanup
-	xcloseAll();
-	xfreeAll();
-	fprintf(stdout, "Success!\n");
+    drawShareFiles(shares, numberOfShares);
+
+    // cleanup
+    xcloseAll();
+    xfreeAll();
+    fprintf(stdout, "Success!\n");
 }

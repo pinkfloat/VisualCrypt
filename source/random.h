@@ -3,57 +3,58 @@
 
 #include <stdint.h>
 #include <stdio.h>
+
 #include "booleanMatrix.h"
 
 #ifndef TYPE_PIXEL
 #define TYPE_PIXEL
 
-typedef uint8_t Pixel; // black / white
+typedef uint8_t Pixel;  // black / white
 
-#endif // TYPE_PIXEL
-
-/********************************************************************
-* Function:     getRandomNumber
-*--------------------------------------------------------------------
-* Description:  Return a random number between min and max, that was
-*               calculated from a file containing random numbers.
-*               To avoid bias, the "java algorithm" is used.
-********************************************************************/
-uint8_t getRandomNumber(FILE* randomSrc, uint8_t min, uint8_t max);
+#endif  // TYPE_PIXEL
 
 /********************************************************************
-* Function:     createSetOfN
-*--------------------------------------------------------------------
-* Description:  Create vector with values from 1 to n
-********************************************************************/
-int* createSetOfN(int n, int start);
+ * Function:     getRandomNumber
+ *--------------------------------------------------------------------
+ * Description:  Return a random number between min and max, that was
+ *               calculated from a file containing random numbers.
+ *               To avoid bias, the "java algorithm" is used.
+ ********************************************************************/
+uint8_t getRandomNumber(FILE *randomSrc, uint8_t min, uint8_t max);
 
 /********************************************************************
-* Function:     shuffleVector
-*--------------------------------------------------------------------
-* Description:  The function shuffleVector() shifts the vector
-*               element random to a different place.
-*               The Fisher-Yates shuffle is used for this purpose.
-* Input:        n = number of elements / size of the vector
-*               randomSrc = file with random numbers
-* In/Out:       vector = the vector which elements will be shifted
-********************************************************************/
-void shuffleVector(int* vector, int n, FILE* randomSrc);
+ * Function:     createSetOfN
+ *--------------------------------------------------------------------
+ * Description:  Create vector with values from 1 to n
+ ********************************************************************/
+int *createSetOfN(int n, int start);
 
 /********************************************************************
-* Function:     shuffleColumns
-*--------------------------------------------------------------------
-* Description:  Copy matrix from src to dest in a column-shuffled way
-*               by getting shuffled indices from parameter "indices".
-********************************************************************/
-void shuffleColumns(BooleanMatrix* dest, BooleanMatrix* src, FILE* randomSrc, int* indices);
+ * Function:     shuffleVector
+ *--------------------------------------------------------------------
+ * Description:  The function shuffleVector() shifts the vector
+ *               element random to a different place.
+ *               The Fisher-Yates shuffle is used for this purpose.
+ * Input:        n = number of elements / size of the vector
+ *               randomSrc = file with random numbers
+ * In/Out:       vector = the vector which elements will be shifted
+ ********************************************************************/
+void shuffleVector(int *vector, int n, FILE *randomSrc);
 
 /********************************************************************
-* Function:     shuffleRows
-*--------------------------------------------------------------------
-* Description:  Copy matrix from src to dest in a row-shuffled way by
-*               getting shuffled indices from parameter "indices".
-********************************************************************/
+ * Function:     shuffleColumns
+ *--------------------------------------------------------------------
+ * Description:  Copy matrix from src to dest in a column-shuffled way
+ *               by getting shuffled indices from parameter "indices".
+ ********************************************************************/
+void shuffleColumns(BooleanMatrix *dest, BooleanMatrix *src, FILE *randomSrc, int *indices);
+
+/********************************************************************
+ * Function:     shuffleRows
+ *--------------------------------------------------------------------
+ * Description:  Copy matrix from src to dest in a row-shuffled way by
+ *               getting shuffled indices from parameter "indices".
+ ********************************************************************/
 // void shuffleRows(BooleanMatrix* dest, BooleanMatrix* src, FILE* randomSrc, int* indices);
 
 #endif /* RANDOM_H */

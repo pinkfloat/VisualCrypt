@@ -15,7 +15,7 @@
     Note: Used in visualCrypt.c
 */
 #define SOURCE_PATH "../image/cameraman.bmp"
-#define SHARE_PATH "../image"
+#define SHARE_PATH  "../image"
 
 /*  RANDOM_FILE_PATH = the file used as source
     to get random numbers
@@ -85,4 +85,4 @@
 */
 #define TIME_LOOPS 1000
 
-#endif /* SETTINGS_H */  
+#endif /* SETTINGS_H */
