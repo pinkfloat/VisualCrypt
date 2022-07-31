@@ -49,12 +49,4 @@ void shuffleVector(int *vector, int n, FILE *randomSrc);
  ********************************************************************/
 void shuffleColumns(BooleanMatrix *dest, BooleanMatrix *src, FILE *randomSrc, int *indices);
 
-/********************************************************************
- * Function:     shuffleRows
- *--------------------------------------------------------------------
- * Description:  Copy matrix from src to dest in a row-shuffled way by
- *               getting shuffled indices from parameter "indices".
- ********************************************************************/
-// void shuffleRows(BooleanMatrix* dest, BooleanMatrix* src, FILE* randomSrc, int* indices);
-
 #endif /* RANDOM_H */

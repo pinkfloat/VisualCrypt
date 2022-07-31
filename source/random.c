@@ -85,31 +85,3 @@ void shuffleColumns(BooleanMatrix *dest, BooleanMatrix *src, FILE *randomSrc, in
         copyMatrixColumn(dest, src, i, indices[i]);
     }
 }
-
-/********************************************************************
- * Function:     copyMatrixRow
- *--------------------------------------------------------------------
- * Description:  Copy a matrix row of row number "srcIdx"
- *               from src to row "destIdx" of dest.
- ********************************************************************/
-static void copyMatrixRow(BooleanMatrix *dest, BooleanMatrix *src, int destIdx, int srcIdx) {
-    int numColumns = src->width;
-    for (int column = 0; column < numColumns; column++) {
-        setPixel(*dest, destIdx, column, getPixel(*src, srcIdx, column));
-    }
-}
-
-/********************************************************************
- * Function:     shuffleRows
- *--------------------------------------------------------------------
- * Description:  Copy matrix from src to dest in a row-shuffled way by
- *               getting shuffled indices from parameter "indices".
- ********************************************************************/
-void shuffleRows(BooleanMatrix *dest, BooleanMatrix *src, FILE *randomSrc, int *indices) {
-    int numRows = src->height;
-    shuffleVector(indices, numRows, randomSrc);
-
-    for (int i = 0; i < numRows; i++) {
-        copyMatrixRow(dest, src, i, indices[i]);
-    }
-}
