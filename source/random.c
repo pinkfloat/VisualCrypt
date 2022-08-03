@@ -58,6 +58,18 @@ void shuffleVector(int *vector, int n, FILE *randomSrc) {
     }
 }
 
+void shuffle8BitVector(uint8_t *vector, int n, FILE *randomSrc) {
+    uint8_t tmp, randNum;
+    for (uint8_t i = n - 1; i > 0; i--) {
+        randNum = getRandomNumber(randomSrc, 0, i + 1);
+
+        // swap elements
+        tmp = vector[i];
+        vector[i] = vector[randNum];
+        vector[randNum] = tmp;
+    }
+}
+
 /********************************************************************
  * Function:     copyMatrixColumn
  *--------------------------------------------------------------------
