@@ -40,7 +40,6 @@ int *createSetOfN(int n, int start);
  * In/Out:       vector = the vector which elements will be shifted
  ********************************************************************/
 void shuffleVector(int *vector, int n, FILE *randomSrc);
-void shuffle8BitVector(uint8_t *vector, int n, FILE *randomSrc);
 
 /********************************************************************
  * Function:     shuffleColumns

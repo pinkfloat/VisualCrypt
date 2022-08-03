@@ -9,6 +9,7 @@ typedef struct {
     BooleanMatrix B1;
     BooleanMatrix columnVector;
     Pixel *sourceArray;
+    int *rowIndices;
     Image *share;
     FILE *randomSrc;
     int width;

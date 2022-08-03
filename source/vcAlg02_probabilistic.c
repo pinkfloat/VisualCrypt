@@ -51,22 +51,24 @@ static void getRandomMatrixColumn(BooleanMatrix *B0, BooleanMatrix *B1, BooleanM
  *               matrix
  *               sharePixelPosition = location where the pixel should
  *               be copied to
+ *               checkList = containing zero's for unused elements
+ *               one's for allready used ones
  *               randomSrc = file containing random numbers
  * Output:       share = containing pixel arrays that need to be
  *               filled. If they are stacked together per OR-function,
  *               the secret image can be seen.
  ********************************************************************/
 static void copyColumnElementsToShares(BooleanMatrix *columnVector, Image *share, int sharePixelPosition,
-                                       FILE *randomSrc) {
+                                       int *rowIndices, FILE *randomSrc) {
     int n = columnVector->height;
     Pixel randPixel;
+    shuffleVector(rowIndices, n, randomSrc);
     Pixel *pxVector = columnVector->array;
-    shuffle8BitVector(pxVector, n, randomSrc);
 
     // for each share
     for (int shareIdx = 0; shareIdx < n; shareIdx++) {
         // choose random which share will get which vector element
-        randPixel = pxVector[shareIdx];
+        randPixel = pxVector[rowIndices[shareIdx]];
         share[shareIdx].array[sharePixelPosition] = randPixel;
     }
 }
@@ -96,11 +98,19 @@ probabilisticData *prepareProbabilisticAlgorithm(AlgorithmData *data) {
     */
     BooleanMatrix columnVector = createBooleanMatrix(n, 1);
 
+    /*  create checklist of size n to store which column elements
+        of the random basis matrix column has been already used
+        for a share file:
+        0 = unused element, 1 = used
+    */
+    int *rowIndices = createSetOfN(n, 0);
+
     probabilisticData *pData = xmalloc(sizeof(probabilisticData));
     pData->B0 = B0;
     pData->B1 = B1;
     pData->columnVector = columnVector;
     pData->sourceArray = data->source->array;
+    pData->rowIndices = rowIndices;
     pData->share = data->shares;
     pData->randomSrc = data->randomSrc;
     pData->width = data->source->width;
@@ -128,6 +138,7 @@ void __probabilisticAlgorithm(probabilisticData *data) {
     BooleanMatrix *B1 = &data->B1;
     BooleanMatrix *columnVector = &data->columnVector;
     Pixel *sourceArray = data->sourceArray;
+    int *rowIndices = data->rowIndices;
     Image *share = data->share;
     FILE *randomSrc = data->randomSrc;
     int imageSize = data->width * data->height;
@@ -136,7 +147,7 @@ void __probabilisticAlgorithm(probabilisticData *data) {
     for (int i = 0; i < imageSize; i++) {
         int sourcePixel = sourceArray[i];
         getRandomMatrixColumn(B0, B1, columnVector, sourcePixel, randomSrc);
-        copyColumnElementsToShares(columnVector, share, i, randomSrc);
+        copyColumnElementsToShares(columnVector, share, i, rowIndices, randomSrc);
     }
 }
 
