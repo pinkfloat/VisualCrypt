@@ -5,13 +5,6 @@
 
 #define MAX_UINT -1
 
-/********************************************************************
- * Function:     getRandomNumber
- *--------------------------------------------------------------------
- * Description:  Return a random number between min and max, that was
- *               calculated from a file containing random numbers.
- *               To avoid bias, the "java algorithm" is used.
- ********************************************************************/
 uint8_t getRandomNumber(FILE *randomSrc, uint8_t min, uint8_t max) {
     uint8_t randNum, inRangeNum, limit = MAX_UINT - max;
 
@@ -23,11 +16,6 @@ uint8_t getRandomNumber(FILE *randomSrc, uint8_t min, uint8_t max) {
     return inRangeNum;
 }
 
-/********************************************************************
- * Function:     createSetOfN
- *--------------------------------------------------------------------
- * Description:  Create vector with values from 1 to n
- ********************************************************************/
 int *createSetOfN(int n, int start) {
     int *setOfN = xmalloc(n * sizeof(int));
     for (int i = 0; i < n; i++) {
@@ -36,16 +24,6 @@ int *createSetOfN(int n, int start) {
     return setOfN;
 }
 
-/********************************************************************
- * Function:     shuffleVector
- *--------------------------------------------------------------------
- * Description:  The function shuffleVector() shifts the vector
- *               element random to a different place.
- *               The Fisher-Yates shuffle is used for this purpose.
- * Input:        n = number of elements / size of the vector
- *               randomSrc = file with random numbers
- * In/Out:       vector = the vector which elements will be shifted
- ********************************************************************/
 void shuffleVector(int *vector, int n, FILE *randomSrc) {
     int tmp, randNum;
     for (int i = n - 1; i > 0; i--) {
@@ -58,11 +36,11 @@ void shuffleVector(int *vector, int n, FILE *randomSrc) {
     }
 }
 
-/********************************************************************
+/*********************************************************************
  * Function:     copyMatrixColumn
  *--------------------------------------------------------------------
- * Description:  Copy a matrix column of column number "srcIdx"
- *               from src to column "destIdx" of dest.
+ * Description:  Copy the matrix column of column number "srcIdx"
+ *               from "src" to column "destIdx" of "dest".
  ********************************************************************/
 static void copyMatrixColumn(BooleanMatrix *dest, BooleanMatrix *src, int destIdx, int srcIdx) {
     int numRows = src->height;
@@ -71,12 +49,6 @@ static void copyMatrixColumn(BooleanMatrix *dest, BooleanMatrix *src, int destId
     }
 }
 
-/********************************************************************
- * Function:     shuffleColumns
- *--------------------------------------------------------------------
- * Description:  Copy matrix from src to dest in a column-shuffled way
- *               by getting shuffled indices from parameter "indices".
- ********************************************************************/
 void shuffleColumns(BooleanMatrix *dest, BooleanMatrix *src, FILE *randomSrc, int *indices) {
     int numColumns = src->width;
     shuffleVector(indices, numColumns, randomSrc);

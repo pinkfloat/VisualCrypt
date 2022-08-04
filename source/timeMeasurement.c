@@ -14,10 +14,10 @@
 #include "vcAlg03_randomGrid_V1.h"
 #include "vcAlgorithms.h"
 
-/********************************************************************
+/*********************************************************************
  * Function:     printMeasuredTime
  *--------------------------------------------------------------------
- * Description:  Print the average measured time ins milliseconds or
+ * Description:  Print the average measured time in milliseconds or
  *               seconds, and the total time over all loops in
  *               (h:m:s) format to the file "fp".
  ********************************************************************/
@@ -45,11 +45,6 @@ static void printMeasuredTime(FILE *fp, struct timespec *start, struct timespec 
     fprintf(stdout, "measurement of %s algorithm done ...\n", name);
 }
 
-/********************************************************************
- * Function:     timeMeasurement
- *--------------------------------------------------------------------
- * Description:  Measure the elapsed time for the different algorithms
- ********************************************************************/
 void timeMeasurement() {
     int n = getNfromUser();
     int k = getKfromUser(n);
@@ -110,7 +105,7 @@ void timeMeasurement() {
     // (n,n) random grid algorithm
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
     for (int i = 0; i < TIME_LOOPS; i++) {
-        randomGrid_nn_Threshold(source.array, shares, &storage, randomSrc, arraySize, n);
+        randomGrid_nn(source.array, shares, &storage, randomSrc, arraySize, n);
     }
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
     printMeasuredTime(logFile, &start, &stop, "(n,n) random grid");
@@ -118,7 +113,7 @@ void timeMeasurement() {
     // alternate (n,n) random grid algorithm
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
     for (int i = 0; i < TIME_LOOPS; i++) {
-        alternate_nn_ThresholdRGA(source.array, shares, tmpSharePixel, randomSrc, arraySize, n);
+        alternate_nn_RGA(source.array, shares, tmpSharePixel, randomSrc, arraySize, n);
     }
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
     printMeasuredTime(logFile, &start, &stop, "alternate (n,n) random grid");
@@ -126,7 +121,7 @@ void timeMeasurement() {
     // (2,n) random grid algorithm
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
     for (int i = 0; i < TIME_LOOPS; i++) {
-        randomGrid_2n_Threshold(source.array, shares, randomSrc, arraySize, n);
+        randomGrid_2n(source.array, shares, randomSrc, arraySize, n);
     }
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
     printMeasuredTime(logFile, &start, &stop, "(2,n) random grid");
@@ -134,7 +129,7 @@ void timeMeasurement() {
     // alternate (2,n) random grid algorithm
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
     for (int i = 0; i < TIME_LOOPS; i++) {
-        alternate_2n_ThresholdRGA(source.array, shares, randomSrc, arraySize, n);
+        alternate_2n_RGA(source.array, shares, randomSrc, arraySize, n);
     }
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
     printMeasuredTime(logFile, &start, &stop, "alternate (2,n) random grid");
@@ -142,9 +137,9 @@ void timeMeasurement() {
     // (k,n) random grid algorithm
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
     for (int i = 0; i < TIME_LOOPS; i++) {
-        // since the (k,n) needs the additional shares filled before, the time must be added
-        randomGrid_nn_Threshold(source.array, tmpShares, &storage, randomSrc, arraySize, k);
-        __randomGrid_kn_Threshold(setOfN, shares, tmpShares, randomSrc, arraySize, n, k);
+        // since the (k,n) needs additional shares filled by the (n,n), the time must be added
+        randomGrid_nn(source.array, tmpShares, &storage, randomSrc, arraySize, k);
+        __randomGrid_kn(setOfN, shares, tmpShares, randomSrc, arraySize, n, k);
     }
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
     printMeasuredTime(logFile, &start, &stop, "(k,n) random grid");
@@ -152,14 +147,13 @@ void timeMeasurement() {
     // alternate (k,n) random grid algorithm
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
     for (int i = 0; i < TIME_LOOPS; i++) {
-        __alternate_kn_ThresholdRGA(setOfN, source.array, sharePixel, shares, randomSrc, arraySize, n, k);
+        __alternate_kn_RGA(setOfN, source.array, sharePixel, shares, randomSrc, arraySize, n, k);
     }
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &stop);
     printMeasuredTime(logFile, &start, &stop, "alternate (k,n) random grid");
 
     fprintf(logFile, "__________________________________________________\n\n");
 
-    // cleanup
     xcloseAll();
     xfreeAll();
     fprintf(stdout, "Success!\nResult was stored in %s\n", TIME_LOG_PATH);

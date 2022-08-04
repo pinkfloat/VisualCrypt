@@ -11,24 +11,24 @@ typedef struct {
     FILE *randomSrc;
 } AlgorithmData;
 
-/********************************************************************
+/*********************************************************************
  * Function:     callAlgorithm
  *--------------------------------------------------------------------
  * Description:  The function callAlgorithm will extract the data of
  *               the source bmp, call the algorithm given to it as
- *               parameter and draw all of the share bmps, after
- *               the algorithm is finished. It will use the settings
+ *               parameter, and draw all of the share bmps, after
+ *               the algorithm is finished. It'll use the settings
  *               stored in "settings.h".
  ********************************************************************/
 void callAlgorithm(void (*algorithm)(AlgorithmData *), int algorithmNumber);
 
-/********************************************************************
+/*********************************************************************
  * Function:     mallocSharesOfSourceSize
  *--------------------------------------------------------------------
- * Description:  This function will allocate the buffer of the share
- *               pixel arrays, that are going to be printed to the
- *               BMPs later. The size will be the same as for the
- *				source file.
+ * Description:  This will allocate the buffer of the share pixel
+ *               arrays, which are going to be printed to the BMPs
+ *               later. The size will be the same as for the source
+ *               file.
  * Input:        source = containing width and height of the source
  *               image,
  *               numberOfShares = amount of shares that will be

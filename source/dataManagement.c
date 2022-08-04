@@ -4,13 +4,6 @@
 #include "fileManagement.h"
 #include "memoryManagement.h"
 
-/********************************************************************
- * Function:     customExitOnFailure
- *--------------------------------------------------------------------
- * Description:  Exit the programm with the exit message "message".
- *               It will free all allocated buffer and close all files
- *               opened so far, before exiting.
- ********************************************************************/
 void customExitOnFailure(const char *message) {
     fprintf(stderr, "%s\n", message);
     fprintf(stderr, "Close all files...\n");
@@ -21,15 +14,6 @@ void customExitOnFailure(const char *message) {
     exit(EXIT_FAILURE);
 }
 
-/********************************************************************
- * Function:     removeFromList
- *--------------------------------------------------------------------
- * Description:  Removes the list element, that has a data pointer,
- *               to the parameter "dataPtr", from the list "first"
- *               is pointing to, and returns the deleted list element.
- *               If nothing is removed from the list, the function
- *               will return NULL instead.
- ********************************************************************/
 List *removeFromList(void *dataPtr, List **first) {
     List *prev, *tmp;
 

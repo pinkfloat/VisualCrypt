@@ -12,16 +12,15 @@ typedef struct {
     uint8_t numSetElements;
     SubSet *even;
     SubSet *odd;
-    uint8_t numSubsets;  // number of subsets behind "even" or "odd"
+    uint8_t numSubsets;
 } Set;
 
-/********************************************************************
+/*********************************************************************
  * Function:     createSet
  *--------------------------------------------------------------------
- * Description:  A Set is (in this programm) considered a structure
- *               that is holding all Subsets of a Set with n elements,
- *               sorted in arrays of SubSets after having even or odd
- *               cardinality. This function will create one of them.
+ * Description:  This will create a Set structure, which is holding
+ *               all Subsets of a Set with n elements, sorted after
+ *               their (even or odd) cardinality.
  * Input:        n = number of set elements,
  *               m = number of subsets having respectively even or
  *               odd cardinality.
@@ -29,7 +28,7 @@ typedef struct {
  ********************************************************************/
 Set createSet(uint8_t n, uint8_t m);
 
-/********************************************************************
+/*********************************************************************
  * Function:     printAllSubsets
  *--------------------------------------------------------------------
  * Description:  Print all subsets of the set "set". The even subsets

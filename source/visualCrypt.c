@@ -16,7 +16,7 @@
 char *sourcePath = SOURCE_PATH;
 char *sharePath = SHARE_PATH;
 
-/********************************************************************
+/*********************************************************************
  * Function:     usage
  *--------------------------------------------------------------------
  * Description:  Print program usage.
@@ -31,12 +31,12 @@ static inline void usage() {
             " -d <destination path>         set path to a result storing directory\n\n");
 }
 
-/********************************************************************
+/*********************************************************************
  * Function:     getPathsFromProgramParameter
  *--------------------------------------------------------------------
  * Description:  Check the program parameters and set the global paths
- *				according to them.
- * Return:       0 on success, 1 on failure, 2 for help option.
+ *				 according to them.
+ * Return:       0 on success, 1 on failure, 2 for help options.
  ********************************************************************/
 static int getPathsFromProgramParameter(int argc, char *argv[]) {
     int c = '?';
@@ -62,7 +62,7 @@ static int getPathsFromProgramParameter(int argc, char *argv[]) {
     return EXIT_SUCCESS;
 }
 
-/********************************************************************
+/*********************************************************************
  * Function:     main
  *--------------------------------------------------------------------
  * Description:  Ask the user which algorithm shall run and call the

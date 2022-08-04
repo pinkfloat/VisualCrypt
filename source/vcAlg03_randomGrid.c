@@ -9,16 +9,6 @@
 #include "vcAlg03_randomGrid_V0.h"
 #include "vcAlg03_randomGrid_V1.h"
 
-/********************************************************************
- * Function:     writePixelToShares
- *--------------------------------------------------------------------
- * Description:  If the share number is part of the first k elements
- *               of the random sorted set (of size n), the very share
- *               will get the pixel that was calculated for one of
- *               the shares, from the source image, before.
- *               Shares with a number not contained in the first
- *               k elements will get randomly a 0/1.
- ********************************************************************/
 void writePixelToShares(int *randSortedSetOfN, void *source, Image *shares, FILE *randomSrc, int n, int k, int i,
                         Pixel (*getPixel)(void *, int, int)) {
     // for each share
@@ -38,13 +28,6 @@ void writePixelToShares(int *randSortedSetOfN, void *source, Image *shares, FILE
     }
 }
 
-/********************************************************************
- * Function:     callRandomGridAlgorithm(
- *--------------------------------------------------------------------
- * Description:  Prepares data which is needed by all or at least
- *               multiple random grid algorithms and calls the chosen
- *               algorithm with the data.
- ********************************************************************/
 void callRandomGridAlgorithm(AlgorithmData *data) {
     int algorithmNumber = data->algorithmNumber;
 
@@ -60,23 +43,23 @@ void callRandomGridAlgorithm(AlgorithmData *data) {
 
     switch (algorithmNumber) {
         case 1:
-            randomGrid_nn_Threshold(source->array, shares, &storage, randomSrc, arraySize, n);
+            randomGrid_nn(source->array, shares, &storage, randomSrc, arraySize, n);
             break;
         case 2:
-            randomGrid_2n_Threshold(source->array, shares, randomSrc, arraySize, n);
+            randomGrid_2n(source->array, shares, randomSrc, arraySize, n);
             break;
         case 3:
-            randomGrid_kn_Threshold(source, shares, &storage, randomSrc, arraySize, n);
+            randomGrid_kn(source, shares, &storage, randomSrc, arraySize, n);
             break;
 
         case 4:
-            alternate_nn_ThresholdRGA(source->array, shares, tmpSharePixel, randomSrc, arraySize, n);
+            alternate_nn_RGA(source->array, shares, tmpSharePixel, randomSrc, arraySize, n);
             break;
         case 5:
-            alternate_2n_ThresholdRGA(source->array, shares, randomSrc, arraySize, n);
+            alternate_2n_RGA(source->array, shares, randomSrc, arraySize, n);
             break;
         case 6:
-            alternate_kn_ThresholdRGA(source, shares, randomSrc, arraySize, n);
+            alternate_kn_RGA(source, shares, randomSrc, arraySize, n);
             break;
         default:
             break;

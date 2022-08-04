@@ -7,7 +7,7 @@
 #include "memoryManagement.h"
 #include "menu.h"
 
-/********************************************************************
+/*********************************************************************
  * Function:     fillPixelRG
  *--------------------------------------------------------------------
  * Description:  This function fills a sharePixel according to the
@@ -18,25 +18,17 @@ static void fillPixelRG(Pixel sourcePixel, Pixel *sharePixel, int numberOfShares
     Pixel tmp = sourcePixel;
     for (int idx = 1; idx < numberOfShares; idx++) {
         sharePixel[idx - 1] = getRandomNumber(randomSrc, 0, 2);
-        if (tmp)                                            // source pixel is black
-            sharePixel[idx] = sharePixel[idx - 1] ? 0 : 1;  // use complementary value of previous share
+        if (tmp)  // source pixel is black
+            sharePixel[idx] = sharePixel[idx - 1] ? 0 : 1;
 
-        else                                        // source pixel is white
-            sharePixel[idx] = sharePixel[idx - 1];  // copy value of previous share
+        else  // source pixel is white
+            sharePixel[idx] = sharePixel[idx - 1];
         tmp = sharePixel[idx];
     }
 }
 
-/********************************************************************
- * Function:     alternate_nn_ThresholdRGA
- *--------------------------------------------------------------------
- * Description:  This alternate variant of the (n,n) random grid
- *               algorithm by Tzung-Her Chen and Kai-Hsiang Tsao
- *               calculates the contentes of all shares pixel by pixel,
- *               instead of filling the shares one after another.
- ********************************************************************/
-void alternate_nn_ThresholdRGA(Pixel *sourceArray, Image *shares, Pixel *tmpSharePixel, FILE *randomSrc, int arraySize,
-                               int numberOfShares) {
+void alternate_nn_RGA(Pixel *sourceArray, Image *shares, Pixel *tmpSharePixel, FILE *randomSrc, int arraySize,
+                      int numberOfShares) {
     // for each pixel
     for (int i = 0; i < arraySize; i++) {
         fillPixelRG(sourceArray[i], tmpSharePixel, numberOfShares, randomSrc);
@@ -47,74 +39,46 @@ void alternate_nn_ThresholdRGA(Pixel *sourceArray, Image *shares, Pixel *tmpShar
     }
 }
 
-/********************************************************************
- * Function:     alternate_2n_ThresholdRGA
- *--------------------------------------------------------------------
- * Description:  This alternate variant of the (2,n) random grid
- *               algorithm by Tzung-Her Chen and Kai-Hsiang Tsao
- *               calculates the contentes of all shares pixel by pixel,
- *               instead of filling the shares one after another.
- ********************************************************************/
-void alternate_2n_ThresholdRGA(Pixel *sourceArray, Image *shares, FILE *randomSrc, int arraySize, int numberOfShares) {
+void alternate_2n_RGA(Pixel *sourceArray, Image *shares, FILE *randomSrc, int arraySize, int numberOfShares) {
     Pixel *randomGrid = shares->array;
 
     // for each pixel
     for (int i = 0; i < arraySize; i++) {
-        // fill pixel of share 1 random
         randomGrid[i] = getRandomNumber(randomSrc, 0, 2);
 
         // for share 2 to n
         for (int idx = 1; idx < numberOfShares; idx++) {
-            if (sourceArray[i])                                           // source pixel is black
-                shares[idx].array[i] = getRandomNumber(randomSrc, 0, 2);  // get random 0/1
+            if (sourceArray[i])  // source pixel is black
+                shares[idx].array[i] = getRandomNumber(randomSrc, 0, 2);
 
-            else                                          // source pixel is white
-                shares[idx].array[i] = shares->array[i];  // copy value of share 1
+            else  // source pixel is white
+                shares[idx].array[i] = shares->array[i];
         }
     }
 }
 
-/********************************************************************
+/*********************************************************************
  * Function:     getSharePixel
  *--------------------------------------------------------------------
- * Description:  This function is used to get the actual pixel
- *               from one of the shares in the alternate (k,n)RG
- *               version.
+ * Description:  This function is used to get the actual pixel from
+ *               one of the shares in the alternate (k,n) RG version.
  ********************************************************************/
 static inline Pixel getSharePixel(void *sharePixel, int shareIdx, __attribute__((unused)) int matrixIdx) {
     Pixel *_sharePixel = (Pixel *)sharePixel;
     return _sharePixel[shareIdx];
 }
 
-/********************************************************************
- * Function:     __alternate_kn_ThresholdRGA
- *--------------------------------------------------------------------
- * Description:  This alternate variant of the (k,n) random grid
- *               algorithm by Tzung-Her Chen and Kai-Hsiang Tsao
- *               calculates the contentes of all shares pixel by pixel,
- *               instead of filling the shares one after another.
- ********************************************************************/
-void __alternate_kn_ThresholdRGA(int *setOfN, Pixel *sourceArray, Pixel *sharePixel, Image *shares, FILE *randomSrc,
-                                 int arraySize, int n, int k) {
+void __alternate_kn_RGA(int *setOfN, Pixel *sourceArray, Pixel *sharePixel, Image *shares, FILE *randomSrc,
+                        int arraySize, int n, int k) {
     // for each pixel
     for (int i = 0; i < arraySize; i++) {
-        /*  create values of sharePixel according to traditional
-            RG-based VSS to encode a pixel
-        */
         fillPixelRG(sourceArray[i], sharePixel, k, randomSrc);
         shuffleVector(setOfN, n, randomSrc);
         writePixelToShares(setOfN, sharePixel, shares, randomSrc, n, k, i, getSharePixel);
     }
 }
 
-/********************************************************************
- * Function:     alternate_kn_ThresholdRGA
- *--------------------------------------------------------------------
- * Description:  This is a wrapper for the alternate (k,n)-threshold
- *               random grid algorithm introduced by Tzung-Her Chen
- *               and Kai-Hsiang Tsao.
- ********************************************************************/
-void alternate_kn_ThresholdRGA(Image *source, Image *shares, FILE *randomSrc, int arraySize, int n) {
+void alternate_kn_RGA(Image *source, Image *shares, FILE *randomSrc, int arraySize, int n) {
     int k = 2;
 
     if (n > 2) {
@@ -124,5 +88,5 @@ void alternate_kn_ThresholdRGA(Image *source, Image *shares, FILE *randomSrc, in
     int *setOfN = createSetOfN(n, 1);
     Pixel *sharePixel = xmalloc(k * sizeof(Pixel));
 
-    __alternate_kn_ThresholdRGA(setOfN, source->array, sharePixel, shares, randomSrc, arraySize, n, k);
+    __alternate_kn_RGA(setOfN, source->array, sharePixel, shares, randomSrc, arraySize, n, k);
 }

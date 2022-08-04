@@ -36,7 +36,7 @@ static inline uint32_t roundToMultipleOf4(uint32_t x) {
 
 /*_____________________________________WRITE_OPERATIONS_____________________________________*/
 
-/********************************************************************
+/*********************************************************************
  * Function:     writeBmpHeader
  *--------------------------------------------------------------------
  * Description:  Each BMP file has a header in front of its pixel
@@ -67,10 +67,10 @@ static void writeBmpHeader(BmpHeader *bmpHeader, int32_t width, int32_t height) 
     bmpHeader->numImportantColors = 0;
 }
 
-/********************************************************************
+/*********************************************************************
  * Function:     writeBmpBody
  *--------------------------------------------------------------------
- * Description:  This function has to be called after writeBmpHeader()
+ * Description:  This function must be called after writeBmpHeader()
  *               to create a bmp file properly. It will take the
  *               content of the pixel array "source", where the value
  *               "0" is considered as white and every other number is
@@ -84,7 +84,7 @@ static void writeBmpHeader(BmpHeader *bmpHeader, int32_t width, int32_t height) 
  *               width = width of the new BMP file in pixel,
  *               height = height of the new BMP file in pixel,
  * Output:       destination = array that will get the rgb values of
- *               the bmp file that will be created.
+ *               the bmp file
  ********************************************************************/
 static void writeBmpBody(const Pixel *source, Pixel *destination, int32_t width, int32_t height) {
     Pixel p_source;
@@ -99,15 +99,6 @@ static void writeBmpBody(const Pixel *source, Pixel *destination, int32_t width,
     }
 }
 
-/********************************************************************
- * Function:     createBMP
- *--------------------------------------------------------------------
- * Description:  The function createBMP will create a black and white
- *               bmp file from the pure pixel data of a boolean array,
- *               stored in image->array. It will fill the empty bmp
- *               file opened in image->file with a valid bmp header
- *               and the array contents, restructured as rgb-values.
- ********************************************************************/
 void createBMP(Image *image) {
     int32_t width = image->width;
     int32_t height = image->height;
@@ -125,28 +116,27 @@ void createBMP(Image *image) {
 
 /*_____________________________________READ_OPERATIONS_____________________________________*/
 
-/********************************************************************
+/*********************************************************************
  * Function:     readBmpHeader
  *--------------------------------------------------------------------
  * Description:  Each BMP file has a header in front of its pixel
- *               data. This function will read to the end of the
- *               bmp header information, and stores them in a
- *               BmpHeader structure. In addition to that, it is
- *               positioning the file offset of "file" to the start
- *               of the pixel data.
+ *               data. This function will store the bmp header
+ *               information in a BmpHeader structure.
+ *               Note: This will position the file offset of "file"
+ *               to the start of the pixel data.
  ********************************************************************/
 static inline void readBmpHeader(FILE *file, BmpHeader *headerInformation) {
     size_t bufferSize = sizeof(BmpHeader);
     xfread(((uint8_t *)headerInformation) + 2, 1, bufferSize - 2, file, "ERR: read BMP header information");
 }
 
-/********************************************************************
+/*********************************************************************
  * Function:     verifyBmpHeaderInformation
  *--------------------------------------------------------------------
- * Description:  The programm can only read BMP files structured
+ * Description:  The program can only read BMP files structured
  *               in a specific (yet common) way. If the input file
- *               got data structured differently, the programm wont
- *               be able to read them and will abort.
+ *               got data structured differently, the program wont
+ *               be able to read them and abort.
  ********************************************************************/
 static inline void verifyBmpHeaderInformation(const BmpHeader *headerInformation) {
     if (headerInformation->bitmapSignatureBytes[0] != 'B' || headerInformation->bitmapSignatureBytes[1] != 'M' ||
@@ -156,13 +146,12 @@ static inline void verifyBmpHeaderInformation(const BmpHeader *headerInformation
     }
 }
 
-/********************************************************************
+/*********************************************************************
  * Function:     readBmpBody
  *--------------------------------------------------------------------
  * Description:  This function has to be called after readBmpHeader().
  *               It will read the rgb values of the opened bmp file
- *               image->file and, since the results are going to be
- *               black and white, calculates if a colored pixel is
+ *               image->file and calculates if a colored pixel is
  *               considered to be white(0) or black(1). The boolean
  *               interpretation of the image will be stored in
  *               image->array.
@@ -196,14 +185,6 @@ static void readBmpBody(Image *image) {
     xfree(bmpBuffer);
 }
 
-/********************************************************************
- * Function:     readBMP
- *--------------------------------------------------------------------
- * Description:  The function readBMP will read a colored bmp opened
- *               in image->file and get the information: width, height
- *               and the pixel data from it, to store them into
- *               the image structure "image".
- ********************************************************************/
 void readBMP(Image *image) {
     BmpHeader headerInformation;
 

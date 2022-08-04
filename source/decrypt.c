@@ -5,11 +5,11 @@
 #include "memoryManagement.h"
 #include "menu.h"
 
-/********************************************************************
+/*********************************************************************
  * Function:     orTwoPixelArrays
  *--------------------------------------------------------------------
- * Description:  The pixel array of dest will be the result of
- *               itself OR-ed with the source pixel array.
+ * Description:  The pixel array of "dest" will be the result of
+ *               itself OR-ed with the pixel array from "source".
  ********************************************************************/
 static void orTwoPixelArrays(Image *dest, Image *source) {
     int height = dest->height;
@@ -21,14 +21,13 @@ static void orTwoPixelArrays(Image *dest, Image *source) {
     }
 }
 
-/********************************************************************
+/*********************************************************************
  * Function:     fillDecryptedImage
  *--------------------------------------------------------------------
  * Description:  The decrypted image is supposed to be the result of
- *               overlapping all share pixel arrays. This function
- *               will fill its data with the data from the shares
- *               and makes use of the OR-function for each pixel
- *               of the shares to put them all together.
+ *               overlapping multiple share pixel arrays. This makes
+ *               use of the OR-function for each pixel of the shares
+ *               and will put them all together in "decrypted".
  ********************************************************************/
 static void fillDecryptedImage(Image *decrypted, Image *share, int numberOfShares) {
     decrypted->height = share->height;
@@ -41,14 +40,6 @@ static void fillDecryptedImage(Image *decrypted, Image *share, int numberOfShare
     }
 }
 
-/********************************************************************
- * Function:     decryptShareFiles
- *--------------------------------------------------------------------
- * Description:  Read share files in dirPath starting at the share
- *               with the number given to first and end with the
- *               number given to last. They will be stored in Image
- *               structures that must have been allocated before.
- ********************************************************************/
 void decryptShareFiles() {
     int valid = 0, first, last;
 
@@ -84,7 +75,6 @@ void decryptShareFiles() {
     fillDecryptedImage(&result, shares, numberOfShares);
     createBMP(&result);
 
-    // cleanup
     xcloseAll();
     xfreeAll();
     fprintf(stdout, "Success!\n");

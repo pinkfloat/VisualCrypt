@@ -9,7 +9,7 @@
  *--------------------------------------------------------------------
  * Description:  If the share number is part of the first k elements
  *               of the random sorted set (of size n), the very share
- *               will get the pixel that was calculated for one of
+ *               will get the pixel, which was calculated for one of
  *               the shares, from the source image, before.
  *               Shares with a number not contained in the first
  *               k elements will get randomly a 0/1.
@@ -20,9 +20,9 @@ void writePixelToShares(int *randSortedSetOfN, void *source, Image *shares, FILE
 /********************************************************************
  * Function:     callRandomGridAlgorithm
  *--------------------------------------------------------------------
- * Description:  Prepares data which is needed by all or at least
- *               multiple random grid algorithms and calls the chosen
- *               algorithm with the data.
+ * Description:  Prepares data which is needed by all, or at least
+ *               multiple, random grid algorithms. It'll call the
+ *               chosen algorithm with the data.
  ********************************************************************/
 void callRandomGridAlgorithm(AlgorithmData *data);
 
