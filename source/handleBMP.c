@@ -28,6 +28,13 @@ typedef struct
     uint32_t numImportantColors;
 } BmpHeader;
 
+static inline uint32_t roundToMultipleOf4(uint32_t x)
+{
+    return (x + 3) &~ 3;
+}
+
+/*_____________________________________WRITE_OPERATIONS_____________________________________*/
+
 static void writeBmpHeader(BmpHeader* bmpHeader, int32_t width, int32_t height)
 {
    	/* 14 Byte BMP Fileheader */
@@ -51,11 +58,6 @@ static void writeBmpHeader(BmpHeader* bmpHeader, int32_t width, int32_t height)
     bmpHeader->numImportantColors    	 = 0;
 }
 
-static inline uint32_t roundToMultipleOf4(uint32_t x)
-{
-    return (x + 3) &~ 3;
-}
-
 /* take binary source value (black / white) and write it to RGB destination */
 static void writeBmpBody(const Pixel* source, Pixel* destination, int32_t width, int32_t height)
 {
@@ -76,7 +78,7 @@ int createBMP(FILE* file, const Pixel* pixelArray, int32_t width, int32_t height
     uint32_t bmpSize = SIZE_BMP_HEADER + roundToMultipleOf4(3*width) * height;
 
     /* create BMP file content */
-    uint8_t* bmpBuffer = malloc(sizeof(BmpHeader) + width * height * BYTES_PER_RGB_PIXEL);
+    uint8_t* bmpBuffer = malloc(bmpSize + 2);
     if (bmpBuffer == NULL) {
         fprintf(stderr, "ERR: allocate buffer\n");
         return -1;
@@ -92,5 +94,80 @@ int createBMP(FILE* file, const Pixel* pixelArray, int32_t width, int32_t height
     }
 
     free(bmpBuffer);
+    return 0;
+}
+
+/*_____________________________________READ_OPERATIONS_____________________________________*/
+
+static int readBmpHeader(FILE* file, BmpHeader* headerInformation)
+{
+    size_t bufferSize = sizeof(BmpHeader);
+
+    if (fread( ((uint8_t*)headerInformation) + 2, 1, bufferSize - 2, file) != bufferSize - 2) {
+        fprintf(stderr, "ERR: get header information\n");
+        return -1;
+    }
+    return 0;
+}
+
+static int readBmpBody(FILE* file, Pixel* pixelArray, int32_t width, int32_t height)
+{
+    /* read remaining file to buffer after readBmpHeader */
+    uint32_t bmpSize = roundToMultipleOf4(3*width) * height;
+    uint8_t* bmpBuffer = malloc(width * height * BYTES_PER_RGB_PIXEL);
+
+    if (bmpBuffer == NULL) {
+        fprintf(stderr, "ERR: allocate buffer\n");
+        return -1;
+    }
+
+    if (fread(bmpBuffer, 1, bmpSize, file) != bmpSize) {
+        free(bmpBuffer);
+        fprintf(stderr, "ERR: invalid BMP file\n");
+        return -1;
+    }
+
+    /* calculate pixel Array */
+    uint8_t* pBuffer = bmpBuffer;
+
+    for (int32_t row = 0; row < height; row++) {
+        for (int32_t column = 0; column < width; column++) {
+
+            /* assuming that the read picture is at least grey since only one of the
+            RGB color values is used to determine if the pixel is set to black or white */
+            pixelArray[row * width + column] = *pBuffer > 127 ? 1 : 0; /* white = 1, black = 0 */
+            pBuffer += 3;
+        }
+    }
+
+    free(bmpBuffer);
+    return 0;
+}
+
+/* Info: allocates buffer without freeing on success */
+int readBMP(FILE* file, Pixel** pixelArray, int32_t* width, int32_t* height)
+{
+    BmpHeader headerInformation;
+
+    if(readBmpHeader(file, &headerInformation) != 0){
+		fprintf(stderr, "ERR: read BMP Header\n");
+        return -1;
+	}
+
+    *width = headerInformation.widthInPixel;
+	*height = headerInformation.heightInPixel;
+
+	*pixelArray = malloc(*width * *height);
+	if (*pixelArray == NULL) {
+		fprintf(stderr, "ERR: allocate pArray buffer\n");
+		return -1;
+	}
+
+	if (readBmpBody(file, *pixelArray, *width, *height) != 0){
+		fprintf(stderr, "ERR: read BMP Body\n");
+        free(*pixelArray);
+		return -1;
+	}
+
     return 0;
 }
