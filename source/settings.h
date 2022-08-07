@@ -9,6 +9,8 @@
     These are the standard values for source image and result directory, if they are not
     changed via command line options when the program is called.
 
+    The paths must be relative to the program location.
+
     Note: Used in visualCrypt.c
 */
 #define SOURCE_PATH "../image/cameraman.bmp"

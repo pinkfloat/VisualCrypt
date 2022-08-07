@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "decrypt.h"
@@ -13,8 +14,8 @@
 #define EXIT_ON_HELP 2
 
 // Global
-char *sourcePath = SOURCE_PATH;
-char *sharePath = SHARE_PATH;
+char *sourcePath = NULL;
+char *sharePath = NULL;
 
 /*********************************************************************
  * Function:     usage
@@ -63,6 +64,31 @@ static int getPathsFromProgramParameter(int argc, char *argv[]) {
 }
 
 /*********************************************************************
+ * Function:     setImagePaths
+ *--------------------------------------------------------------------
+ * Description:  Set the global image paths to their std values, and
+ *               relative to the location, where the program
+ *               "visualCrypt" was called from, if they weren't
+ *               already changed by program parameters.
+ ********************************************************************/
+void setImagePaths(char *argv[]) {
+    char *programPath = argv[0];
+    size_t programPathLen = strlen(programPath) - 11;
+
+    if (!sourcePath) {
+        sourcePath = xcalloc(programPathLen + strlen(SOURCE_PATH) + 1, 1);
+        strncpy(sourcePath, programPath, programPathLen);
+        strncpy(sourcePath + programPathLen, SOURCE_PATH, strlen(SOURCE_PATH) + 1);
+    }
+
+    if (!sharePath) {
+        sharePath = xcalloc(programPathLen + strlen(SHARE_PATH) + 1, 1);
+        strncpy(sharePath, programPath, programPathLen);
+        strncpy(sharePath + programPathLen, SHARE_PATH, strlen(SHARE_PATH) + 1);
+    }
+}
+
+/*********************************************************************
  * Function:     main
  *--------------------------------------------------------------------
  * Description:  Ask the user which algorithm shall run and call the
@@ -76,6 +102,8 @@ int main(int argc, char *argv[]) {
     if (exitStatus) {
         return exitStatus;
     }
+
+    setImagePaths(argv);
 
     char *menu[] = {"(n,n) deterministic algorithm",
                     "(n,n) probabilistic algorithm",
