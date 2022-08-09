@@ -45,7 +45,7 @@ static void printMeasuredTime(FILE *fp, struct timespec *start, struct timespec 
     fprintf(stdout, "measurement of %s algorithm done ...\n", name);
 }
 
-void timeMeasurement() {
+void timeMeasurement(char *logPath) {
     int n = getNfromUser();
     int k = getKfromUser(n);
 
@@ -74,7 +74,7 @@ void timeMeasurement() {
     /*_________________________ START TIME MEASUREMENT _________________________*/
 
     struct timespec start, stop;
-    FILE *logFile = xfopen(TIME_LOG_PATH, "a");
+    FILE *logFile = xfopen(logPath, "a");
 
     fprintf(stdout, "Start time measurement ...\n");
 
@@ -154,7 +154,8 @@ void timeMeasurement() {
 
     fprintf(logFile, "__________________________________________________\n\n");
 
+    fprintf(stdout, "Success!\nResult was stored in %s\n", logPath);
+
     xcloseAll();
     xfreeAll();
-    fprintf(stdout, "Success!\nResult was stored in %s\n", TIME_LOG_PATH);
 }

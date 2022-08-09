@@ -64,14 +64,13 @@ static int getPathsFromProgramParameter(int argc, char *argv[]) {
 }
 
 /*********************************************************************
- * Function:     setImagePaths
+ * Function:     setPaths
  *--------------------------------------------------------------------
- * Description:  Set the global image paths to their std values, and
- *               relative to the location, where the program
+ * Description:  Set paths relative to the location, where the program
  *               "visualCrypt" was called from, if they weren't
  *               already changed by program parameters.
  ********************************************************************/
-void setImagePaths(char *argv[]) {
+void setPaths(char *argv[], char **logPath) {
     char *programPath = argv[0];
     size_t programPathLen = strlen(programPath) - 11;
 
@@ -86,6 +85,10 @@ void setImagePaths(char *argv[]) {
         strncpy(sharePath, programPath, programPathLen);
         strncpy(sharePath + programPathLen, SHARE_PATH, strlen(SHARE_PATH) + 1);
     }
+
+    *logPath = xcalloc(programPathLen + strlen(TIME_LOG_PATH) + 1, 1);
+    strncpy(*logPath, programPath, programPathLen);
+    strncpy(*logPath + programPathLen, TIME_LOG_PATH, strlen(TIME_LOG_PATH) + 1);
 }
 
 /*********************************************************************
@@ -97,13 +100,14 @@ void setImagePaths(char *argv[]) {
  ********************************************************************/
 int main(int argc, char *argv[]) {
     int choice;
+    char *logPath = NULL;
 
     int exitStatus = getPathsFromProgramParameter(argc, argv);
     if (exitStatus) {
         return exitStatus;
     }
 
-    setImagePaths(argv);
+    setPaths(argv, &logPath);
 
     char *menu[] = {"(n,n) deterministic algorithm",
                     "(n,n) probabilistic algorithm",
@@ -135,7 +139,7 @@ int main(int argc, char *argv[]) {
             decryptShareFiles();
             break;
         case 7:
-            timeMeasurement();
+            timeMeasurement(logPath);
             break;
         case 8:
             return EXIT_SUCCESS;

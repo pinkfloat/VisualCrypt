@@ -3,18 +3,17 @@
 
 /* PATHS */
 
-/*  SOURCE_PATH = the secret image
+/*  SOURCE_PATH = the secret image.
     SHARE_PATH = directory where the shares and decryptions of the shares will be stored.
-
-    These are the standard values for source image and result directory, if they are not
-    changed via command line options when the program is called.
+    TIME_LOG_PATH = the log file of the time measurement.
 
     The paths must be relative to the program location.
 
     Note: Used in visualCrypt.c
 */
-#define SOURCE_PATH "../image/cameraman.bmp"
-#define SHARE_PATH  "../image"
+#define SOURCE_PATH   "../image/cameraman.bmp"
+#define SHARE_PATH    "../image"
+#define TIME_LOG_PATH "../timeMeasurement.log"
 
 /*  RANDOM_FILE_PATH = the file used as source to get random numbers
 
@@ -24,12 +23,6 @@
     Note: Used in vcAlgorithms.c and timeMeasurement.c
 */
 #define RANDOM_FILE_PATH "/dev/urandom"
-
-/*  TIME_LOG_PATH = the log file of the time measurement.
-
-    Note: Used in timeMeasurement.c
-*/
-#define TIME_LOG_PATH "../timeMeasurement.log"
 
 /* ADJUSTMENTS */
 
