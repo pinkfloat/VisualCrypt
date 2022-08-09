@@ -10,7 +10,7 @@ void customExitOnFailure(const char *message) {
     xcloseAll();
     fprintf(stderr, "Free all buffer...\n");
     xfreeAll();
-    fprintf(stderr, "Exit programm...\n");
+    fprintf(stderr, "Exit program...\n");
     exit(EXIT_FAILURE);
 }
 
