@@ -1,75 +1,73 @@
 # VisualCrypt
 
-Mit dem Programm "visualCrypt" lassen sich Bilder im .bmp Format verschlüsseln.
+With the program "visualCrypt" images in .bmp format can be encrypted.
 
-## Programm erzeugen
+## Generate Program
 
-Im ./source Verzeichnis befindet sich ein Makefile, das per Aufruf:
+In the ./source directory is a makefile, which creates the program "visualCrypt" by calling
 > make  
 
-das Programm "visualCrypt" erstellt. Da das Programm Linux-spezifische Bibliotheken  
-benötigt, wird die Verwendung unter einem Linux-Betriebssystem (oder Subsystem) empfohlen.
+Since the program uses Linux-specific libraries, it is recommended to use it on a Linux  
+operating system (or subsystem).
 
-## Programm ausführen
+## Call Program
 
-Das ausführbare Programm lässt sich anschließend im ./source Verzeichnis finden.  
-Übergabeparameter sind hierbei optional.
+The executable program can then be found in the./source directory.  
+Calling it with transfer parameters is optional.
 
-### Anwendungsbeispiele:
+### Examples Of Usage
+
 > ./visualCrypt
 
-Zur Ausführung aus dem source Verzeichnis.
+For execution from the source directory.
 
 > ./source/visualCrypt
 
-Zur Ausführung aus dem VisualCrypt Verzeichnis.
+For execution from the VisualCrypt directory.
 
-#### Es sind folgende Übergabeparameter für das Programm definiert:
+#### The following transfer parameters are defined for the program
 
 > ./source/visualCrypt -h
 
-Liefert Informationen über die Verwendung.
+Provides information about usage.
 
 >./source/visualCrypt -s &lt;path to image file&gt;
 
-Mit -s ist es möglich, das zu verschlüsselnde Bild auszuwählen.  
-Nach der Option muss der Pfad zu einem validen BMP-File übergeben werden.  
-Ohne den Parameter wird das Bild &lt;path to visualCrypt&gt;/image/cameraman.bmp verwendet.
+With -s it is possible to select the image to be encrypted.  
+After the option, the path to a valid BMP file must be passed.  
+Without the parameter, the image &lt;path to visualCrypt&gt;/image/cameraman.bmp is used.
 
 >./source/visualCrypt -d &lt;path to target directory&gt;
 
-Mit -d lässt sich das Zielverzeichnis auswählen, in welchem die erzeugten Shares  
-abgelegt oder (zur Entschlüsselung) gesucht werden. Der angegebene Ordner muss  
-hierfür bereits existieren. Die Stapelergebnisse der Shares, nach einer Entschlüsselung,  
-werden dort ebenfalls gespeichert.  
-Ohne den Parameter wird das Verzeichnis &lt;path to visualCrypt&gt;/image verwendet.
+With -d you can select the target directory in which the generated shares can be stored  
+or searched (for decryption). The specified folder must already exist for this purpose.  
+The batch results of the shares, after decryption, are also stored there.  
+Without the parameter, the directory &lt;path to visualCrypt&gt;/image is used.
 
-### Programm-Menü:
+### Program Menu
 
-Die Optionspunkte 1. bis 5. bieten verschiedene Algorithmen zur Verschlüsselung  
-eines BMP-Files an. Nach der Auswahl eines Algorithmus, wird stets die Anzahl der  
-Shares erfragt, die generiert werden soll.
+Option points 1 to 5 provide different algorithms for encryption of a BMP file.  
+After selecting an algorithm, the number of shares to be generated is always requested.
 
-Mit dem Optionspunkt 6. lassen sich bereits erzeugte Shares wieder entschlüsseln.  
-Da die Namen der Shares "share01.bmp", "share02.bmp" usw. lauten, müssen  
-anschließend die Nummern des ersten und letzten Shares angegeben werden,  
-die Teil der Entschlüsselung sein sollen.
+With option point 6 already created shares can be decrypted again.  
+Since the names of the shares are "share01.bmp", "share02.bmp", etc.,  
+the numbers of the first and last shares must then be specified, which should be part  
+of the decryption.
 
-Optionspunkt 7. startet eine Zeitmessung über alle Algorithmen.  
-Achtung: Die Standardeinstellung dauert womöglich mehrere Stunden!  
-Das Ergebnis der Zeitmessung lautet standardmäßig "timeMeasurement.log",  
-und wird im Hauptverzeichnis des Programms (visualCrypt Ordner) abgelegt.  
+Option point 7 starts a time measurement across all algorithms.  
+Attention: The default setting may take several hours!  
+By default, the result of the time measurement is named "timeMeasurement.log",  
+and is stored in the main directory of the program (visualCrypt folder).
 
-### Weitere Optionen:
+### Other Options
 
-In "settings.h" sind Optionen ausgelagert, die nur bedingt angepasst werden müssen.  
-Hierzu zählt zum Beispiel der "Threshold", welcher Einfluss auf den Kontrast des  
-Stapelergebnis nimmt. Ebenso ist es hier möglich, die Anzahl der Messwiederholungen,  
-der Zeitmessung, zu editieren.
+In "settings.h" options are outsourced that only need to be adjusted to a limited extent.  
+This includes, for example, the "Threshold", which influences the contrast of the batch result.  
+It is also possible in here to edit the number of measurement repeats in the time measurement.
 
-## Programm löschen
+## Delete Program
 
-Wird im source-Verzeichnis der Befehl:
+If the command:
 > make clean
 
-ausgeführt, werden alle Kompilate gelöscht.
+ is used in the source directory, all compilations are deleted.
