@@ -1,3 +1,8 @@
+/*
+*   Copyright: (c) 2023 Sabrina Otto. All rights reserved.
+*   This work is licensed under the terms of the MIT license.
+*/
+
 #ifndef RANDOM_GRID_ALGORITHMS_V1_H
 #define RANDOM_GRID_ALGORITHMS_V1_H
 

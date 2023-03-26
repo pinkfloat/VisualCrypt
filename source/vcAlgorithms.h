@@ -1,3 +1,8 @@
+/*
+*   Copyright: (c) 2023 Sabrina Otto. All rights reserved.
+*   This work is licensed under the terms of the MIT license.
+*/
+
 #ifndef VCALGORITHMS_H
 #define VCALGORITHMS_H
 
